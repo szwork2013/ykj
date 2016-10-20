@@ -22,11 +22,8 @@ const Add = (props) => {
           }
 		  
           const formData = form.getFieldsValue();
-          dispatch({
-            type: 'orders/add',
-            payload: formData,
-          })
-		  
+		      formData.orderGoods = orderGoods;
+          console.log(formData)
         });
 		
       } }

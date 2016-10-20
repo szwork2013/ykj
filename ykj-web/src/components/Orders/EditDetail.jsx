@@ -27,10 +27,10 @@ class EditDetail extends Component {
   }
 
   render() {
-    const { orders, form, type, onSubmit, moreProps, dispatch, ...rest } = this.props;
-
-    const { loading, queryCustomers } = orders;
-    const { getFieldProps, getFieldError, isFieldValidating } = form;
+    const { orders, form, type, onSubmit,codewordTypes, moreProps, dispatch, ...rest } = this.props;
+    const { loading, queryCustomers,currentOrder={} ,fuzzyCustomerList = []} = orders;
+    const { getFieldProps, getFieldError, isFieldValidating,setFields } = form;
+    const orderSources = codewordTypes['ORDER_SOURCE'] || [];
 
     const price = {a:17645.00, b:15733.00, c:1912.00}
     const dataSource = [
@@ -682,7 +682,7 @@ EditDetail.defaultProps = {
 
 export default Form.create({
   mapPropsToFields: (props) => {
-    const order = props.orders.current;
+    const order = props.orders.currentOrder;
     return {
       id: {
         value: order.id

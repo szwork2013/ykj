@@ -29,7 +29,7 @@ class TableVariable extends Component {
     }
 
     addRow( columns, dataSource ) {
-        if (dataSource[dataSource.length - 1].goodName != undefined) {
+        if (dataSource[dataSource.length - 1].name != undefined) {
             const newRow = {};
             columns.map( (column, index) => {
                 if(column.dataIndex && column.dataIndex == 'Number') {
@@ -114,7 +114,7 @@ class TableVariable extends Component {
                    
                 }
             }
-            if(column.dataIndex == 'goodType') {
+            if(column.dataIndex == 'model') {
                 column.render = (text, record, index) => {
                     if(text) {
                         return text;
@@ -132,7 +132,7 @@ class TableVariable extends Component {
                     }    
                 }
             }
-            if(column.dataIndex == 'status') {
+            if(column.dataIndex == 'initPosition') {
                 column.render = (text, record, index) => {
                     return (
                         <Input value={ text } onChange={ (e) => {
@@ -141,7 +141,7 @@ class TableVariable extends Component {
                     )
                 }
             }
-            if(column.dataIndex == 'addTime') {
+            if(column.dataIndex == 'orderGoodsNum') {
                 column.render = (text, record, index) => {
                     return (
                         <InputNumber value={text} onChange={ (value) => {
@@ -150,7 +150,7 @@ class TableVariable extends Component {
                     )
                 }
             }
-            if(column.dataIndex == 'orderOrigin') {
+            if(column.dataIndex == 'strikeUnitPrice') {
                 column.render = (text, record, index) => {
                     return (
                         <InputNumber value={text} onChange={ (value) => {
@@ -159,7 +159,7 @@ class TableVariable extends Component {
                     )
                 }
             }
-            if(column.dataIndex == 'orderOrigi') {
+            if(column.dataIndex == 'storeNow') {
                 column.render = (text, record, index) => {
                     return (
                         <InputNumber value={text} onChange={ (value) => {
@@ -168,7 +168,7 @@ class TableVariable extends Component {
                     )
                 }
             }
-            if(column.dataIndex == 'yuliu') {
+            if(column.dataIndex == 'reservedGoods') {
                 column.render = (text, record, index) => {
                     return (
                         <InputNumber value={text} onChange={ (value) => {
@@ -177,7 +177,7 @@ class TableVariable extends Component {
                     )
                 }
             }
-            if(column.dataIndex == 'time') {
+            if(column.dataIndex == 'reservedDate') {
                 column.render = (text, record, index) => {
                     return (
                         text ?
@@ -195,7 +195,7 @@ class TableVariable extends Component {
                     )
                 }
             }
-            if(column.dataIndex == 'followe') {
+            if(column.dataIndex == 'remark') {
                 column.render = (text, record, index) => {
                     return (
                         <Input value={ text } onChange={ (e) => {
@@ -228,7 +228,7 @@ class TableVariable extends Component {
     getBeforePrice(dataSource) {
         let beforePrice = 0;
         for(let i = 0; i<dataSource.length; i++) {
-            beforePrice = beforePrice + dataSource[i].contact * dataSource[i].addTime
+            beforePrice = beforePrice + dataSource[i].price * dataSource[i].orderGoodsNum
         }
         return beforePrice;
     }
@@ -236,7 +236,7 @@ class TableVariable extends Component {
     getAfterPrice(dataSource) {
         let afterPrice = 0;
         for(let i = 0; i<dataSource.length; i++) {
-            afterPrice = afterPrice + dataSource[i].orderOrigin * dataSource[i].addTime
+            afterPrice = afterPrice + dataSource[i].strikeUnitPrice * dataSource[i].orderGoodsNum
         }
         return afterPrice;
     }

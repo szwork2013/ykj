@@ -12,6 +12,7 @@ import AuditModal from './AuditModal';
 import PayModal from './PayModal';
 import UploadModal from './UploadModal';
 import FollowModal from './FollowModal';
+import Search from './Search';
 
 import styles from './index.less';
 
@@ -21,7 +22,8 @@ const FormItem = Form.Item;
 const Option = Select.Option;
 const RangePicker = DatePicker.RangePicker;
 const { confirm } = Modal;
-const List = ({ items, orders, form, children, dispatch, ...rest }) => {
+const List = (props) => {
+  const { items, orders, form, children, dispatch, ...rest } = props;
   const { getFieldProps } = form;
   
   const onTableChange = (pagination, filters, sorter) => {
@@ -34,54 +36,8 @@ const List = ({ items, orders, form, children, dispatch, ...rest }) => {
     });
   }
 
-  const options = {
-      operation: [
-        {
-            label: "新增订单",
-            url: '/order/orders/add',
-        },
-        {
-            label: "订单导入",
-            url: '',
-        },
-        {
-            label: "订单导出",
-            url: '',
-        },
-        {
-            label: "刷新",
-            url: '',
-        },
-      ],
-      filter: [
-        {
-          label: "全部",
-          url: '',
-          number: '',
-        },
-        {
-          label: "预订单",
-          url: '',
-          number: '',
-        },
-        {
-          label: "进行中",
-          url: '',
-          number: '',
-        },
-        {
-          label: "退单",
-          url: '',
-          number: '',
-        },
-        {
-          label: "完成",
-          url: '',
-          number: '',
-        },
-      ]
-    }
-  
+
+ 
   const formItemLayout = {
     labelCol: { span: 10 },
     wrapperCol: { span: 14 },
@@ -90,107 +46,7 @@ const List = ({ items, orders, form, children, dispatch, ...rest }) => {
     <Container
       { ...rest }
     >
-      <BoxTabs>
-        <Form
-          horizontal
-        >
-          <Tabs defaultActiveKey="1" tabBarExtraContent={ 
-
-            <ButtonGroup>
-              <Button type="primary" onClick={ () => {
-
-                const formData = form.getFieldsValue();
-                dispatch({
-                  type: 'orders/setQuery',
-                  payload: formData,
-                });
-
-              } } >查询</Button>
-              <Button type="ghost" >重置</Button>
-            </ButtonGroup>
-
-          } >
-            <TabPane tab="快捷搜索" key="1">
-            
-              <Row gutter={ 1 } >
-                <Col sm={ 6 }>
-                  <FormItem
-                    { ...formItemLayout }
-                  >
-                    <Select
-                      showSearch
-                      placeholder = "跟单人、下单人、服务人员、全部"
-                      notFoundContent = "无对应项"
-                      style = { { width:250 } }
-                      onChange = { () => {
-
-                      }}
-                    >
-                      {
-                        items.map( (item, index) => {
-                          const options = [];
-                          options.push(
-                            <Option key={ index }>{`item${index}`}</Option>
-                          )
-                          return options;
-                        })
-                      }
-                    </Select>
-                  </FormItem>
-                  
-                </Col>
-                <Col sm={ 4 }>
-                  <FormItem
-                    { ...formItemLayout }
-                  >
-                    <Select
-                      showSearch
-                      placeholder = "下单时间、完成时间"
-                      notFoundContent = "无对应项"
-                      style = { { width:150 } }
-                      onChange = { () => {
-
-                      }}
-                    >
-                      {
-                        items.map( (item, index) => {
-                          const options = [];
-                          options.push(
-                            <Option key={ index }>{`item${index}`}</Option>
-                          )
-                          return options;
-                        })
-                      }
-                    </Select>
-                  </FormItem>
-                </Col>
-                <Col sm={ 4 }>
-                  <FormItem
-                    { ...formItemLayout }
-                    label="时间"
-                  >
-                    <RangePicker
-                      style={{ width: 200 }} 
-                      onChange={ () => {
-
-                      }}
-                    >
-                    </RangePicker>
-                  </FormItem>
-                </Col>
-                <Col sm={ 7 } offset={ 3 }>
-                  <FormItem
-                    { ...formItemLayout }
-                  >
-                    <Input  placeholder = "请输入关键字" size="default" />
-                  </FormItem>
-                </Col>
-              </Row>
-              <OperationBox options={options}/>
-            </TabPane>
-          </Tabs>
-        </Form>
-      </BoxTabs>
+      <Search  {...props} />
       <BoxTable
         noPadding
         
@@ -421,7 +277,7 @@ const List = ({ items, orders, form, children, dispatch, ...rest }) => {
           }]
         }
         rowKey={ record => record.id }
-        dataSource={ orders.orders }
+        dataSource={ orders.list }
         pagination={ orders.pagination }
         loading={ orders.loading }
         onChange={ onTableChange }

@@ -17,6 +17,28 @@ const mergeQuery = (oldQuery, newQuery) => {
 
 const initialState = {
   query: {},
+  list : [{
+    id : 'TEST1'
+  }],
+  stateStatisticalResult : [],
+  currentOrder : {orderNo:'1231',orderGoods:[
+      {
+        name: '小木板',
+        model: 'v0.1.0-rc',
+        initPosition: '墙壁',
+        unit: '件',
+        orderGoodsNum: 70,
+        price: 40,
+        discountRate: 0.01,
+        strikeUnitPrice: 40,
+        follower: '90',
+        storeNow: '10',
+        reservedDate: '2016-10-10',
+        remark: '木'
+      }
+    ]},
+  //模糊匹配到的用户列表
+  fuzzyCustomerList : [],
   orders: [],
   current: {},
   currentGoodInfo: {},

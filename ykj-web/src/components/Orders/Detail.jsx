@@ -30,58 +30,11 @@ class Detail extends Component {
   }
 
   render() {
-    const { orders, form, type, onSubmit, moreProps, dispatch, ...rest } = this.props;
+    const { orders, form, type, onSubmit,codewordTypes, moreProps, dispatch, ...rest } = this.props;
+    const { loading, queryCustomers,currentOrder={} ,fuzzyCustomerList = []} = orders;
+    const { getFieldProps, getFieldError, isFieldValidating,setFields } = form;
+    const orderSources = codewordTypes['ORDER_SOURCE'] || [];
 
-    const { loading, queryCustomers } = orders;
-    const { getFieldProps, getFieldError, isFieldValidating } = form;
-
-    const dataSource = [
-      {
-        Number: 1,
-        goodName: '小木板',
-        goodType: 'v0.1.0-rc',
-        status: '墙壁',
-        payStatus: '件',
-        addTime: 70,
-        contact: 40,
-        address: 0.01,
-        orderOrigin: 40,
-        follower: '90',
-        orderOrigi: '10',
-        time: '2016-10-10',
-        followe: '木'
-      },
-      {
-        Number: 2,
-        goodName: '小木板',
-        goodType: 'v0.1.0-rc',
-        status: 'lal',
-        payStatus: '件',
-        addTime: 80,
-        contact: 50,
-        address: 0.01,
-        orderOrigin: 50,
-        follower: '90',
-        orderOrigi: '20',
-        time: '2016-11-10',
-        followe: '木板'
-      },
-      {
-        Number: 3,
-        goodName: '小木板',
-        goodType: 'v0.1.0-rc',
-        status: 'mmm',
-        payStatus: '件',
-        addTime: 90,
-        contact: 60,
-        address: 0.01,
-        orderOrigin: 60,
-        follower: '90',
-        orderOrigi: '30',
-        time: '2016-12-10',
-        followe: '木板质量'
-      },
-    ]
 
     const orderNoProps = getFieldProps('orderNo', {
         rules: [
@@ -115,7 +68,7 @@ class Detail extends Component {
 
     const orderTypeProps = getFieldProps('orderType', {
         rules: [
-            { required: true, message: '请选择订单来源'}
+            { required: false, message: '请选择订单来源'}
         ],
     });
 
@@ -124,11 +77,43 @@ class Detail extends Component {
             { required: true, min: 1, message: '送货地址至少 1 个字符'}
         ],
     });
+
+     const companyProps = getFieldProps('company', {
+        rules: [
+            { required: false}
+        ],
+    });
+
+     const phoneProps = getFieldProps('phone', {
+        rules: [
+            { required: false}
+        ],
+    });
+
+    const orderResponsibleIdProps = getFieldProps('orderResponsibleId', {
+  		rule: [
+  			{ required: false}
+  		]
+  	})
     
     const formItemLayout = {
       labelCol: { span: 6 },
       wrapperCol: { span: 10 },
     };
+
+    const treeData = [
+      { name: '杭州', id: '1' },
+      { name: '台州', id: '2' },
+      { name: '湖州', id: '3' },
+      { name: '张伟刚', id: '4', pId: '1' },
+      { name: '许照亮', id: '5', pId: '2' },
+      { name: '其味无穷', id: '6', pId: '5' },
+    ]
+
+    const customers = [{
+      id : '1',
+      name : '33'
+    }]
 
     return (
       <Container
@@ -173,23 +158,20 @@ class Detail extends Component {
                           label = "客户姓名"
                           help={isFieldValidating('name') ? '校验中...' : (getFieldError('name') || []).join(', ')}
                       >
-                          <Select {...nameProps} combobox onchange={ (value) => {
-                            dispatch({
-                              type: 'orders/queryCustomer',
-                              payload: value,
-                            });
+                          <Select {...nameProps} showSearch onBlur={ (value) => {
+                            console.log(value)
+                            form.setFieldsValue({
+                              name: value,
+                            })
                           }} onSelect={ (value, option) => {
-                            queryCustomers.map( (customer, index) => {
-                              if(customer.id == value) {
-                                this.setState({
-                                  currentCustOrg: customer.organization,
-                                  currentCustPhone: customer.phone,
-                                  currentCustFollower: customer.responsibleName,
-                                });
-                              }
-                            });
+                            console.log("a"+value);
+                            
                           }} style={ { width: '80%'} } size="default" disabled={ orders.submiting }>
-                          
+                           {
+                            fuzzyCustomerList.map(item => {
+                              return <Option key={item.id} value={item.id}>{item.name}</Option>
+                            })
+                          }
                           </Select>
                       </FormItem>
                   </Col>
@@ -198,7 +180,7 @@ class Detail extends Component {
                           { ...formItemLayout }
                           label = "客户单位名称"
                       >
-                          <p className="ant-form-text" >{ this.state.currentCustOrg }</p>
+                          <Input {...companyProps} size="default" style={ { width: '80%'} } disabled={ orders.submiting } />
                       </FormItem>
                   </Col>
                 </Row>
@@ -208,7 +190,7 @@ class Detail extends Component {
                           { ...formItemLayout }
                           label = "客户电话"   
                       >
-                          <p className="ant-form-text" >{ this.state.currentCustPhone }</p>
+                          <Input {...phoneProps} size="default" style={ { width: '80%'} } disabled={ orders.submiting } />
                       </FormItem>
                   </Col>
                   <Col sm={ 12 }>
@@ -230,19 +212,19 @@ class Detail extends Component {
                           hasFeedback
                           help={isFieldValidating('orderResponsibleId') ? '校验中...' : (getFieldError('orderResponsibleId') || []).join(', ')}
                       >
-                          <div className="ant-search-input-wrapper" >
-                              <InputGroup className={classNames({ 'ant-search-input': true })} style={ { width: '80%'} } >
-                                  <Input {...orderResponsibleProps} size="default" defaultValue={ this.state.currentCustFollower } disabled={ orders.submiting } />
-                                  <div className="ant-input-group-wrap">
-                                      <Button icon="edit" onClick={ () => {
-                                        dispatch({
-                                          type: 'orders/toggleModalShow',
-                                          payload: true,
-                                        });
-                                      }} className={classNames({ 'ant-search-btn': true })} size="default" />
-                                  </div>
-                              </InputGroup>
-                          </div>
+                          <TreeBox 
+                                treeData={treeData}
+                                multiple={ false }
+                                checkable={ false }
+                                changeable={ true }
+                                treeProps={ orderResponsibleIdProps }
+                                onOk={(value) => {
+                                  const { setFieldsValue } = form
+                                  setFieldsValue({
+                                    orderResponsibleId: value
+                                  })
+                                }}
+                              /> 
                       </FormItem>
                   </Col>
                   <Col sm={ 12 }>
@@ -253,8 +235,11 @@ class Detail extends Component {
                           help={isFieldValidating('orderType') ? '校验中...' : (getFieldError('orderType') || []).join(', ')}
                       >
                           <Select {...orderTypeProps} style={ { width: '80%'} } size="default" disabled={ orders.submiting }>
-                            <Option key='1' value='1' >自然客户</Option>
-                            <Option key='2' value='2' >活动</Option>
+                           {
+                            orderSources.map(item => {
+                              return <Option key={item.code} value={item.code}>{item.value}</Option>
+                            })
+                          }
                           </Select>
                       </FormItem>
                   </Col>
@@ -341,76 +326,76 @@ class Detail extends Component {
                   },
                   {
                     title: '商品名称',
-                    dataIndex: 'goodName',
-                    key: 'goodName',
+                    dataIndex: 'name',
+                    key: 'name',
                   },
                   {
                     title: '商品型号',
-                    dataIndex: 'goodType',
-                    key: 'goodType',
+                    dataIndex: 'model',
+                    key: 'model',
                     width: '120px',
                   },
                   {
                     title: '位置',
-                    dataIndex: 'status',
-                    key: 'status',
+                    dataIndex: 'initPosition',
+                    key: 'initPosition',
                   },
                   {
                     title: '单位',
-                    dataIndex: 'payStatus',
-                    key: 'payStatus',
+                    dataIndex: 'unit',
+                    key: 'unit',
                     
                   },
                   {
                     title: '数量',
-                    dataIndex: 'addTime',
-                    key: 'addTime',
+                    dataIndex: 'orderGoodsNum',
+                    key: 'orderGoodsNum',
                   },
                   {
                     title: '原价',
-                    dataIndex: 'contact',
-                    key: 'contact',
+                    dataIndex: 'price',
+                    key: 'price',
                   },
                   {
                     title: '折扣率',
-                    dataIndex: 'address',
-                    key: 'address',
+                    dataIndex: 'discountRate',
+                    key: 'discountRate',
                     render: (text, record, index) => {
-                      return <p className="ant-form-text">{ isNaN((record.orderOrigin/record.contact).toFixed(2)) ? `1.00` : `${(record.orderOrigin/record.contact).toFixed(2)}`}</p>
+                      return <p className="ant-form-text">{ isNaN((record.strikeUnitPrice/record.price).toFixed(2)) ? `1.00` : `${(record.strikeUnitPrice/record.price).toFixed(2)}`}</p>
                     }
                   },
                   {
                     title: '折后单价',
-                    dataIndex: 'orderOrigin',
-                    key: 'orderOrigin',
+                    dataIndex: 'strikeUnitPrice',
+                    key: 'strikeUnitPrice',
                   },
                   {
                     title: '小计',
                     dataIndex: 'follower',
                     key: 'follower',
                     render: (text, record, index) => {
-                      return <p className="ant-form-text">{ isNaN(record.addTime*record.orderOrigin) ? `0.00` : `${(record.addTime*record.orderOrigin)}`}</p>
+                      return <p className="ant-form-text">{ isNaN(record.orderGoodsNum*record.strikeUnitPrice) ? `0.00` : `${(record.orderGoodsNum*record.strikeUnitPrice)}`}</p>
                     }
                   },
                   {
                     title: '当前库存',
-                    dataIndex: 'orderOrigi',
-                    key: 'orderOrigi',
+                    dataIndex: 'storeNow',
+                    key: 'storeNow',
                   },
                   {
                     title: '预留库存',
-                    dataIndex: 'yuliu',
-                    key: 'yuliu',
+                    dataIndex: 'reservedGoods',
+                    key: 'reservedGoods',
                   },
                   {
                     title: '预留时间',
-                    dataIndex: 'time',
-                    key: 'time',
+                    dataIndex: 'reservedDate',
+                    key: 'reservedDate',
                   },
                   {
                     title: '备注',
-                    dataIndex: 'followe',
-                    key: 'followe',
+                    dataIndex: 'remark',
+                    key: 'remark',
                   },
                   {
                     title: '操作',
@@ -419,6 +404,7 @@ class Detail extends Component {
                 }
                 type={ type }
                 isAddable={ true }
+                dataSource = {currentOrder.orderGoods}
               />
             <br/>
             <Row>
@@ -451,7 +437,7 @@ Detail.defaultProps = {
 
 export default Form.create({
   mapPropsToFields: (props) => {
-    const order = props.orders.current;
+    const order = props.orders.currentOrder;
     return {
       id: {
         value: order.id
@@ -521,6 +507,9 @@ export default Form.create({
       },
       isDel: {
         value: order.isDel
+      },
+      orderGoods : {
+        value : order.orderGoods
       },
       ...props.mapPropsToFields(order),
     }
