@@ -27,4 +27,11 @@ public interface OrderMapper extends Mapper<Order> {
 			@Param("mutiSearchColumn") String mutiSearchColumn, @Param("businessId") String businessId);
 	
 	public Order selectTodayLastCreateOrder(@Param("today") String date);
+	
+	/**
+	 * 根据查询条件查询订单极其关联明细信息
+	 * @param condition
+	 * @return
+	 */
+	public List<Order> selectOrdersAllWithDetailByCondition(OrderCondition condition);
 }

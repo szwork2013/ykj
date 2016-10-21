@@ -4,8 +4,10 @@ import { Modal, Form, Cascader, InputNumber, Row, Col, Input, DatePicker, Select
 const FormItem = Form.Item;
 const Option = Select.Option;
 
-const PayModal = ({ form, dispatch, submiting, onOk, ...rest }) => {
+const PayModal = ({ form, dispatch, submiting, codewordTypes,onOk,currnetOrder, ...rest }) => {
     const { getFieldProps, getFieldError, isFieldValidating } = form;
+    const categorySources = codewordTypes['CATEGORY'] || [];
+    const payWaySources = codewordTypes['PAYMENT_WAY'] || [];
 
     const categoryProps = getFieldProps('category', {
         rules: [
@@ -36,6 +38,8 @@ const PayModal = ({ form, dispatch, submiting, onOk, ...rest }) => {
         wrapperCol: { span: 15 },
     };
 
+   //const {currentOrder} = orders;
+    console.log(currnetOrder)
     return (
         <Modal
             title= "付款"
@@ -46,7 +50,12 @@ const PayModal = ({ form, dispatch, submiting, onOk, ...rest }) => {
                         return false;
                     }
                     const formData = form.getFieldsValue();
-                    onOk(formData);
+                    formData.orderId = orders.currentOrder.id;
+                    console.log(formData);
+                    dispatch({
+                        type: 'orders/payOrder',
+                        payload: formData
+                    }) 
                     form.resetFields();
                 });
             }}
@@ -72,7 +81,12 @@ const PayModal = ({ form, dispatch, submiting, onOk, ...rest }) => {
                                 help={isFieldValidating('category') ? '校验中...' : (getFieldError('category') || []).join(', ')}
                             >
                                 <Select {...categoryProps} disabled={ submiting } size="default">
-
+                                    
+                                     {
+                                        categorySources.map(item => {
+                                        return <Option key={item.code} value={item.code}>{item.value}</Option>
+                                        })
+                                    }
                                 </Select>
                             </FormItem>   
                         </Col>
@@ -84,7 +98,11 @@ const PayModal = ({ form, dispatch, submiting, onOk, ...rest }) => {
                                 help={isFieldValidating('payWay') ? '校验中...' : (getFieldError('payWay') || []).join(', ')}
                             >
                                 <Select {...payWayProps} disabled={ submiting } size="default">
-
+                                     {
+                                        payWaySources.map(item => {
+                                        return <Option key={item.code} value={item.code}>{item.value}</Option>
+                                        })
+                                    }
                                 </Select>
                             </FormItem>   
                         </Col>

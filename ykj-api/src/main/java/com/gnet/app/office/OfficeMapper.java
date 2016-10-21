@@ -4,6 +4,8 @@ import java.util.Date;
 
 import org.apache.ibatis.annotations.Param;
 
+import com.sun.tools.javac.util.List;
+
 import tk.mybatis.mapper.common.Mapper;
 
 public interface OfficeMapper extends Mapper<Office>{
@@ -17,4 +19,11 @@ public interface OfficeMapper extends Mapper<Office>{
 
 	public Integer deleteById(@Param("id") String id, @Param("date") Date date);
 
+	/**
+	 * 根据查询条件获取所有对应部门信息集合
+	 * @param condition
+	 * @return
+	 */
+	public List<Office> selectOfficesAllByCondition(OfficeCondition condition);
+	
 }

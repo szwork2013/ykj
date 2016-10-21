@@ -85,6 +85,9 @@ public class Good extends BaseEntity {
 	/** 重 **/
 	private BigDecimal weight;
 	
+	/** 当前库存 */
+	private BigDecimal storeNow;
+	
 	/** 在售状态,0:在售,1:下架,2:停产 **/
 	private Integer onsaleStatus;
 	

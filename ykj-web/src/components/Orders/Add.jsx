@@ -15,7 +15,10 @@ const Add = (props) => {
       mapPropsToFields={ (order) => ({}) }
       onSubmit={ (e, form, orderGoods) => {
         e.preventDefault();
-        console.log(orderGoods);
+        orderGoods.map((item)=>{
+          item.discountRate =  isNaN((item.strikeUnitPrice/item.price).toFixed(2)) ? `1.00` : `${(item.strikeUnitPrice/item.price).toFixed(2)}`;
+        })
+      
         form.validateFieldsAndScroll((errors, values) => {
           if (!!errors) {
             return;
@@ -24,6 +27,10 @@ const Add = (props) => {
           const formData = form.getFieldsValue();
 		      formData.orderGoods = orderGoods;
           console.log(formData)
+          dispatch({
+            type: 'orders/add',
+            payload: formData,
+          })
         });
 		
       } }

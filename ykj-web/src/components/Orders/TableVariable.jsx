@@ -29,7 +29,7 @@ class TableVariable extends Component {
     }
 
     addRow( columns, dataSource ) {
-        if (dataSource[dataSource.length - 1].name != undefined) {
+        if (dataSource[dataSource.length - 1].goodName != undefined) {
             const newRow = {};
             columns.map( (column, index) => {
                 if(column.dataIndex && column.dataIndex == 'Number') {
@@ -66,7 +66,7 @@ class TableVariable extends Component {
     }
 
     getEditColumns(columns, dataSource, type) {
-
+            const { goodList = [] ,form} = this.props;
         columns.map( (column, index) => {
             const columnName = column.dataIndex;
 
@@ -114,19 +114,32 @@ class TableVariable extends Component {
                    
                 }
             }
-            if(column.dataIndex == 'model') {
+            if(column.dataIndex == 'goodModel') {
                 column.render = (text, record, index) => {
                     if(text) {
                         return text;
                     } else {
                         return (
                             <Select combobox onchange={ (value) => {
-                                dispatch({
-                                    type: 'orders/queryGood',
-                                    payload: value,
-                                });
-                            }} onSelect={ () => {} } >
-                            
+                            }} onSelect={ (value) => {
+                                
+                                goodList.map(item => {
+                                    if(item.id === value){
+                                        this.changeValue(item.name, "goodName", index);
+                                        this.changeValue(item.unit, "unit", index);
+                                        this.changeValue(item.storeNow, "storeNow", index);
+                                        this.changeValue(item.price, "price", index);
+                                        this.changeValue(value, "storageGoodsId", index);
+                                    }
+                                    })
+
+                                return true;
+                            } } >
+                                {
+                                    goodList.map(item => {
+                                    return <Option key={item.id} value={item.id}>{item.name}</Option>
+                                })
+                            }
                             </Select>
                         )
                     }    
@@ -159,6 +172,7 @@ class TableVariable extends Component {
                     )
                 }
             }
+            /**
             if(column.dataIndex == 'storeNow') {
                 column.render = (text, record, index) => {
                     return (
@@ -168,6 +182,7 @@ class TableVariable extends Component {
                     )
                 }
             }
+             */
             if(column.dataIndex == 'reservedGoods') {
                 column.render = (text, record, index) => {
                     return (
@@ -211,11 +226,12 @@ class TableVariable extends Component {
     changeValue(targetValue, columnName, index) {      
         const newDataSource = this.state.dataSource.map( (item, rowId) => {
             if(index == rowId) {
-                item[columnName] = targetValue;
+               
+                    item[columnName] = targetValue;
             }
             return item;
         })
-        //console.log(newDataSource);
+        
         this.setState({
             dataSource: newDataSource,
         })
@@ -244,7 +260,6 @@ class TableVariable extends Component {
 
     renderTable(props) {
         const { dataSource, isAddable, goodsEditing, dispatch, type, columns, ...rest } = props;
-
         return (
             type == 'edit' ?
             (

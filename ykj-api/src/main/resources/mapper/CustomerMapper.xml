@@ -85,4 +85,25 @@
     <update id="deleteById">
     update ykj_customer set modify_date = #{date}, is_del = 1 where id = #{id} 
     </update>  
+    
+    <select id="selectCustomersAllByCondition" resultMap="BaseCustomerMapper" parameterType="com.gnet.app.customer.CustomerCondition">
+		select * from ykj_customer 
+		<where>
+			<if test=" fuzzyName != null and fuzzyName != ''">
+                and name like CONCAT('%',CONCAT(#{fuzzyName},'%'))
+            </if>
+		    <if test=" orginType != null ">
+                and origin_type  = #{orginType}
+            </if>
+            <if test=" isDel != null">
+                and is_del = #{isDel}
+            </if>
+            <if test=" isEffectivity != null ">
+                and is_effectivity = #{isEffectivity}
+            </if>
+            <if test=" businessId != null and businessId != ''">
+                and business_id = #{businessId}
+            </if>
+		</where>
+	</select>
 </mapper>

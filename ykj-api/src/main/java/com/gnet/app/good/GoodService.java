@@ -98,5 +98,19 @@ public class GoodService {
 		return goodMapper.updateByPrimaryKeySelective(good) == 1;
 	}
 	
+	/**
+	 * 根据商家编码和商品类型模糊查询在售所有商品
+	 * @param businessId 商家编码
+	 * @param fuzzyModel 商品类型模糊
+	 * @return
+	 */
+	@Transactional(readOnly = true)
+	public List<Good> selectOnSaleGoodsAllForFuzzyModel(String businessId,String fuzzyModel){
+		GoodCondition condition = new GoodCondition();
+		condition.setFuzzyModel(fuzzyModel);
+		condition.setBusinessId(businessId);
+		condition.setOnsaleStatus(Good.ONSALE_STATUS);
+		return this.goodMapper.selectGoodsAllByCondition(condition);
+	}
 	
 }

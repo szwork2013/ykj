@@ -80,3 +80,18 @@ export async function setCurrentByOrderId(access_token, payload) {
 		}
 	})
 }
+
+
+
+/**
+ * 根据客户姓名搜索客户信息
+ */
+export async function searchCustomersAllByName(access_token, name) {
+	console.log("111"+name)
+  return request(`/api/customers/searchCustomersAllByName/${name}`, {
+    headers: {
+      'Authorization': `Bearer ${access_token}`,
+      'Content-Type': 'application/json',
+    },
+  })
+}

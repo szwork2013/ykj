@@ -21,4 +21,10 @@ public interface CustomerMapper extends Mapper<Customer>{
 
 	public Integer deleteById(@Param("id") String id, @Param("date") Date date);
     
+	/**
+	 * 根据查询条件查询特定的客户信息集合
+	 * @param condition 
+	 * @return
+	 */
+	public List<Customer> selectCustomersAllByCondition(CustomerCondition condition);
 }

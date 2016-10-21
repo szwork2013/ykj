@@ -3,7 +3,7 @@ import { Modal, Form, Cascader, InputNumber, Row, Col, Input, DatePicker } from 
 
 const FormItem = Form.Item;
 
-const AuditModal = ({ form, dispatch, orders, onOk, ...rest }) => {
+const AuditModal = ({ form, dispatch, orders, ...rest }) => {
     const { getFieldProps, getFieldError, isFieldValidating } = form;
 
     const formItemLayout = {
@@ -16,22 +16,27 @@ const AuditModal = ({ form, dispatch, orders, onOk, ...rest }) => {
             title= "订单审核"
             { ...rest }
             onOk= { () => {
-                 onOk();
+                dispatch({
+                    type: 'orders/audit',
+                    payload: {
+                        id : orders.currentOrder.id
+                    },
+                }) 
             }}
             onCancel= { () => {
                 dispatch({
                     type: 'orders/toggleAuditModal',
                     payload: {
-                        currentOrderId: undefined,
+                        currentOrder : {},
                         AuditModalShow: false,
                     },
                 })    
             }}
         >
             <div style={ { marginTop: '12px', marginLeft: '100px'} }>
-                <p className="ant-form-text" >{ `订单号：${orders.current.orderNo}` }</p>
+                <p className="ant-form-text" >{ `订单号：${orders.currentOrder.orderNo||''}` }</p>
                 <br/><br/>
-                <p className="ant-form-text" >{ `订单地址：${orders.current.address}` }</p>
+                <p className="ant-form-text" >{ `订单地址：${orders.currentOrder.address||''}` }</p>
                 <br/><br/>
                 <p className="ant-form-text" >{ `请确认是否审核通过` }</p>
             </div>

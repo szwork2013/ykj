@@ -1,8 +1,5 @@
 package com.gnet.app.customer;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +7,8 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.rest.webmvc.RepositoryLinksResource;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
 import org.springframework.data.web.PageableDefault;
@@ -26,10 +25,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import com.gnet.security.user.CustomUser;
-import com.gnet.utils.sort.ParamSceneUtils;
-import com.gnet.utils.sort.exception.NotFoundOrderDirectionException;
-import com.gnet.utils.sort.exception.NotFoundOrderPropertyException;
+
 import com.gnet.app.clerk.Clerk;
 import com.gnet.app.clerk.ClerkErrorBuilder;
 import com.gnet.app.clerk.ClerkService;
@@ -52,6 +48,10 @@ import com.gnet.app.tags.TagsService;
 import com.gnet.app.tags.TagsValidator;
 import com.gnet.resource.boolResource.BooleanResourceAssembler;
 import com.gnet.resource.listResource.ListResourcesAssembler;
+import com.gnet.security.user.CustomUser;
+import com.gnet.utils.sort.ParamSceneUtils;
+import com.gnet.utils.sort.exception.NotFoundOrderDirectionException;
+import com.gnet.utils.sort.exception.NotFoundOrderPropertyException;
 
 
 @RepositoryRestController
@@ -70,7 +70,8 @@ public class CustomerController implements ResourceProcessor<RepositoryLinksReso
 	private TagsService tagsService;
 	@Autowired
 	private CustomerHousePropertyService customerHousePropertyService;
-	
+	@Autowired
+	private ListResourcesAssembler<Customer> listCustomerResourcesAssembler;
 	@Autowired
 	private ListResourcesAssembler<Tags> listResourcesAssembler;
 	@Autowired
@@ -451,6 +452,29 @@ public class CustomerController implements ResourceProcessor<RepositoryLinksReso
 	public RepositoryLinksResource process(RepositoryLinksResource resource) {
 		resource.add(ControllerLinkBuilder.linkTo(CustomerController.class).withRel("customers"));
 		return resource;
+	}
+	
+	/**
+	 * 根据客户名字搜索所有对应的客户信息
+	 * @param name
+	 * @param authentication
+	 * @return
+	 */
+	@RequestMapping(value = "/searchCustomersAllByName/{name}", method = RequestMethod.GET)
+	public ResponseEntity<?> searchCustomersAllByName(@PathVariable("name") String name,
+			Authentication authentication) {
+		CustomUser customUser = (CustomUser) authentication.getPrincipal();
+		String businessId = customUser.getClerk().getBusinessId();
+
+		if("ALL".equals(name)){
+			name = "";
+		}
+		
+		List<Customer> customerList = this.customerService.selectCustomersAllForFuzzyName(businessId, name);
+
+		Resources<CustomerResource> resources = listCustomerResourcesAssembler.toResource(customerList, new CustomerResourceAssembler());
+
+		return ResponseEntity.ok(resources);
 	}
 
 }

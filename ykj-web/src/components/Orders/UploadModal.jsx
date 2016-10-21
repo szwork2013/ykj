@@ -23,6 +23,8 @@ class UploadModal extends Component {
             ]
         })
 
+        const url=  "/api/orders/"+orders.currentOrder.id+"/upload";
+        console.log(url)
         const formItemLayout = {
             labelCol: { span: 9 },
             wrapperCol: { span: 15 },
@@ -39,23 +41,25 @@ class UploadModal extends Component {
                             return false;
                         }
                         const formData = form.getFieldsValue();
-                        onOk(formData);
+                        console.log(formData);
+                        form.submiting();
                         form.resetFields();
                     });
                 }}
                 onCancel= { () => {
                     form.resetFields();
+                     dispatch({
+                        type: 'orders/toggleUploadModal',
+                        payload: {
+                            currentOrder : {},
+                            UploadModalShow: false,
+                        },
+                    })   
+                    
                     this.setState({
                         orderPicture: undefined,
                         orderSrc: undefined,
                     });
-                    dispatch({
-                        type: 'orders/toggleUploadModal',
-                        payload: {
-                            currentOrderId: undefined,
-                            UploadModalShow: false,
-                        },
-                    })    
                 }}    
                 width={ 800 }
             >
@@ -76,6 +80,8 @@ class UploadModal extends Component {
                                 >
                                     <Upload
                                         name= "orderUpload"
+                                        action = "/api/orders/upload"
+                                        data={orders.currentOrder}
                                         showUploadList={ false }
                                         disabled={ submiting }
                                         beforeUpload={ file => {
@@ -114,6 +120,10 @@ class UploadModal extends Component {
                             :
                             undefined
                         }
+                        <FormItem wrapperCol={{ span: 16, offset: 8 }} style={{ marginTop: 24 }}>
+                            <Button  htmlType="submit">取消</Button>
+                            <Button type="primary" htmlType="submit">上传</Button>
+                        </FormItem>
                      
                 </Form>
             </Modal>

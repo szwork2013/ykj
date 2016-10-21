@@ -115,10 +115,9 @@ const List = (props) => {
                     <td>
                       <a href="javascript:void(0)" onClick={ () => {
                         dispatch({
-                          type: 'orders/queryFollowStatus',
+                          type: 'orders/toFollow',
                           payload: {
                             currentOrderId: record.id,
-                            FollowModalShow: true,
                           }
                         });
                       }} ><Icon type="upload" />跟踪</a>
@@ -133,10 +132,11 @@ const List = (props) => {
                       <span className="ant-divider"></span>
                       <a href="javascript:void(0)" onClick={ () => {
                         dispatch({
-                          type: 'orders/toggleUploadModal',
+                          type: 'orders/toUpload',
                           payload: {
-                            currentOrderId: record.id,
-                            UploadModalShow: true,
+                            currentOrder : {
+                              id : record.id
+                            } 
                           }
                         });
                       }} ><Icon type="upload" />订单上传</a>
@@ -172,20 +172,30 @@ const List = (props) => {
                           <span className="ant-divider"></span>
                           <a href="javascript:void(0)" onClick={ () => {
                             dispatch({
-                              type: 'orders/toggleAuditModal',
+                              type: 'orders/toAudit',
                               payload: {
-                                currentOrderId: record.id,
-                                AuditModalShow: true,
+                                currentOrder : {
+                                  id : record.id
+                                } 
                               }
                             });
                           }} ><Icon type="edit" />审核</a>
                           <span className="ant-divider"></span>
                           <a href="javascript:void(0)" onClick={ () => {
                             dispatch({
+                                type: 'merge',
+                                payload: {
+                                  currentOrder: {}
+                                },
+                            });   
+                            dispatch({
                                 type: 'orders/togglePayModal',
                                 payload: {
-                                  currentOrderId: record.id,
-                                  payModalShow: true,
+                                  currentOrder: {
+                                    id : record.id
+                                  },
+                                  payModalShow :true
+                                    
                                 },
                             });   
                           }} ><Icon type="edit" />付款</a>
@@ -277,7 +287,7 @@ const List = (props) => {
           }]
         }
         rowKey={ record => record.id }
-        dataSource={ orders.list }
+        dataSource={ orders.orders }
         pagination={ orders.pagination }
         loading={ orders.loading }
         onChange={ onTableChange }
@@ -293,49 +303,25 @@ const List = (props) => {
         dispatch={ dispatch }
         orders={ orders }
         submiting={ orders.submiting }
-        onOk={ (data) => {
-          dispatch({
-            type: 'orders/uploadOrder',
-            payload: data,
-          });
-        }}
       >
       </UploadModal>
       <PayModal
         visible={ orders.payModalShow }
         dispatch={ dispatch }
-        
+        currnetOrder={orders.currentOrder}
         submiting={ orders.submiting }
-        onOk={ (data) => {
-          dispatch({
-            type: 'orders/pay',
-            payload: data,
-          });
-        }}
       >
       </PayModal>
       <FinishModal
         visible={ orders.finishModalShow }
         dispatch={ dispatch }
         submiting={ orders.submiting }
-        onOk={ (data) => {
-          dispatch({
-            type: 'orders/finish',
-            payload: data,
-          });
-        }}
       >
       </FinishModal>
       <AuditModal
         visible={ orders.AuditModalShow }
         dispatch={ dispatch }
         orders={ orders }
-        onOk={ () => {
-          dispatch({
-            type: 'orders/audit',
-            payload: {},
-          });
-        }}
       >
       </AuditModal>
     </Container>

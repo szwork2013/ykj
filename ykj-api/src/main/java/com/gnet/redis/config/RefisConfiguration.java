@@ -26,7 +26,7 @@ public class RefisConfiguration {
 	public JedisConnectionFactory redisConnectionFactory() {
 		JedisConnectionFactory jedisConnectionFactory = new JedisConnectionFactory();
 		// host地址
-		jedisConnectionFactory.setHostName("10.32.49.180");
+		jedisConnectionFactory.setHostName("192.168.1.139");
 		// 端口号
 		jedisConnectionFactory.setPort(6379);
 		jedisConnectionFactory.afterPropertiesSet();

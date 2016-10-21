@@ -16,50 +16,54 @@ const Search = ({  orders, form, dispatch, ...rest }) => {
     wrapperCol: { span: 14 },
   };
 
-  const userTypes = [{
+  const customUserField = [{
     key : '',
     value : '全部'
   },{
-    key : '1',
+    key : 'orderResponsibleId',
     value : '跟单人'
   },{
-    key : '2',
+    key : 'orderCreatorId',
     value : '下单人'
   },{
-    key : '3',
+    key : 'customerId',
     value : '服务人员'
   }];
 
-  const timeType =  [{
+  const customDateFiled =  [{
     key : '',
     value : '全部'
   },{
-    key : '1',
+    key : 'createDate',
     value : '下单时间'
   },{
-    key : '2',
+    key : 'finishDate',
     value : '完成时间'
   }];
 
-  const userTypeProps = getFieldProps('userType', {
+  const customUserFieldProps = getFieldProps('customUserField', {
+        initialValue : orders.query.customUserField || '',
         rules: [
             { required: false}
         ]
     });
 
-    const timeTypeProps = getFieldProps('timeType', {
+    const customDateFiledProps = getFieldProps('customDateFiled', {
+        initialValue : orders.query.customDateFiled || '',
         rules: [
             { required: false}
         ]
     });
 
     const dateProps = getFieldProps('date', {
+        initialValue : orders.query.date || [],
         rules: [
             { required: false}
         ]
     });
 
-    const textProps = getFieldProps('text', {
+    const textProps = getFieldProps('fuzzyText', {
+         initialValue : orders.query.fuzzyText || '',
         rules: [
             { required: false}
         ]
@@ -86,6 +90,29 @@ const Search = ({  orders, form, dispatch, ...rest }) => {
       ],
       filter: orders.stateStatisticalResult
     }
+
+    const formatDate = (date,format) => { 
+      const o = { 
+      "M+" : date.getMonth()+1, //month 
+      "d+" : date.getDate(), //day 
+      "h+" : date.getHours(), //hour 
+      "m+" : date.getMinutes(), //minute 
+      "s+" : date.getSeconds(), //second 
+      "q+" : Math.floor((date.getMonth()+3)/3), //quarter 
+      "S" : date.getMilliseconds() //millisecond 
+      } 
+
+      if(/(y+)/.test(format)) { 
+        format = format.replace(RegExp.$1, (date.getFullYear()+"").substr(4 - RegExp.$1.length)); 
+      } 
+
+      for(let k in o) { 
+        if(new RegExp("("+ k +")").test(format)) { 
+          format = format.replace(RegExp.$1, RegExp.$1.length==1 ? o[k] : ("00"+ o[k]).substr((""+ o[k]).length)); 
+        } 
+      } 
+      return format; 
+} 
   
   return (
     <BoxTabs>
@@ -98,7 +125,17 @@ const Search = ({  orders, form, dispatch, ...rest }) => {
               <Button type="primary" onClick={ () => {
 
                 const formData = form.getFieldsValue();
-                console.log(formData);
+                
+                if(formData.date){
+                  formData.customDateStart = formatDate(formData.date[0],'yyyy-MM-dd');
+                  formData.customDateEnd = formatDate(formData.date[1],'yyyy-MM-dd');
+                 // delete formData.date
+                }
+                
+                dispatch({
+                  type: 'orders/setQuery',
+                  payload: formData,
+                });
 
               } } >查询</Button>
               <Button type="ghost" >重置</Button>
@@ -120,11 +157,11 @@ const Search = ({  orders, form, dispatch, ...rest }) => {
                       onChange = { () => {
 
                       }}
-                      {...userTypeProps}
+                      {...customUserFieldProps}
                     >
                       {
-                      userTypes.map(item => {
-                        return <Option key={item.key} value={item.value}>{item.value}</Option>
+                      customUserField.map(item => {
+                        return <Option key={item.key} value={item.key}>{item.value}</Option>
                       })
                     }
                     </Select>
@@ -143,11 +180,11 @@ const Search = ({  orders, form, dispatch, ...rest }) => {
                       onChange = { () => {
 
                       }}
-                      {...timeTypeProps}
+                      {...customDateFiledProps}
                     >
                      {
-                      timeType.map(item => {
-                        return <Option key={item.key} value={item.value}>{item.value}</Option>
+                      customDateFiled.map(item => {
+                        return <Option key={item.key} value={item.key}>{item.value}</Option>
                       })
                     }
                     </Select>

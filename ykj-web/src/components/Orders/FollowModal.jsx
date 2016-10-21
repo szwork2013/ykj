@@ -5,10 +5,11 @@ import styles from './FollowModal.less';
 const FormItem = Form.Item;
 const Option = Select.Option;
 
-const FollowModal = ({ form, dispatch, ...rest }) => {
+const FollowModal = ({ form, dispatch,...rest }) => {
     const { getFieldProps, getFieldError, isFieldValidating } = form;
 
-    const status = [true, false, true, false, true, false, true, false, true]
+    //const status = [true, false, true, false, true, false, true, false, true]
+    const status = [0,1, 2, 3, 4, 5, 6, 7, 8, 9]
 
     const formItemLayout = {
         labelCol: { span: 9 },

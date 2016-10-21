@@ -90,57 +90,82 @@ public class OrderController implements ResourceProcessor<RepositoryLinksResourc
 
 	@RequestMapping(method = RequestMethod.GET)
 	public ResponseEntity<?> getOrders(
-		@PageableDefault Pageable pageable,
-		@RequestParam(name = "isall", required = false) Boolean isAll,
-		Authentication authentication
+			@PageableDefault Pageable pageable,
+			@RequestParam(name = "isall", required = false) Boolean isAll,
+			OrderCondition orderCondition,
+			Authentication authentication
 	) {
-		return searchOrders(pageable, isAll, null, null, null, null, null, null, null, authentication);
+		return searchOrders(pageable,isAll,orderCondition,authentication);
 	}
 	
 	@RequestMapping(value = "/search", method = RequestMethod.GET)
 	public ResponseEntity<?> searchOrders(
 		@PageableDefault Pageable pageable,
 		@RequestParam(name = "isall", required = false) Boolean isAll,
-		@RequestParam(name = "type", required = false) Integer type,
-		@RequestParam(name = "orderSource", required = false) Integer orderSource,
-		@RequestParam(name = "orderResponsibleName", required = false) String orderResponsibleName,
-		@RequestParam(name = "customerName", required = false) String customerName,
-		@RequestParam(name = "startOrderDate", required = false) String startOrderDate,
-		@RequestParam(name = "endOrderDate", required = false) String endOrderDate,
-		@RequestParam(name = "mutiSearchColumn", required = false) String mutiSearchColumn,
+		OrderCondition orderCondition,
 		Authentication authentication
 	){
 		CustomUser customUser = (CustomUser) authentication.getPrincipal();
-		List<String> orderList = null;
-		
-		// 排序处理
-		try {
-			orderList = ParamSceneUtils.toOrder(pageable, OrderOrderType.class);
-		} catch (NotFoundOrderPropertyException e) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new OrderErrorBuilder(OrderErrorBuilder.ERROR_SORT_PROPERTY_NOTFOUND, "排序字段不符合要求").build());
-		} catch (NotFoundOrderDirectionException e) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new OrderErrorBuilder(OrderErrorBuilder.ERROR_SORT_DIRECTION_NOTFOUND, "排序方向不符合要求").build());
-		}
-		
 		
 		// 判断是否分页
 		Resources<OrderResource> resources = null;
 		if (isAll != null && isAll) {
-			List<Order> orders = orderService.findAll(customUser.getClerk(), type, orderSource, orderResponsibleName,
-					customerName, startOrderDate, endOrderDate, mutiSearchColumn, orderList);
-			
+			List<Order> orders = orderService.selectOrdersAllWithDetailByCondition(customUser.getClerk(),orderCondition,pageable);
 			orderService.addSearchExtraData(orders);
 			resources = listResourcesAssembler.toResource(orders, new OrderResourceAssembler());
 		} else {
-			Page<Order> orders = orderService.paginationAll(customUser.getClerk(), pageable, type, orderSource, 
-					orderResponsibleName, customerName, startOrderDate, endOrderDate, mutiSearchColumn, orderList);
-			
+			Page<Order> orders = orderService.paginationOrdersAllWithDetailByCondition(customUser.getClerk(),orderCondition,pageable);
 			orderService.addSearchExtraData(orders.getContent());
 			resources = pagedResourcesAssembler.toResource(orders, new OrderResourceAssembler());
 		}
 		
 		return ResponseEntity.ok(resources);
 	}
+	
+//	@RequestMapping(value = "/search", method = RequestMethod.GET)
+//	public ResponseEntity<?> searchOrders(
+//		@PageableDefault Pageable pageable,
+//		@RequestParam(name = "isall", required = false) Boolean isAll,
+//		@RequestParam(name = "type", required = false) Integer type,
+//		@RequestParam(name = "orderSource", required = false) Integer orderSource,
+//		@RequestParam(name = "orderResponsibleName", required = false) String orderResponsibleName,
+//		@RequestParam(name = "customerName", required = false) String customerName,
+//		@RequestParam(name = "startOrderDate", required = false) String startOrderDate,
+//		@RequestParam(name = "endOrderDate", required = false) String endOrderDate,
+//		@RequestParam(name = "mutiSearchColumn", required = false) String mutiSearchColumn,
+//		Authentication authentication
+//	){
+//		CustomUser customUser = (CustomUser) authentication.getPrincipal();
+//		List<String> orderList = null;
+//		
+//		// 排序处理
+//		try {
+//			orderList = ParamSceneUtils.toOrder(pageable, OrderOrderType.class);
+//		} catch (NotFoundOrderPropertyException e) {
+//			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new OrderErrorBuilder(OrderErrorBuilder.ERROR_SORT_PROPERTY_NOTFOUND, "排序字段不符合要求").build());
+//		} catch (NotFoundOrderDirectionException e) {
+//			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new OrderErrorBuilder(OrderErrorBuilder.ERROR_SORT_DIRECTION_NOTFOUND, "排序方向不符合要求").build());
+//		}
+//		
+//		
+//		// 判断是否分页
+//		Resources<OrderResource> resources = null;
+//		if (isAll != null && isAll) {
+//			List<Order> orders = orderService.findAll(customUser.getClerk(), type, orderSource, orderResponsibleName,
+//					customerName, startOrderDate, endOrderDate, mutiSearchColumn, orderList);
+//			
+//			orderService.addSearchExtraData(orders);
+//			resources = listResourcesAssembler.toResource(orders, new OrderResourceAssembler());
+//		} else {
+//			Page<Order> orders = orderService.paginationAll(customUser.getClerk(), pageable, type, orderSource, 
+//					orderResponsibleName, customerName, startOrderDate, endOrderDate, mutiSearchColumn, orderList);
+//			
+//			orderService.addSearchExtraData(orders.getContent());
+//			resources = pagedResourcesAssembler.toResource(orders, new OrderResourceAssembler());
+//		}
+//		
+//		return ResponseEntity.ok(resources);
+//	}
 	
 	/**
 	 * 返回订单的测量列表
@@ -442,13 +467,12 @@ public class OrderController implements ResourceProcessor<RepositoryLinksResourc
 	) {
 		
 		CustomUser customUser = (CustomUser) authentication.getPrincipal();
-		order.setBusinessId(customUser.getClerk().getBusinessId());
+		 order.setBusinessId(customUser.getClerk().getBusinessId());
 		
 		Map<String, Object> error = OrderValidator.validateBeforeCreateOrder(order);
 		if (error != null) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new OrderErrorBuilder(Integer.valueOf(error.get("code").toString()), error.get("msg").toString()).build());
 		}
-		
 		Boolean result = orderService.create(order, customUser.getClerk().getId());
 		if (result) {
 			return ResponseEntity.created(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(OrderController.class).getOrder(order.getId())).toUri()).build();

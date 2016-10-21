@@ -31,10 +31,9 @@ class Detail extends Component {
 
   render() {
     const { orders, form, type, onSubmit,codewordTypes, moreProps, dispatch, ...rest } = this.props;
-    const { loading, queryCustomers,currentOrder={} ,fuzzyCustomerList = []} = orders;
+    const { loading, queryCustomers,currentOrder={} ,fuzzyCustomerList = [], goodList=[],customerList=[]} = orders;
     const { getFieldProps, getFieldError, isFieldValidating,setFields } = form;
     const orderSources = codewordTypes['ORDER_SOURCE'] || [];
-
 
     const orderNoProps = getFieldProps('orderNo', {
         rules: [
@@ -66,7 +65,7 @@ class Detail extends Component {
         ],
     });
 
-    const orderTypeProps = getFieldProps('orderType', {
+    const orderSourceProps = getFieldProps('orderSource', {
         rules: [
             { required: false, message: '请选择订单来源'}
         ],
@@ -91,6 +90,13 @@ class Detail extends Component {
     });
 
     const orderResponsibleIdProps = getFieldProps('orderResponsibleId', {
+  		rule: [
+  			{ required: false}
+  		]
+  	})
+
+    const customerIdProps = getFieldProps('customerId', {
+      type: 'hidden',
   		rule: [
   			{ required: false}
   		]
@@ -158,17 +164,29 @@ class Detail extends Component {
                           label = "客户姓名"
                           help={isFieldValidating('name') ? '校验中...' : (getFieldError('name') || []).join(', ')}
                       >
+                          <Input {...customerIdProps} type="hidden" size="default" style={ { width: '80%'} } disabled={ orders.submiting } />
+                        
                           <Select {...nameProps} showSearch onBlur={ (value) => {
                             console.log(value)
                             form.setFieldsValue({
                               name: value,
                             })
                           }} onSelect={ (value, option) => {
-                            console.log("a"+value);
-                            
+
+                            customerList.map(item => {
+                              if(item.id === value){
+                                 form.setFieldsValue({
+                                  company: item.organization || '',
+                                  phone : item.phone || '',
+                                  customerId : item.id || ''
+                                })
+                              }
+                            })
+                           
+                            return true;
                           }} style={ { width: '80%'} } size="default" disabled={ orders.submiting }>
                            {
-                            fuzzyCustomerList.map(item => {
+                            customerList.map(item => {
                               return <Option key={item.id} value={item.id}>{item.name}</Option>
                             })
                           }
@@ -234,7 +252,7 @@ class Detail extends Component {
                           hasFeedback
                           help={isFieldValidating('orderType') ? '校验中...' : (getFieldError('orderType') || []).join(', ')}
                       >
-                          <Select {...orderTypeProps} style={ { width: '80%'} } size="default" disabled={ orders.submiting }>
+                          <Select {...orderSourceProps} style={ { width: '80%'} } size="default" disabled={ orders.submiting }>
                            {
                             orderSources.map(item => {
                               return <Option key={item.code} value={item.code}>{item.value}</Option>
@@ -326,13 +344,13 @@ class Detail extends Component {
                   },
                   {
                     title: '商品名称',
-                    dataIndex: 'name',
-                    key: 'name',
+                    dataIndex: 'goodName',
+                    key: 'goodName',
                   },
                   {
                     title: '商品型号',
-                    dataIndex: 'model',
-                    key: 'model',
+                    dataIndex: 'goodModel',
+                    key: 'goodModel',
                     width: '120px',
                   },
                   {
@@ -404,7 +422,8 @@ class Detail extends Component {
                 }
                 type={ type }
                 isAddable={ true }
-                dataSource = {currentOrder.orderGoods}
+                goodList = {goodList}
+                form = {form}
               />
             <br/>
             <Row>

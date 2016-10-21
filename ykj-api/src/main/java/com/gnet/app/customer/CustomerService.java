@@ -163,5 +163,19 @@ public class CustomerService {
 	public boolean deleteById(String id, Date date) {
 		return customerMapper.deleteById(id, date) == 1;
 	}
+   
+   /**
+	 * 根据用户名字模糊搜索所有对应的客户信息
+	 * @param businessId 商家编码
+	 * @param fuzzyName 客户名称模糊
+	 * @return
+	 */
+   @Transactional(readOnly = true)
+	public List<Customer> selectCustomersAllForFuzzyName(String businessId,String fuzzyName){
+		CustomerCondition condition = new CustomerCondition();
+		condition.setFuzzyName(fuzzyName);
+		condition.setBusinessId(businessId);
+		return this.customerMapper.selectCustomersAllByCondition(condition);
+	}
 
 }

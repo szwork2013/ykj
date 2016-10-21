@@ -3,7 +3,8 @@ import { routerRedux } from 'dva/router';
 import { message } from 'antd';
 import request, { parseError } from '../../utils/request';
 import { root, search, view, create, update, remove, removeAll, searchCustomers, 
-       finishOrder, auditOrder, payOrder, viewGood, saveFillOrBack, uploadOrder, getFollowStatus } from '../../services/order';
+       finishOrder, auditOrder, payOrder, viewGood, saveFillOrBack, uploadOrder, searchGoodsAllByModel,getOrderCurrentProcessStatus } from '../../services/order';
+import {searchCustomersAllByName } from '../../services/customer';
 import pathToRegexp from 'path-to-regexp';
 import querystring from 'querystring';
 
@@ -17,31 +18,15 @@ const mergeQuery = (oldQuery, newQuery) => {
 
 const initialState = {
   query: {},
-  list : [{
-    id : 'TEST1'
-  }],
+  orders: [],
   stateStatisticalResult : [],
-  currentOrder : {orderNo:'1231',orderGoods:[
-      {
-        name: '小木板',
-        model: 'v0.1.0-rc',
-        initPosition: '墙壁',
-        unit: '件',
-        orderGoodsNum: 70,
-        price: 40,
-        discountRate: 0.01,
-        strikeUnitPrice: 40,
-        follower: '90',
-        storeNow: '10',
-        reservedDate: '2016-10-10',
-        remark: '木'
-      }
-    ]},
+  currentOrder : {},
   //模糊匹配到的用户列表
   fuzzyCustomerList : [],
-  orders: [],
   current: {},
   currentGoodInfo: {},
+  goodList : [],
+  customerList : [],
   pagination: {
     current: 1,
   },
@@ -113,6 +98,28 @@ export default {
       });
     },
 
+    /**
+     * 新增操作时的监听处理
+     */
+    addSubscriptions({ dispatch, history }) {
+      history.listen(location => {
+                if (location.pathname === '/order/orders/add') {
+                    dispatch({
+                        type: 'searchGoodsByModel',
+                        payload: 'ALL'
+                    });
+                    dispatch({
+                        type: 'searchCustomersByName',
+                        payload: 'ALL'
+                    });
+                    dispatch({
+                        type: 'codewords/setCodewordsByType',
+                        payload: 'ORDER_SOURCE'
+                    });
+                }
+            });
+    },
+
     enterOutSubscriptions({ dispatch, history }) {
       history.listen((location, state) => {
         if (pathToRegexp('/order/orders/enterOut/:id/:goodId').test(location.pathname)) {
@@ -157,7 +164,7 @@ export default {
         }
       } );
       const { data, error } = yield search(access_token, mergeQuery(oldQuery, query));
-
+      console.log(data)
       if (!error) {
         yield put({
           type: 'setOrders',
@@ -229,6 +236,10 @@ export default {
         payload: true,
       });
       
+       yield put({
+        type: 'createSuccess',
+        payload: payload,
+      });
       const access_token = yield select( state => state.oauth.access_token );
       const { data, error } = yield create(access_token, payload);
 
@@ -239,6 +250,8 @@ export default {
     	const err = yield parseError(error);
         yield message.error(`创建订单管理信息失败:${err.status} ${err.message}`, 3);
       }
+      console.log(payload)
+     
 
       yield put({
         type: 'toggleSubmiting',
@@ -362,35 +375,7 @@ export default {
 
       return false;
     },
-    *audit({ payload }, {select, put}) {
-
-      const { access_token, id, query } = yield select( state => {
-        return {
-  	      access_token: state.oauth.access_token,
-          id: state.orders.currentOrderId,
-          query: state.orders.query,
-        }
-      } );
-      const { data, error } = yield auditOrder(access_token, id);
-
-      if (!error) {
-        yield message.success('审核操作成功', 2);
-        yield put({ type: 'setQuery', payload: query })
-        return true;
-      }
-
-      const err = yield parseError(error);
-      yield message.error(`审核操作失败:${err.status} ${err.message}`, 3);
-
-      yield put({
-        type: 'toggleAuditModal',
-        payload: {
-          AuditModalShow: false, 
-        },
-      });
-
-      return false;
-    },
+    
     *pay({ payload: dataSourse }, {select, put}) {
       yield put({
         type: 'toggleSubmiting',
@@ -544,7 +529,7 @@ export default {
         }
       } );
       
-      const { data, error } = yield getFollowStatus(access_token, id);
+      const { data, error } = yield s(access_token, id);
 
       if (!error) {
         yield put({
@@ -558,7 +543,180 @@ export default {
       const err = yield parseError(error);
       yield message.error(`跟踪订单状态失败:${err.status} ${err.message}`, 3);
       return false;
-    }
+    },
+    /**
+     * 显示订单最新流程状态状态
+     */
+    *showOrderProcessStatus({payload},{select,put}){
+      
+        const access_token = yield select( state => state.oauth.access_token );
+        const { data, error } = yield getOrderCurrentProcessStatus(access_token, payload.currentOrder.id || '');
+
+        if (!error) {
+          yield put({
+            type: 'merge',
+            payload: {
+              currentOrder : {
+                processStatus : data
+              }
+            },
+          })
+          
+           yield put({
+            type: 'toggleFollowModal',
+            payload: {FollowModalShow : true},
+          })
+
+          return true;
+        }
+
+        const err = yield parseError(error);
+        yield message.error(`加载订单状态失败:${err.status} ${err.message}`, 3);
+        return false;
+      }, 
+    /**
+     * 图片上传准备
+     */
+    *toUpload({payload},{select,put}){
+      
+        yield put({
+          type: 'merge',
+          payload: {
+            currentOrder : {}
+          },
+        })
+
+        yield put({
+          type: 'merge',
+          payload: {
+            currentOrder : payload.currentOrder
+          },
+        })
+        
+        yield put({
+          type: 'toggleUploadModal',
+          payload: {UploadModalShow : true},
+        })
+        return true;
+      },
+    /**
+     * 图片上传
+     */
+    *upload({ payload }, {select, put}) {
+      console.log(payload)
+      const access_token = yield select( state => state.oauth.access_token );
+      const { data, error } = yield uploadOrder(access_token, payload.id);
+
+      if (!error) {
+        yield message.success('订单上传操作成功', 2);
+        
+        yield put({
+          type: 'toggleUploadModal',
+          payload: {
+            UploadModalShow: false, 
+          },
+        });
+        return true;
+      }
+
+      const err = yield parseError(error);
+      yield message.error(`订单上传操作失败:${err.status} ${err.message}`, 3);
+
+
+      return false;
+    },
+    /**
+     * 准备订单审核
+     */
+    *toAudit({payload},{select,put}){
+      const access_token = yield select( state => state.oauth.access_token );
+      const { data, error } = yield view(access_token, payload.currentOrder.id || '');
+
+      if (!error) {
+        yield put({
+          type: 'merge',
+          payload: {
+            currentOrder : data
+          },
+        })
+        yield put({
+          type: 'toggleAuditModal',
+          payload: {AuditModalShow : true},
+        })
+        return true;
+      }
+
+       const err = yield parseError(error);
+      yield message.error(`加载订单信息失败:${err.status} ${err.message}`, 3);
+      return false;
+    },
+    /**
+     * 订单审核
+     */
+    *audit({ payload }, {select, put}) {
+      console.log(payload)
+      const access_token = yield select( state => state.oauth.access_token );
+      const { data, error } = yield auditOrder(access_token, payload.id);
+
+      if (!error) {
+        yield message.success('审核操作成功', 2);
+        
+        yield put({
+          type: 'toggleAuditModal',
+          payload: {
+            AuditModalShow: false, 
+          },
+        });
+        return true;
+      }
+
+      const err = yield parseError(error);
+      yield message.error(`审核操作失败:${err.status} ${err.message}`, 3);
+
+
+      return false;
+    },
+    /**
+     * 搜索商品信息
+     */
+    *searchGoodsByModel({payload },{select, put}){
+      const access_token = yield select( state => state.oauth.access_token );
+      const { data, error } = yield searchGoodsAllByModel(access_token, payload);
+
+      if (!error) {
+        yield put({
+          type: 'merge',
+          payload: {
+            goodList: data._embedded && data._embedded.goods || []
+          },
+        })
+        return true;
+      }
+
+      const err = yield parseError(error);
+      yield message.error(`加载商品信息失败:${err.status} ${err.message}`, 3);
+      return false;
+    },
+    /**
+     * 搜索客户信息
+     */
+    *searchCustomersByName({payload },{select, put}){
+      const access_token = yield select( state => state.oauth.access_token );
+      const { data, error } = yield searchCustomersAllByName(access_token, payload);
+       if (!error) {
+        yield put({
+          type: 'merge',
+          payload: {
+            customerList: data._embedded && data._embedded.customers || []
+          },
+        })
+        return true;
+      }
+
+      const err = yield parseError(error);
+      yield message.error(`加载客户信息失败:${err.status} ${err.message}`, 3);
+      return false;
+    },
   },
 
   reducers: {
@@ -586,9 +744,7 @@ export default {
     toggleFinishModal(state, { payload }) {
       return { ...state, ...payload }
     },
-    toggleAuditModal(state, { payload }) {
-      return { ...state, ...payload }
-    },
+    
     togglePayModal(state, { payload }) {
       return { ...state, ...payload }
     },
@@ -609,6 +765,16 @@ export default {
     },
     clear(state) {
       return initialState
+    },
+
+    merge(state,{payload}){
+      return { ...state, ...payload }
+    },
+    createSuccess(state,{payload}){
+      return { ...state, ...payload }
+    },
+    toggleAuditModal(state, { payload }) {
+      return { ...state, ...payload }
     },
   }
 

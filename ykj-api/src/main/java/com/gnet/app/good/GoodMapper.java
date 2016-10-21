@@ -1,12 +1,13 @@
 package com.gnet.app.good;
 
-import tk.mybatis.mapper.common.Mapper;
-
 import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
 
+import tk.mybatis.mapper.common.Mapper;
+
 public interface GoodMapper extends Mapper<Good> {
+	
 	
 	public List<Good> selectGoodsAll(@Param("name") String name, @Param("onsaleStatus") Integer onsaleStatus, @Param("businessId") String businessId);
 	
@@ -17,4 +18,6 @@ public interface GoodMapper extends Mapper<Good> {
 	public int useInOrder(@Param("storageGoodsId") String storageGoodsId);
 	
 	public List<Good> findByIds(@Param("ids") List<String> ids);
+	
+	public List<Good> selectGoodsAllByCondition(GoodCondition condition);
 }

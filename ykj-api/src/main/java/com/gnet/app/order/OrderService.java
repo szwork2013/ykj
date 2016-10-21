@@ -9,6 +9,8 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
@@ -25,6 +27,9 @@ import com.gnet.app.orderService.OrderServiceMapper;
 import com.gnet.utils.math.PriceUtils;
 import com.gnet.utils.page.PageUtil;
 import com.gnet.utils.page.PageUtil.Callback;
+import com.gnet.utils.sort.ParamSceneUtils;
+import com.gnet.utils.sort.exception.NotFoundOrderDirectionException;
+import com.gnet.utils.sort.exception.NotFoundOrderPropertyException;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -256,6 +261,7 @@ public class OrderService {
 	@Transactional(readOnly = false)
 	public Boolean create(Order order, String operatorId) {
 		Date date = new Date();
+		order.setOrderCreatorId(operatorId);
 		// 放入订单编号
 		order.setOrderNo(OrderKit.generateOrderNo(order.getBusinessId()));
 		// 若不需要审核，则进行直接变为进行中订单
@@ -294,14 +300,14 @@ public class OrderService {
 			storageGoodIds.add(orderGood.getStorageGoodsId());
 		}
 		
-		// 获得仓库商品数据
+//		// 获得仓库商品数据
 		Map<String, Good> storageGoodsMap = Maps.newHashMap();
 		List<Good> goods = goodMapper.findByIds(storageGoodIds);
 		for (Good good : goods) {
 			storageGoodsMap.put(good.getId(), good);
 		}
 		
-		// 计算折前单价和折后单价
+//		// 计算折前单价和折后单价
 		BigDecimal priceBeforeDiscount = new BigDecimal(0);
 		BigDecimal priceAfterDiscount = new BigDecimal(0);
 		for (OrderGood orderGood : orderGoods) {
@@ -444,6 +450,70 @@ public class OrderService {
 		}
 		
 		return true;
+	}
+	
+	/**
+	 * 根据查询条件查询订单极其关联明细信息
+	 * @param condition
+	 * @return
+	 */
+	public List<Order> selectOrdersAllWithDetailByCondition(Clerk clerk,OrderCondition condition,Pageable pageable){
+		
+		Integer roleType = clerk.getRoleType();
+		
+		if (Clerk.ROLE_TYPE_ADMIN.equals(roleType) || Clerk.ROLE_TYPE_MANAGER.equals(roleType) 
+			|| Clerk.ROLE_TYPE_LOGISTIC.equals(roleType) || Clerk.ROLE_TYPE_AFTER_SALES.equals(roleType)
+			|| Clerk.ROLE_TYPE_WAREHOUSE.equals(roleType)) {
+			condition.setBusinessId(clerk.getBusinessId());
+		} else if (Clerk.ROLE_TYPE_STORE_MANAGER.equals(roleType)) {
+			condition.setSotreId(clerk.getStoreId());
+		} else if (Clerk.ROLE_TYPE_CLERK.equals(roleType)) {
+			condition.setOrderResponsibleId(clerk.getId());
+		} else {
+			return new ArrayList<>();
+		}
+		return this.orderMapper.selectOrdersAllWithDetailByCondition(condition);
+	}
+	
+	public Page<Order> paginationOrdersAllWithDetailByCondition(Clerk clerk,OrderCondition condition,Pageable pageable) {
+		Integer roleType = clerk.getRoleType();
+		
+		if (Clerk.ROLE_TYPE_ADMIN.equals(roleType) || Clerk.ROLE_TYPE_MANAGER.equals(roleType) 
+			|| Clerk.ROLE_TYPE_LOGISTIC.equals(roleType) || Clerk.ROLE_TYPE_AFTER_SALES.equals(roleType)
+			|| Clerk.ROLE_TYPE_WAREHOUSE.equals(roleType)) {
+			condition.setBusinessId(clerk.getBusinessId());
+		} else if (Clerk.ROLE_TYPE_STORE_MANAGER.equals(roleType)) {
+			condition.setSotreId(clerk.getStoreId());
+		} else if (Clerk.ROLE_TYPE_CLERK.equals(roleType)) {
+			condition.setOrderResponsibleId(clerk.getId());
+		} else {
+			return PageUtil.pagination(pageable, new Callback<Order>() {
+				
+				public List<Order> getPageContent() {
+					return new ArrayList<>();
+				}
+			});
+		}
+		
+		List<String> orderList = null;
+		
+		// 排序处理
+		try {
+			orderList = ParamSceneUtils.toOrder(pageable, OrderOrderType.class);
+		} catch (NotFoundOrderPropertyException e) {
+			throw new RuntimeException("排序字段不符合规则");
+		} catch (NotFoundOrderDirectionException e) {
+			throw new RuntimeException("排序方向不符合要求");
+		}
+		
+		return PageUtil.pagination(pageable, orderList, new PageUtil.Callback<Order>() {
+			
+			@Override
+			public List<Order> getPageContent() {
+				return orderMapper.selectOrdersAllWithDetailByCondition(condition);
+			}
+		
+		});
 	}
 	
 }

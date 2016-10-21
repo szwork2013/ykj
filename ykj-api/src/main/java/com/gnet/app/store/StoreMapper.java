@@ -21,4 +21,11 @@ public interface StoreMapper extends Mapper<Store> {
 
 	public Integer isModifyExist(@Param("name") String name, @Param("oldName") String oldName, @Param("businessId") String businessId);
 
+	/**
+	 * 根据查询条件查询符合的所有门店信息
+	 * @param condition
+	 * @return
+	 */
+	public List<Store> selectStoresAllByCondition(StoreCondition condition);
+	
 }

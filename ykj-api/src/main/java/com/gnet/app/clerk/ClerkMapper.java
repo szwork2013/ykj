@@ -1,8 +1,7 @@
 package com.gnet.app.clerk;
 
-import java.util.List;
-
 import java.util.Date;
+import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
 
@@ -29,5 +28,12 @@ public interface ClerkMapper extends Mapper<Clerk>{
 	public Integer businessExistClerk(@Param("id") String id);
 
 	public Integer storeExistClerk(@Param("id") String id);
+	
+	/**
+	 * 根据查询条件查询对应公司人员集合
+	 * @param condition
+	 * @return
+	 */
+	public List<Clerk> selectClearksAllByCondition(ClerkCondition condition);
 	
 }

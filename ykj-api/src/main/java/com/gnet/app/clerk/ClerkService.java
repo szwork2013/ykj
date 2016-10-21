@@ -201,6 +201,4 @@ public class ClerkService {
 		return clerkMapper.storeExistClerk(id) > 0;
 	}
 	
-	
-	
 }
