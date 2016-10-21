@@ -47,7 +47,7 @@
        <if test="buildingName != null">
        and ychp.building_name like "${@com.gnet.utils.string.StringEscapeUtils@escapeSql(buildingName)}%"
        </if>
-       group by yc.id
+        <!--group by yc.id-->
     </select>
     
     <select id="selectAllById" resultMap="BaseCustomerMapper">
@@ -64,7 +64,7 @@
        <if test="buildingName != null">
        and ychp.building_name like "${@com.gnet.utils.string.StringEscapeUtils@escapeSql(buildingName)}%"
        </if>
-       group by yc.id
+       <!--group by yc.id-->
     </select>
     
     <select id="selectOneById" resultMap="BaseCustomerMapper">

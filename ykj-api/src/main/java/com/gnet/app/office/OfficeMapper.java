@@ -1,10 +1,10 @@
 package com.gnet.app.office;
 
 import java.util.Date;
+import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
 
-import com.sun.tools.javac.util.List;
 
 import tk.mybatis.mapper.common.Mapper;
 
