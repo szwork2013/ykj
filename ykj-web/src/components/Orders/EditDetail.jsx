@@ -28,65 +28,9 @@ class EditDetail extends Component {
 
   render() {
     const { orders, form, type, onSubmit,codewordTypes, moreProps, dispatch, ...rest } = this.props;
-    const { loading, queryCustomers,currentOrder={} ,fuzzyCustomerList = []} = orders;
+    const { loading, queryCustomers,currentOrder={} ,fuzzyCustomerList = [], goodList=[],customerList=[]} = orders;
     const { getFieldProps, getFieldError, isFieldValidating,setFields } = form;
     const orderSources = codewordTypes['ORDER_SOURCE'] || [];
-
-    const price = {a:17645.00, b:15733.00, c:1912.00}
-    const dataSource = [
-      {
-        Number: 1,
-        goodName: '小木板',
-        goodType: 'v0.1.0-rc',
-        status: '墙壁',
-        payStatus: '件',
-        addTime: 70,
-        contact: 40,
-        address: 0.01,
-        orderOrigin: 40,
-        follower: '90',
-        orderOrigi: '10',
-        yuliu: '3',
-        time: '2016-10-10',
-        followe: '木',
-        outNumber: '2',
-      },
-      {
-        Number: 2,
-        goodName: '小木板',
-        goodType: 'v0.1.0-rc',
-        status: 'lal',
-        payStatus: '件',
-        addTime: 80,
-        contact: 50,
-        address: 0.02,
-        orderOrigin: 50,
-        follower: '90',
-        orderOrigi: '20',
-        yuliu: '4',
-        time: '2016-11-10',
-        followe: '木板',
-        outNumber: '2',
-      },
-      {
-        Number: 3,
-        goodName: '小木板',
-        goodType: 'v0.1.0-rc',
-        status: 'mmm',
-        payStatus: '件',
-        addTime: 90,
-        contact: 60,
-        address: 0.01,
-        orderOrigin: 60,
-        follower: '90',
-        orderOrigi: '30',
-        yuliu: '5',
-        time: '2016-12-10',
-        followe: '木板质量',
-        outNumber: '2',
-      },
-    ]
-
     const orderNoProps = getFieldProps('orderNo', {
         rules: [
             { required: true, min: 1, message: '订单号必须填写'}
@@ -117,9 +61,9 @@ class EditDetail extends Component {
         ],
     });
 
-    const orderTypeProps = getFieldProps('orderType', {
+    const orderSourceProps = getFieldProps('orderSource', {
         rules: [
-            { required: true, message: '请选择订单来源'}
+            { required: false, message: '请选择订单来源'}
         ],
     });
 
@@ -128,11 +72,51 @@ class EditDetail extends Component {
             { required: true, min: 1, message: '送货地址至少 1 个字符'}
         ],
     });
+
+     const companyProps = getFieldProps('company', {
+        rules: [
+            { required: false}
+        ],
+    });
+
+     const phoneProps = getFieldProps('phone', {
+        rules: [
+            { required: false}
+        ],
+    });
+
+    const orderResponsibleIdProps = getFieldProps('orderResponsibleId', {
+  		rule: [
+  			{ required: false}
+  		]
+  	})
+
+    const customerIdProps = getFieldProps('customerId', {
+      type: 'hidden',
+  		rule: [
+  			{ required: false}
+  		]
+  	})
     
     const formItemLayout = {
       labelCol: { span: 6 },
       wrapperCol: { span: 10 },
     };
+
+    const treeData = [
+      { name: '杭州', id: '1' },
+      { name: '台州', id: '2' },
+      { name: '湖州', id: '3' },
+      { name: '张伟刚', id: '4', pId: '1' },
+      { name: '许照亮', id: '5', pId: '2' },
+      { name: '其味无穷', id: '6', pId: '5' },
+    ]
+
+    const customers = [{
+      id : '1',
+      name : '33'
+    }]
+    const price = {a:17645.00, b:15733.00, c:1912.00}
 
     return (
       <Container
@@ -177,23 +161,31 @@ class EditDetail extends Component {
                           label = "客户姓名"
                           help={isFieldValidating('name') ? '校验中...' : (getFieldError('name') || []).join(', ')}
                       >
-                          <Select {...nameProps} combobox onchange={ (value) => {
-                            dispatch({
-                              type: 'orders/queryCustomer',
-                              payload: value,
-                            });
+                          <Input {...customerIdProps} type="hidden" size="default" style={ { width: '80%'} } disabled={ orders.submiting } />
+                        
+                          <Select {...nameProps} onBlur={ (value) => {
+                            form.setFieldsValue({
+                              name: value,
+                            })
                           }} onSelect={ (value, option) => {
-                            queryCustomers.map( (customer, index) => {
-                              if(customer.id == value) {
-                                this.setState({
-                                  currentCustOrg: customer.organization,
-                                  currentCustPhone: customer.phone,
-                                  currentCustFollower: customer.responsibleName,
-                                });
+
+                            customerList.map(item => {
+                              if(item.id === value){
+                                 form.setFieldsValue({
+                                  company: item.organization || '',
+                                  phone : item.phone || '',
+                                  customerId : item.id || ''
+                                })
                               }
-                            });
+                            })
+                           
+                            return true;
                           }} style={ { width: '80%'} } size="default" disabled={ orders.submiting }>
-                          
+                           {
+                            customerList.map(item => {
+                              return <Option key={item.id} value={item.id}>{item.name}</Option>
+                            })
+                          }
                           </Select>
                       </FormItem>
                   </Col>
@@ -202,7 +194,7 @@ class EditDetail extends Component {
                           { ...formItemLayout }
                           label = "客户单位名称"
                       >
-                          <p className="ant-form-text" >{ this.state.currentCustOrg }</p>
+                          <Input {...companyProps} size="default" style={ { width: '80%'} } disabled={ orders.submiting } />
                       </FormItem>
                   </Col>
                 </Row>
@@ -212,7 +204,7 @@ class EditDetail extends Component {
                           { ...formItemLayout }
                           label = "客户电话"   
                       >
-                          <p className="ant-form-text" >{ this.state.currentCustPhone }</p>
+                          <Input {...phoneProps} size="default" style={ { width: '80%'} } disabled={ orders.submiting } />
                       </FormItem>
                   </Col>
                   <Col sm={ 12 }>
@@ -234,19 +226,19 @@ class EditDetail extends Component {
                           hasFeedback
                           help={isFieldValidating('orderResponsibleId') ? '校验中...' : (getFieldError('orderResponsibleId') || []).join(', ')}
                       >
-                          <div className="ant-search-input-wrapper" >
-                              <InputGroup className={classNames({ 'ant-search-input': true })} style={ { width: '80%'} } >
-                                  <Input {...orderResponsibleProps} size="default" defaultValue={ this.state.currentCustFollower } disabled={ orders.submiting } />
-                                  <div className="ant-input-group-wrap">
-                                      <Button icon="edit" onClick={ () => {
-                                        dispatch({
-                                          type: 'orders/toggleModalShow',
-                                          payload: true,
-                                        });
-                                      }} className={classNames({ 'ant-search-btn': true })} size="default" />
-                                  </div>
-                              </InputGroup>
-                          </div>
+                          <TreeBox 
+                                treeData={treeData}
+                                multiple={ false }
+                                checkable={ false }
+                                changeable={ true }
+                                treeProps={ orderResponsibleIdProps }
+                                onOk={(value) => {
+                                  const { setFieldsValue } = form
+                                  setFieldsValue({
+                                    orderResponsibleId: value
+                                  })
+                                }}
+                              /> 
                       </FormItem>
                   </Col>
                   <Col sm={ 12 }>
@@ -256,9 +248,12 @@ class EditDetail extends Component {
                           hasFeedback
                           help={isFieldValidating('orderType') ? '校验中...' : (getFieldError('orderType') || []).join(', ')}
                       >
-                          <Select {...orderTypeProps} style={ { width: '80%'} } size="default" disabled={ orders.submiting }>
-                            <Option key='1' value='1' >自然客户</Option>
-                            <Option key='2' value='2' >活动</Option>
+                          <Select {...orderSourceProps} style={ { width: '80%'} } size="default" disabled={ orders.submiting }>
+                           {
+                            orderSources.map(item => {
+                              return <Option key={item.code} value={item.code}>{item.value}</Option>
+                            })
+                          }
                           </Select>
                       </FormItem>
                   </Col>
@@ -344,100 +339,96 @@ class EditDetail extends Component {
             </Box>
               <TableVariable
                   columns={
-                    [{
-                      title: '序号',
-                      dataIndex: 'Number',
-                      key: 'Number',
-                      render: (text, record, index) => (index + 1)
-                    },
-                    {
-                      title: '商品名称',
-                      dataIndex: 'goodName',
-                      key: 'goodName',
-                    },
-                    {
-                      title: '商品型号',
-                      dataIndex: 'goodType',
-                      key: 'goodType',
-                      width: '120px',
-                    },
-                    {
-                      title: '位置',
-                      dataIndex: 'status',
-                      key: 'status',
-                    },
-                    {
-                      title: '单位',
-                      dataIndex: 'payStatus',
-                      key: 'payStatus',
-                      
-                    },
-                    {
-                      title: '数量',
-                      dataIndex: 'addTime',
-                      key: 'addTime',
-                    },
-                    {
-                      title: '原价',
-                      dataIndex: 'contact',
-                      key: 'contact',
-                    },
-                    {
-                      title: '折扣率',
-                      dataIndex: 'address',
-                      key: 'address',
-                      render: (text, record, index) => {
-                          return <p className="ant-form-text">{ isNaN((record.orderOrigin/record.contact).toFixed(2)) ? `1.00` : `${(record.orderOrigin/record.contact).toFixed(2)}`}</p> 
-                      }
-                    },
-                    {
-                      title: '折后单价',
-                      dataIndex: 'orderOrigin',
-                      key: 'orderOrigin',
-                    },
-                    {
-                      title: '小计',
-                      dataIndex: 'follower',
-                      key: 'follower',
-                      render: (text, record, index) => {
-                          return <p className="ant-form-text">{ isNaN(record.addTime*record.orderOrigin) ? `0.00` : `${(record.addTime*record.orderOrigin)}`}</p>
-                      }
-                    },
-                    {
-                      title: '当前库存',
-                      dataIndex: 'orderOrigi',
-                      key: 'orderOrigi',
-                    },
-                    {
-                      title: '预留库存',
-                      dataIndex: 'yuliu',
-                      key: 'yuliu',
-                    },
-                    {
-                      title: '预留时间',
-                      dataIndex: 'time',
-                      key: 'time',
-                    },
-                    {
-                      title: '已出库数',
-                      dataIndex: 'outNumber',
-                      key: 'outNumber',
-                    },
-                    {
-                      title: '备注',
-                      dataIndex: 'followe',
-                      key: 'followe',
-                    },
-                    {
-                      title: '操作',
-                      key: 'operation',
-                    }]
-                  }
-                  type={ type }
-                  isAddable={ true }
-                  dataSource={ dataSource }
+                  [{
+                    title: '序号',
+                    dataIndex: 'Number',
+                    key: 'Number',
+                  },
+                  {
+                    title: '商品名称',
+                    dataIndex: 'goodName',
+                    key: 'goodName',
+                  },
+                  {
+                    title: '商品型号',
+                    dataIndex: 'goodModel',
+                    key: 'goodModel',
+                    width: '120px',
+                  },
+                  {
+                    title: '位置',
+                    dataIndex: 'initPosition',
+                    key: 'initPosition',
+                  },
+                  {
+                    title: '单位',
+                    dataIndex: 'unit',
+                    key: 'unit',
+                    
+                  },
+                  {
+                    title: '数量',
+                    dataIndex: 'orderGoodsNum',
+                    key: 'orderGoodsNum',
+                  },
+                  {
+                    title: '原价',
+                    dataIndex: 'goodPrice',
+                    key: 'goodPrice',
+                  },
+                  {
+                    title: '折扣率',
+                    dataIndex: 'discountRate',
+                    key: 'discountRate',
+                    render: (text, record, index) => {
+                      return <p className="ant-form-text">{ isNaN((record.strikeUnitPrice/record.price).toFixed(2)) ? `1.00` : `${(record.strikeUnitPrice/record.price).toFixed(2)}`}</p>
+                    }
+                  },
+                  {
+                    title: '折后单价',
+                    dataIndex: 'strikeUnitPrice',
+                    key: 'strikeUnitPrice',
+                  },
+                  {
+                    title: '小计',
+                    dataIndex: 'follower',
+                    key: 'follower',
+                    render: (text, record, index) => {
+                      return <p className="ant-form-text">{ isNaN(record.orderGoodsNum*record.strikeUnitPrice) ? `0.00` : `${(record.orderGoodsNum*record.strikeUnitPrice)}`}</p>
+                    }
+                  },
+                  {
+                    title: '当前库存',
+                    dataIndex: 'goodStoreNow',
+                    key: 'goodStoreNow',
+                  },
+                  {
+                    title: '预留库存',
+                    dataIndex: 'reservedGoods',
+                    key: 'reservedGoods',
+                  },
+                  {
+                    title: '预留时间',
+                    dataIndex: 'reservedDate',
+                    key: 'reservedDate',
+                  },
+                  {
+                    title: '备注',
+                    dataIndex: 'remark',
+                    key: 'remark',
+                  },
+                  {
+                    title: '操作',
+                    key: 'operation',
+                  }]
+                }
+                  type = {"edit"}
+                  goodList = {orders.goodList}
+                  isAddable = {true}
+                  goodsEditing={true}
+                  dataSource = {currentOrder.orderGoods}
                   dispatch={dispatch}
-                  goodsEditing={orders.goodsEditing}
+                  orderId = {currentOrder.id}
                   onOk={ (orderGoods) => {
                     this.setState({
                       orderGoods: orderGoods,
@@ -468,8 +459,8 @@ class EditDetail extends Component {
                     },
                     {
                       title: '类目',
-                      dataIndex: 'category',
-                      key: 'category',
+                      dataIndex: 'categoryName',
+                      key: 'categoryName',
                     },
                     {
                       title: '金额',
@@ -478,8 +469,8 @@ class EditDetail extends Component {
                     },
                     {
                       title: '付款方式',
-                      dataIndex: 'payWay',
-                      key: 'payWay',
+                      dataIndex: 'payWayName',
+                      key: 'payWayName',
                     },
                     {
                       title: '摘要',
@@ -488,8 +479,8 @@ class EditDetail extends Component {
                     },
                     {
                       title: '记录人',
-                      dataIndex: 'recorder',
-                      key: 'recorder',
+                      dataIndex: 'recorderName',
+                      key: 'recorderName',
                     },
                     {
                       title: '日期',
@@ -497,6 +488,7 @@ class EditDetail extends Component {
                       key: 'recorderDate',
                     }]
                   }
+                  dataSource = {currentOrder.orderRevenueAndRefunds}
                   style={ { width: '85%', marginLeft: '90px'} }
                 />
                 <Row>
@@ -683,6 +675,7 @@ EditDetail.defaultProps = {
 export default Form.create({
   mapPropsToFields: (props) => {
     const order = props.orders.currentOrder;
+    console.log(order)
     return {
       id: {
         value: order.id
@@ -698,6 +691,18 @@ export default Form.create({
       },
       customerId: {
         value: order.customerId
+      },
+      name: {
+        value: order.customerId
+      },                        
+      company : {
+         value: order.organization
+      },
+      phone : {
+         value: order.customerPhone
+      },
+      phoneSec : {
+         value: order.phoneSec
       },
       businessId: {
         value: order.businessId
@@ -752,6 +757,9 @@ export default Form.create({
       },
       isDel: {
         value: order.isDel
+      },
+      orderGoods : {
+        value : order.orderGoods
       },
       ...props.mapPropsToFields(order),
     }

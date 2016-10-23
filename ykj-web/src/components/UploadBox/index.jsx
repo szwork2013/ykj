@@ -24,6 +24,7 @@ const UploadBox = React.createClass({
 
   componentWillReceiveProps(nextProps) {
     let fileList = nextProps.fileList || [];
+    console.log(this.setState)
     this.setState({
       fileList: fileList.map(item => {
         return item;
@@ -39,6 +40,7 @@ const UploadBox = React.createClass({
   onError() {
 
   },
+
 
   getFileById(id) {
     const fileList = this.state.fileList;
@@ -73,7 +75,11 @@ const UploadBox = React.createClass({
   },
 
   renderByStatus(status, id) {
-    const { upload } = this.props;
+    const { upload,showStatus=true } = this.props;
+    if(!showStatus){
+      return ;
+    }
+
     switch (status) {
       case 0:
         return (
@@ -116,6 +122,7 @@ const UploadBox = React.createClass({
   render() {
     const { upload } = this.props;
     let fileList = this.state.fileList || [];
+   
     const fileNumber = this.state.fileNumber;
     return (
       <div>

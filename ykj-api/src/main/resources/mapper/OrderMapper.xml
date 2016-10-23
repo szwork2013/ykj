@@ -24,6 +24,11 @@
 			jdbcType="VARCHAR" />
 		<result column="order_source" property="orderSource" jdbcType="INTEGER" />
 		<result column="is_del" property="isDel" jdbcType="BOOLEAN" />
+		<result column="finish_date" property="finishDate" />
+		<result column="attachment" property="attachment"
+			jdbcType="CHAR" />
+		<result column="attachment_name" property="attachmentName"
+			jdbcType="CHAR" />
 		<result column="order_responsible_id" property="orderResponsibleId"
 			jdbcType="CHAR" />
 		<result column="create_date" property="createDate" />
@@ -44,6 +49,24 @@
 			jdbcType="VARCHAR" />
 		<result column="subscriptionIsFinish" property="subscriptionIsFinish"
 			jdbcType="BIT" />
+		<result column="orderResponsiblePhone" property="orderResponsiblePhone"
+			jdbcType="VARCHAR" />
+		<result column="typeName" property="typeName"
+			jdbcType="VARCHAR" />
+		<result column="orderSourceName" property="orderSourceName"
+			jdbcType="VARCHAR" />
+		<result column="businessName" property="businessName"
+			jdbcType="VARCHAR" />	
+		<result column="businessLogo" property="businessLogo"
+			jdbcType="VARCHAR" />	
+		<result column="businessServiceCall" property="businessServiceCall"
+			jdbcType="VARCHAR" />
+		
+	</resultMap>
+	
+	<resultMap id="OrderTypeStatisticalResultMap" type="com.gnet.app.order.OrderTypeStatisticalResult">
+		<result column="type" property="type" jdbcType="INTEGER" />
+		<result column="result" property="result" jdbcType="INTEGER" />
 	</resultMap>
 
 	<update id="deleteById">
@@ -199,9 +222,10 @@
 
 	<select id="selectOrdersAllWithDetailByCondition" resultMap="BaseOrderMap"
 		parameterType="com.gnet.app.order.OrderCondition">
-		select yo.*, yck.name as orderResponsibleName, yc.name as
-		customerName, yc.phone as customerPhone, yop.is_finish as
-		subscriptionIsFinish
+		select yo.*, yck.name as orderResponsibleName,yck.phone orderResponsiblePhone, yc.name as
+		customerName, yc.phone as customerPhone, yop.is_finish as subscriptionIsFinish,
+		(select s.value from sc_codeword s,sc_codeword_type w where w.id=s.codeword_type_id and s.code=yo.type and w.type_value = 'ORDER_TYPE') typeName,
+		(select s.value from sc_codeword s,sc_codeword_type w where w.id=s.codeword_type_id and s.code=yo.order_source and w.type_value = 'ORDER_SOURCE') orderSourceName 
 		from ykj_order yo
 		left join ykj_customer yc on yc.id = yo.customer_id and yc.is_del =
 		yo.is_del
@@ -210,6 +234,9 @@
 		left join ykj_order_process yop on yop.order_id = yo.id and yop.type =
 		yo.type
 		<where>
+			<if test = "id != null and id != ''">
+				and yo.id = #{id}
+			</if>
 			<if test="orderResponsibleId != null and orderResponsibleId != ''">
 				and yo.order_responsible_id = #{orderResponsibleId}
 			</if>
@@ -247,6 +274,77 @@
 		</where>
 
 	</select>
+	
+	<select id="getOrdersForPrintByCondition" resultMap="BaseOrderMap">
+		select yo.*, yck.name as orderResponsibleName,yck.phone orderResponsiblePhone, yc.name as
+		customerName, yc.phone as customerPhone, yop.is_finish as subscriptionIsFinish,yob.name businessName, yob.logo businessLogo,yob.service_call businessServiceCall,
+		(select s.value from sc_codeword s,sc_codeword_type w where w.id=s.codeword_type_id and s.code=yo.type and w.type_value = 'ORDER_TYPE') typeName,
+		(select s.value from sc_codeword s,sc_codeword_type w where w.id=s.codeword_type_id and s.code=yo.order_source and w.type_value = 'ORDER_SOURCE') orderSourceName 
+		from ykj_order yo
+		left join ykj_customer yc on yc.id = yo.customer_id 
+		left join ykj_clerk yck on yck.id = yo.order_responsible_id and yck.business_id = yo.business_id
+		left join ykj_order_process yop on yop.order_id = yo.id and yop.type = yo.type
+		left join ykj_business yob on yob.id = yo.business_id
+		where yo.id = #{orderId} and yo.business_id = #{businessId} 
+		
+	</select>
+	
+	<select id="selectOrderTypeStatisticalResultByCondition" resultMap="OrderTypeStatisticalResultMap" parameterType="com.gnet.app.order.OrderCondition">
+		select t.type,count(1) result from (
+		select yo.*, yck.name as orderResponsibleName,yck.phone orderResponsiblePhone, yc.name as
+		customerName, yc.phone as customerPhone, yop.is_finish as subscriptionIsFinish,
+		(select s.value from sc_codeword s,sc_codeword_type w where w.id=s.codeword_type_id and s.code=yo.type and w.type_value = 'ORDER_TYPE') typeName,
+		(select s.value from sc_codeword s,sc_codeword_type w where w.id=s.codeword_type_id and s.code=yo.order_source and w.type_value = 'ORDER_SOURCE') orderSourceName 
+		from ykj_order yo
+		left join ykj_customer yc on yc.id = yo.customer_id and yc.is_del =
+		yo.is_del
+		left join ykj_clerk yck on yck.id = yo.order_responsible_id and yck.is_del
+		= yo.is_del and yck.business_id = yo.business_id
+		left join ykj_order_process yop on yop.order_id = yo.id and yop.type =
+		yo.type
+		<where>
+			<if test = "id != null and id != ''">
+				and yo.id = #{id}
+			</if>
+			<if test="orderResponsibleId != null and orderResponsibleId != ''">
+				and yo.order_responsible_id = #{orderResponsibleId}
+			</if>
+			<if test="orderCreatorId != null and orderCreatorId != ''">
+				and yo.order_creator_id = #{orderCreatorId}
+			</if>
+			<if test="customerId != null and customerId != ''">
+				and yo.customer_id = #{customerId}
+			</if>
+			<if test="type != null ">
+				and yo.type = #{type}
+			</if>
+			<if test="orderNo != null and orderNo != ''">
+				and yo.order_no = #{orderNo}
+			</if>
+			<if test="orderSource != null ">
+				and yo.orderSource = #{order_source}
+			</if>
+			<if test="isDel != null ">
+				and yo.is_del = #{isDel}
+			</if>
+			<if test="fuzzyText != null and fuzzyText != ''">
+				and concat_ws(',' ,yck.phone, yo.address, yo.order_no,
+				yo.private_remark) like CONCAT('%',CONCAT(#{fuzzyText},'%'))
+			</if>
+			<if test="businessId != null and businessId != ''">
+				and yo.business_id = #{businessId}
+			</if>
+			<if test= "customDateFiled != null and customDateFiled == 'createDate' and customDateStart != null and customDateEnd != null">
+				and yo.create_date between DATE_FORMAT(#{customDateStart},'%Y-%m-%d') and DATE_FORMAT(#{customDateEnd},'%Y-%m-%d')
+			</if>
+			<if test= "customDateFiled != null and customDateFiled == 'finishDate' and customDateStart != null and customDateEnd != null">
+				yo.finish_date between DATE_FORMAT(#{customDateStart},'%Y-%m-%d') and DATE_FORMAT(#{customDateEnd},'%Y-%m-%d')
+			</if>
+		</where>
+		) t group by t.type
+	</select>
+	
+	
 
 
 </mapper>

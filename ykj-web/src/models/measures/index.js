@@ -3,6 +3,7 @@ import { routerRedux } from 'dva/router';
 import { message } from 'antd';
 import request, { parseError } from '../../utils/request';
 import { root, search, view, create, update, remove, removeAll, statement, cancelStatement, upload } from '../../services/measure';
+import { getOrderDetailForEdit } from '../../services/order';
 import pathToRegexp from 'path-to-regexp';
 import querystring from 'querystring';
 
@@ -14,21 +15,38 @@ const mergeQuery = (oldQuery, newQuery) => {
   }
 }
 
+
 const initialState = {
     query: {},
-    measures: [],
-    current: {},
+    /**
+     * 数据集合
+     */
+    list : [],
+    /**
+     * 当前操作对象
+     */
+    currentItem : {},
     pagination: {
         current: 1,
     },
     loading: false,
     submiting: false,
-    customerId: undefined,
-    fileList: [{
-        id: '12qweqweqwewqeqeqw',
-        serviceId: '123123',
-        status: 0
-    }]
+    /**
+     * 当前订单号
+     */
+    currentOrderId : '',
+    /**
+     * 当前订单
+     */
+    currentOrder : {},
+    /**
+     * 上传文件列表
+     */
+    uploadFileList :[],
+    /**
+     * 位置窗口查看
+     */
+    positionModalShow : false
 }
 
 export default {
@@ -37,62 +55,83 @@ export default {
     state: initialState,
 
     subscriptions: {
-        listSubscriptions({ dispatch, history }) {
+        /**
+         * 通用监听，用于加载订单用户信息
+         */
+        commonSubscriptions({ dispatch, history }) {
+            
             history.listen((location, state) => {
-                if (pathToRegexp('/order/orders/:id/measures').test(location.pathname)) {
-                    const match = pathToRegexp('/order/orders/:id/measures').exec(location.pathname);
-                    const id = match[1];
-                    dispatch({ type: 'clear' })
+                if (pathToRegexp('/order/orders/:id/measures/*').test(location.pathname) || pathToRegexp('/order/orders/:id/measures').test(location.pathname)) {
+                    const match = pathToRegexp('/order/orders/:id/measures/*').exec(location.pathname) || pathToRegexp('/order/orders/:id/measures').exec(location.pathname);
+                    const orderId = match[1];
+                    dispatch({
+                        type: 'initOrderInfo',
+                        payload: {
+                            orderId : orderId
+                        },
+                    });
                     dispatch({
                         type: 'setQuery',
-                        payload: id,
+                        payload: {
+                            orderId : orderId
+                        },
                     });
+
+
+                    /*
                     dispatch({
-                        type: 'customers/setCurrentByOrderId',
-                        payload: id
-                    })
+                        type: 'merge',
+                        payload: {
+                            serviceType : getServiceTypeByPath(location),
+                            currentOrder : {
+                                orderNo : '1111',
+                                customerName : 'XXX',
+                                customerPhone : '130000000',
+                                address : '123121'
+                            }
+                        },
+                    });
+                    */
+                    
                 }
             });
         },
-
-        itemSubscriptions({ dispatch, history }) {
+        /**
+         * 测量数据修改监听
+         */
+        editEditSubscriptions({ dispatch, history }) {
+            
             history.listen((location, state) => {
-                if (pathToRegexp('/order/orders/:id/measures/:action+').test(location.pathname)) {
-                    dispatch({ type: 'clear' })
-                }
-            })
-        },
-
-        editSubscriptions({ dispatch, history }) {
-            history.listen((location, state) => {
-                if (pathToRegexp('/order/orders/:id/measures/edit/:id').test(location.pathname)) {
-                    const match = pathToRegexp('/order/orders/:id/measures/edit/:id').exec(location.pathname);
+                if (pathToRegexp('/order/orders/:id/measures/edit/:measureId').test(location.pathname)) {
+                    const match = pathToRegexp('/order/orders/:id/measures/edit/:measureId').exec(location.pathname);
                     const orderId = match[1];
-                    const id = match[2];
+                    const measureId = match[2];
                     dispatch({
                         type: 'view',
-                        payload: id,
+                        payload: measureId
                     });
+                    /*
                     dispatch({
-                        type: 'customers/setCurrentByOrderId',
-                        payload: orderId
-                    })
+                        type: 'merge',
+                        payload: {
+                            currentItem : {
+                                id : '123',
+                                name : '测量名称',
+                                needTime : '2016-10-16',
+                                clerkId : '3',
+                                clerkPhone : '1300000000',
+                                cost: 5,
+                                remark : '备注',
+                                servicePosition : '服务位置 : 小和山公交站',
+                                isFinish : true
+                            }
+                        },
+                    });
+                    */
                 }
             });
         },
-
-        addSubscriptions({ dispatch, history }) {
-            history.listen((location, state) => {
-                if (pathToRegexp('/order/orders/:id/measures/add').test(location.pathname)) {
-                    const match = pathToRegexp('/order/orders/:id/measures/add').exec(location.pathname);
-                    const id = match[1];
-                    dispatch({
-                        type: 'customers/setCurrentByOrderId',
-                        payload: id
-                    })
-                }
-            });
-        }
+        
     },
 
     effects: {
@@ -102,19 +141,16 @@ export default {
                 payload: true,
             });
 
-            const { access_token, oldQuery } = yield select(state => {
-                return {
-                    'access_token': state.oauth.access_token,
-                    'oldQuery': state.measures.query,
-                }
-            });
-            const { data, error } = yield search(access_token, query);
+            const access_token = yield select(state => state.oauth.access_token);
 
+            
+            const { data, error } = yield search(access_token, query);
+            console.log(data)
             if (!error) {
                 yield put({
-                    type: 'setMeasures',
+                    type: 'merge',
                     payload: {
-                        measures: data._embedded && data._embedded.orderSers || [],
+                        list: data._embedded && data._embedded.orderSers || [],
                         pagination: {
                             current: data.page && data.page.number + 1,
                             total: data.page && data.page.totalElements,
@@ -155,8 +191,10 @@ export default {
 
             if (!error) {
                 yield put({
-                    type: 'setCurrent',
-                    payload: data,
+                    type: 'merge',
+                    payload : {
+                        currentItem : data
+                    }
                 })
 
                 yield put({
@@ -182,8 +220,10 @@ export default {
                 payload: true,
             });
             yield put({
-                type: 'setCurrent',
-                payload,
+                type: 'merge',
+                payload : {
+                    currentItem : payload
+                }
             });
 
             const access_token = yield select(state => state.oauth.access_token);
@@ -208,18 +248,19 @@ export default {
                 payload: true,
             });
             yield put({
-                type: 'setCurrent',
-                payload,
-            });
-
-            const {access_token, measure} = yield select(state => {
-                return {
-                    access_token: state.oauth.access_token,
-                    measure: state.measures.current,
+                type: 'merge',
+                payload :{
+                    currentItem : payload
                 }
             });
-            let newMeasure = { ...measure, ...payload };
-            const { data, error } = yield update(access_token, newMeasure);
+
+            const {access_token} = yield select(state => {
+                return {
+                    access_token: state.oauth.access_token
+                }
+            });
+
+            const { data, error } = yield update(access_token, payload);
 
             if (!error) {
                 yield message.success('更新测量安排信息成功', 2);
@@ -254,7 +295,7 @@ export default {
             return false;
         },
         *statement({ payload: id }, { put, select }) {
-            const access_token = yield select(state => state.oauth.access_token);
+            const { access_token, query } = yield select(state => state.oauth.access_token);
 
             const { data, error } = yield statement(access_token, id);
 
@@ -308,6 +349,28 @@ export default {
             const err = yield parseError(error);
             yield message.error(`上传附件失败:${err.status} ${err.message}`, 3);
             return false;
+        },
+        /**
+         * 初始化订单信息
+         */
+        *initOrderInfo({ payload }, { put, select }){
+            const access_token = yield select(state => state.oauth.access_token);
+            const { data, error } = yield getOrderDetailForEdit(access_token, payload.orderId);
+            
+            if (!error) {
+                yield put({
+                    type: 'merge',
+                    payload: {
+                        currentOrder : data,
+                        currentOrderId : payload.orderId
+                    }
+                })
+                return true;
+            }else{
+                const err = yield parseError(error);
+                yield message.error(`获取订单信息失败:${err.status} ${err.message}`, 3);
+            }
+            return false;
         }
 },
 
@@ -315,20 +378,15 @@ reducers: {
     setQuery(state, { payload: query }) {
         return { ...state, query: mergeQuery(state.query, query) }
     },
-    setMeasures(state, { payload }) {
-        return { ...state, ...payload }
-    },
-    setCurrent(state, { payload: current }) {
-        return { ...state, current }
-    },
-    setFileList(state, { payload }) {
-        return { ...state, fileList: payload }
-    },
     toggleLoadding(state, { payload: loading }) {
         return { ...state, loading }
     },
     toggleSubmiting(state, { payload: submiting }) {
         return { ...state, submiting }
+    },
+    merge(state, { payload }) {
+        console.log({ ...state, ...payload })
+        return { ...state, ...payload }
     },
     clear(state) {
         return initialState

@@ -7,7 +7,9 @@ import Box from '../Box';
 import BoxTable from '../BoxTable';
 import BoxTabs from '../BoxTabs';
 
-import OrderCustomerInfo from '../CustomerInfo/OrderCustomerInfo'
+import OrderCustomerInfo from '../OrderService/OrderCustomerInfo'
+import PositionModal from '../OrderService/PositionModal';
+import OperationBox from '../OperationBox';
 
 import styles from './index.less';
 
@@ -15,11 +17,9 @@ const ButtonGroup = Button.Group;
 const TabPane = Tabs.TabPane;
 const FormItem = Form.Item;
 const { confirm } = Modal;
-const List = ({ customers, measures, form, children, dispatch, ...rest }) => {
+const List = ({form, measures,orderService,dispatch, ...rest }) => {
   const { getFieldProps } = form;
-
-  const options = customers.current
-
+  const currentOrder = measures.currentOrder;
   const onTableChange = (pagination, filters, sorter) => {
     dispatch({
       type: 'measures/setQuery',
@@ -34,6 +34,9 @@ const List = ({ customers, measures, form, children, dispatch, ...rest }) => {
     labelCol: { span: 10 },
     wrapperCol: { span: 14 },
   };
+
+  
+    
   return (
     <Container
       { ...rest }
@@ -42,7 +45,7 @@ const List = ({ customers, measures, form, children, dispatch, ...rest }) => {
       <br/>
       <OrderCustomerInfo
         dispatch={dispatch}
-        options={options}
+        currentOrder={measures.currentOrder}
       />
       <Row>
         <Col span={12}><h3>测量历史</h3></Col>
@@ -52,7 +55,6 @@ const List = ({ customers, measures, form, children, dispatch, ...rest }) => {
           </Button>
         </Col>
       </Row>
-      <br/>
       <BoxTable
         noPadding
         scroll={{ x: 1000 }}
@@ -62,25 +64,38 @@ const List = ({ customers, measures, form, children, dispatch, ...rest }) => {
             title: '序号',
             dataIndex: 'index',
             key: 'index',
-            fixed: 'left',
             render: (text, record, index) => index + 1 
           },
           {
             title: '测量名称',
             dataIndex: 'name',
             key: 'name',
-            fixed: 'left',
           },
           {
             title: '状态',
             dataIndex: 'status',
-            key: 'status',
-            fixed: 'left',
+            key: 'status'
           },
           {
             title: '服务位置',
             dataIndex: 'servicePosition',
             key: 'servicePosition',
+            render: (text, record, index) => {
+               return <a href="javascript:void(0)"  onClick={()=>{
+                  dispatch({
+                    type: 'measures/merge',
+                    payload: {
+                      positionModalShow : true,
+                      currentItem : {
+                        servicePosition : text
+                      }
+                    },
+                  });    
+
+                }}>
+                <Icon type="environment" />
+                </a>
+            }
           },
           {
             title: '服务时间',
@@ -94,8 +109,8 @@ const List = ({ customers, measures, form, children, dispatch, ...rest }) => {
           },
           {
             title: '附件',
-            dataIndex: 'attachmentId',
-            key: 'attachmentId',
+            dataIndex: 'attachmentFileName',
+            key: 'attachmentFileName',
           },
           {
             title: '服务评价星级',
@@ -145,7 +160,6 @@ const List = ({ customers, measures, form, children, dispatch, ...rest }) => {
           {
             title: '操作',
             key: 'operation',
-            fixed: 'right',
             render: (text, record) => (
               <span>
                 <Link to={`/order/orders/${rest.params.id}/measures/edit/${record.id}`}><Icon type="edit" />编辑</Link>
@@ -165,11 +179,33 @@ const List = ({ customers, measures, form, children, dispatch, ...rest }) => {
           }]
         }
         rowKey={ record => record.id }
-        dataSource={ measures.measures }
+        dataSource={ measures.list }
         pagination={ measures.pagination }
         loading={ measures.loading }
         onChange={ onTableChange }
       />
+      <PositionModal
+        data= {measures.currentItem.servicePosition}
+        visible={ measures.positionModalShow }
+        dispatch={ dispatch }
+        onOk = {()=>{
+          dispatch({
+            type: 'measures/merge',
+              payload: {
+                positionModalShow : false
+              },
+            });  
+          } } 
+          onCancle = {()=>{
+            dispatch({
+              type: 'measures/merge',
+              payload: {
+                positionModalShow : false
+              },
+            });  
+          }}
+      >
+      </PositionModal>
     </Container>
   )
 }
@@ -180,8 +216,5 @@ List.propTypes = {
 
 export default Form.create({
   mapPropsToFields: (props) => {
-    const query = props.measures.query;
-    return {
-    }
   }
 })(List);

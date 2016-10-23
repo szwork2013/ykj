@@ -23,7 +23,7 @@ const Option = Select.Option;
 const RangePicker = DatePicker.RangePicker;
 const { confirm } = Modal;
 const List = (props) => {
-  const { items, orders, form, children, dispatch, ...rest } = props;
+  const { items, orders, form, children, dispatch,codewordTypes, ...rest } = props;
   const { getFieldProps } = form;
   
   const onTableChange = (pagination, filters, sorter) => {
@@ -97,8 +97,8 @@ const List = (props) => {
           },
           {
             title: '订单来源',
-            dataIndex: 'orderType',
-            key: 'orderType',
+            dataIndex: 'orderSourceName',
+            key: 'orderSourceName',
           },
           {
             title: '跟单人',
@@ -113,6 +113,25 @@ const List = (props) => {
                 <tbody>
                   <tr>
                     <td>
+                      <Popconfirm title="确定要删除这个订单吗？" onConfirm={ () => {
+                              dispatch({
+                                type: 'orders/deleteOne',
+                                payload: record.id,
+                              })
+
+                            } } onCancel={() => {} }>
+                            <a href="#"><Icon type="delete" />删除</a>
+                          </Popconfirm>
+                       <span className="ant-divider"></span>
+                        <a href="javascript:void(0)" onClick={ () => {
+                        dispatch({
+                          type: 'orders/toFinishOrder',
+                          payload:  {
+                                id : record.id
+                              }
+                        });
+                      }} ><Icon type="upload" />完成</a>
+                       <span className="ant-divider"></span>
                       <a href="javascript:void(0)" onClick={ () => {
                         dispatch({
                           type: 'orders/toFollow',
@@ -150,6 +169,7 @@ const List = (props) => {
                                 payload: record.id,
                               })
 
+
                             } } onCancel={() => {} }>
                             <a href="#"><Icon type="delete" />删除</a>
                           </Popconfirm>
@@ -183,19 +203,11 @@ const List = (props) => {
                           <span className="ant-divider"></span>
                           <a href="javascript:void(0)" onClick={ () => {
                             dispatch({
-                                type: 'merge',
-                                payload: {
-                                  currentOrder: {}
-                                },
-                            });   
-                            dispatch({
-                                type: 'orders/togglePayModal',
+                                type: 'orders/toRevenueOrder',
                                 payload: {
                                   currentOrder: {
                                     id : record.id
-                                  },
-                                  payModalShow :true
-                                    
+                                  }
                                 },
                             });   
                           }} ><Icon type="edit" />付款</a>
@@ -216,16 +228,25 @@ const List = (props) => {
                             <td>
                               <Link to={ `/order/orders/print/${record.id}` }><Icon type="edit" />打印</Link>
                               <span className="ant-divider"></span>
-                              <Link to={ `/order/orders/edit/${record.id}` }><Icon type="edit" />退单</Link>
+                                <Popconfirm title="确定要针对当前订单退单吗？" onConfirm={ () => {
+                                    dispatch({
+                                      type: 'orders/cancelOrder',
+                                      payload: record.id,
+                                    })
+
+                                  } } onCancel={() => {} }>
+                                  <a href="#"><Icon type="edit" />退单</a>
+                                </Popconfirm>
                               <span className="ant-divider"></span>
                               <a href="javascript:void(0)" onClick={ () => {
                                 dispatch({
-                                    type: 'orders/togglePayModal',
-                                    payload: {
-                                      currentOrderId: record.id,
-                                      payModalShow: true,
-                                    },
-                                });   
+                                  type: 'orders/toRevenueOrder',
+                                  payload: {
+                                    currentOrder: {
+                                      id : record.id
+                                    }
+                                  },
+                              });   
                               }} ><Icon type="edit" />付款</a>
                             </td>  
                           </tr>
@@ -236,7 +257,15 @@ const List = (props) => {
                             <td>
                               <Link to={ `/order/orders/print/${record.id}` }><Icon type="edit" />打印</Link>
                               <span className="ant-divider"></span>
-                              <Link to={ `/order/orders/edit/${record.id}` }><Icon type="edit" />退单</Link>
+                              <Popconfirm title="确定要针对当前订单退单吗？" onConfirm={ () => {
+                                    dispatch({
+                                      type: 'orders/cancelOrder',
+                                      payload: record.id,
+                                    })
+
+                                  } } onCancel={() => {} }>
+                                  <a href="#"><Icon type="edit" />退单</a>
+                                </Popconfirm> 
                               <span className="ant-divider"></span>
                               <Link to={ `/order/orders/${record.id}/measures` }><Icon type="edit" />测量</Link>
                               <span className="ant-divider"></span>
@@ -254,12 +283,13 @@ const List = (props) => {
                         <td>
                           <a href="javascript:void(0)" onClick={ () => {
                             dispatch({
-                                type: 'orders/togglePayModal',
-                                payload: {
-                                  currentOrderId: record.id,
-                                  payModalShow: true,
-                                },
-                            });   
+                                  type: 'orders/toRevenueOrder',
+                                  payload: {
+                                    currentOrder: {
+                                      id : record.id
+                                    }
+                                  },
+                              });   
                           }} ><Icon type="edit" />付款</a>
                           <span className="ant-divider"></span>
                           <Link to={ `/order/orders/${record.id}/deliverys` }><Icon type="edit" />送货</Link>
@@ -268,12 +298,11 @@ const List = (props) => {
                           <span className="ant-divider"></span>
                           <a href="javascript:void(0)" onClick={ () => {
                             dispatch({
-                                type: 'orders/toggleFinishModal',
-                                payload: {
-                                  currentOrderId: record.id,
-                                  finishModalShow: true,
-                                },
-                            });   
+                              type: 'orders/toFinishOrder',
+                              payload:  {
+                                id : record.id
+                              }
+                            });
                           }} ><Icon type="edit" />完成</a>
                         </td>
                       </tr>
@@ -310,11 +339,13 @@ const List = (props) => {
         dispatch={ dispatch }
         currnetOrder={orders.currentOrder}
         submiting={ orders.submiting }
+        codewordTypes = {codewordTypes}
       >
       </PayModal>
       <FinishModal
         visible={ orders.finishModalShow }
         dispatch={ dispatch }
+        currnetOrder={orders.currentOrder}
         submiting={ orders.submiting }
       >
       </FinishModal>

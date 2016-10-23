@@ -23,4 +23,17 @@ public interface OrderServiceMapper extends Mapper<OrderSer> {
 	public OrderSer selectServiceUnFinishWithoutMaintenance(@Param("orderId") String orderId);
 	
 	public List<OrderSer> finishServiceNum(@Param("orderId") String orderId, @Param("type") Integer type);
+	
+	/**
+	 * 根据查询条件查询订单服务及其关联信息集合
+	 * @param condition
+	 * @return
+	 */
+	public List<OrderSer> selectOrderServiceWithDetailByCondition(OrderServiceCondition condition);
+
+	/**
+	 * 获取当天最大的服务号
+	 * @return
+	 */
+	public String selectMaxServiceCodeToday();
 }

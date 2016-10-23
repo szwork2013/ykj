@@ -3,7 +3,7 @@ import React, { PropTypes } from 'react';
 import Detail from './Detail';
 
 const Add = (props) => {
-  const { dispatch } = props;
+  const { dispatch,designs } = props;
   return (
     <Detail
       {...props}
@@ -22,10 +22,12 @@ const Add = (props) => {
           }
 		  
           const formData = form.getFieldsValue();
-          dispatch({
-            type: 'designs/add',
-            payload: formData,
-          })
+          formData.orderId = designs.currentOrder.id;
+          console.log(formData)
+            dispatch({
+              type: 'designs/add',
+              payload: formData,
+            })
 		  
         });
 		

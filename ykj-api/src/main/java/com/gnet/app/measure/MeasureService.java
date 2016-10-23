@@ -14,11 +14,10 @@ import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import com.gnet.app.noticeMsg.NoticeMsg;
 import com.gnet.app.noticeMsg.NoticeMsgService;
-import com.gnet.app.order.Order;
-import com.gnet.app.order.OrderService;
 import com.gnet.app.orderProcess.OrderProcess;
 import com.gnet.app.orderProcess.OrderProcessMapper;
 import com.gnet.app.orderService.OrderSer;
+import com.gnet.app.orderService.OrderSerService;
 import com.gnet.app.orderService.OrderServiceMapper;
 import com.gnet.app.orderServiceAttachment.OrderServiceAttachment;
 import com.gnet.app.orderServiceAttachment.OrderServiceAttachmentService;
@@ -29,7 +28,7 @@ import com.gnet.utils.spring.SpringContextHolder;
 
 @Service
 @Transactional(readOnly = true)
-public class MeasureService {
+public class MeasureService extends OrderSerService{
 	
 	@Autowired
 	private OrderServiceMapper orderServiceMapper;

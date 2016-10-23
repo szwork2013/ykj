@@ -166,7 +166,7 @@ class Detail extends Component {
                       >
                           <Input {...customerIdProps} type="hidden" size="default" style={ { width: '80%'} } disabled={ orders.submiting } />
                         
-                          <Select {...nameProps} showSearch onBlur={ (value) => {
+                          <Select {...nameProps} onBlur={ (value) => {
                             console.log(value)
                             form.setFieldsValue({
                               name: value,
@@ -360,8 +360,8 @@ class Detail extends Component {
                   },
                   {
                     title: '单位',
-                    dataIndex: 'unit',
-                    key: 'unit',
+                    dataIndex: 'goodUnitName',
+                    key: 'goodUnitName',
                     
                   },
                   {
@@ -371,15 +371,15 @@ class Detail extends Component {
                   },
                   {
                     title: '原价',
-                    dataIndex: 'price',
-                    key: 'price',
+                    dataIndex: 'goodPrice',
+                    key: 'goodPrice',
                   },
                   {
                     title: '折扣率',
                     dataIndex: 'discountRate',
                     key: 'discountRate',
                     render: (text, record, index) => {
-                      return <p className="ant-form-text">{ isNaN((record.strikeUnitPrice/record.price).toFixed(2)) ? `1.00` : `${(record.strikeUnitPrice/record.price).toFixed(2)}`}</p>
+                      return <p className="ant-form-text">{ isNaN((record.strikeUnitPrice/record.goodPrice).toFixed(2)) ? `1.00` : `${(record.strikeUnitPrice/record.goodPrice).toFixed(2)}`}</p>
                     }
                   },
                   {
@@ -397,8 +397,8 @@ class Detail extends Component {
                   },
                   {
                     title: '当前库存',
-                    dataIndex: 'storeNow',
-                    key: 'storeNow',
+                    dataIndex: 'goodStoreNow',
+                    key: 'goodStoreNow',
                   },
                   {
                     title: '预留库存',
@@ -423,6 +423,7 @@ class Detail extends Component {
                 type={ type }
                 isAddable={ true }
                 goodList = {goodList}
+                goodsEditing = {true}
                 form = {form}
               />
             <br/>

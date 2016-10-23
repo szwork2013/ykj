@@ -39,6 +39,10 @@ public class FileUploadService {
 		this.rootPath = webApplicationContext.getServletContext().getRealPath("/");
 	}
 	
+	public String getRootPath(){
+		return this.rootPath;
+	}
+	
 	/**
 	 * 上传不同类型的多个文件（上传文件的下标编号与文件类型的下标编号需保持一致）
 	 * 
@@ -168,5 +172,6 @@ public class FileUploadService {
 	public String getUploadRootPath() {
 		return rootPath;
 	}
+	
 	
 }

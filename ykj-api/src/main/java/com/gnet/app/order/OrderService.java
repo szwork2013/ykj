@@ -1,5 +1,7 @@
 package com.gnet.app.order;
 
+import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
@@ -9,21 +11,24 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.gnet.app.clerk.Clerk;
 import com.gnet.app.good.Good;
 import com.gnet.app.good.GoodMapper;
 import com.gnet.app.orderGood.OrderGood;
+import com.gnet.app.orderGood.OrderGoodCondition;
 import com.gnet.app.orderGood.OrderGoodMapper;
 import com.gnet.app.orderProcess.OrderProcess;
 import com.gnet.app.orderProcess.OrderProcessMapper;
 import com.gnet.app.orderService.OrderSer;
 import com.gnet.app.orderService.OrderServiceMapper;
+import com.gnet.app.revenueandrefund.RevenueAndRefundCondition;
+import com.gnet.app.revenueandrefund.RevenueAndRefundMapper;
+import com.gnet.upload.FileUploadService;
 import com.gnet.utils.math.PriceUtils;
 import com.gnet.utils.page.PageUtil;
 import com.gnet.utils.page.PageUtil.Callback;
@@ -38,7 +43,7 @@ import tk.mybatis.mapper.entity.Example;
 @Service
 @Transactional(readOnly = true)
 public class OrderService {
-	
+
 	@Autowired
 	private OrderMapper orderMapper;
 	@Autowired
@@ -47,20 +52,25 @@ public class OrderService {
 	private OrderGoodMapper orderGoodMapper;
 	@Autowired
 	private OrderServiceMapper orderServiceMapper;
-	
+	@Autowired
+	private RevenueAndRefundMapper revenueAndRefundMapper;
+	@Autowired
+	private FileUploadService fileUploadService;
+
 	@Autowired
 	private GoodMapper goodMapper;
-	
+
 	public Order findById(String id) {
 		return orderMapper.selectByPrimaryKey(id);
 	}
-	
+
 	public Order find(Order order) {
 		return orderMapper.selectOne(order);
 	}
-	
+
 	/**
 	 * 通过订单编号判断服务是否全部完成
+	 * 
 	 * @param orderId
 	 * @return
 	 */
@@ -70,11 +80,11 @@ public class OrderService {
 		orderSer.setIsFinish(Boolean.FALSE);
 		return orderServiceMapper.selectCount(orderSer) == 0;
 	}
-	
+
 	public OrderSer getServiceWithoutMaintenanceUnFinish(String orderId) {
 		return orderServiceMapper.selectServiceUnFinishWithoutMaintenance(orderId);
 	}
-	
+
 	/**
 	 * 根据角色类型获得订单数据
 	 * 
@@ -90,51 +100,58 @@ public class OrderService {
 	 * @return
 	 */
 	public List<Order> findAll(Clerk clerk, Integer type, Integer orderSource, String orderResponsibleName,
-			String customerName, String startOrderDate, String endOrderDate, String mutiSearchColumn, List<String> orderList) {
+			String customerName, String startOrderDate, String endOrderDate, String mutiSearchColumn,
+			List<String> orderList) {
 		Integer roleType = clerk.getRoleType();
 		List<Order> orders = null;
-		if (Clerk.ROLE_TYPE_ADMIN.equals(roleType) || Clerk.ROLE_TYPE_MANAGER.equals(roleType) 
-			|| Clerk.ROLE_TYPE_LOGISTIC.equals(roleType) || Clerk.ROLE_TYPE_AFTER_SALES.equals(roleType)
-			|| Clerk.ROLE_TYPE_WAREHOUSE.equals(roleType)) {
-			
-			orders = findUnderBusiness(type, orderSource, orderResponsibleName, customerName, startOrderDate, endOrderDate, mutiSearchColumn, clerk.getBusinessId(), orderList);
-		
+		if (Clerk.ROLE_TYPE_ADMIN.equals(roleType) || Clerk.ROLE_TYPE_MANAGER.equals(roleType)
+				|| Clerk.ROLE_TYPE_LOGISTIC.equals(roleType) || Clerk.ROLE_TYPE_AFTER_SALES.equals(roleType)
+				|| Clerk.ROLE_TYPE_WAREHOUSE.equals(roleType)) {
+
+			orders = findUnderBusiness(type, orderSource, orderResponsibleName, customerName, startOrderDate,
+					endOrderDate, mutiSearchColumn, clerk.getBusinessId(), orderList);
+
 		} else if (Clerk.ROLE_TYPE_STORE_MANAGER.equals(roleType)) {
-			
-			orders = findUnderStore(roleType, orderSource, orderResponsibleName, customerName, startOrderDate, endOrderDate, mutiSearchColumn, clerk.getStoreId(), orderList);
-		
+
+			orders = findUnderStore(roleType, orderSource, orderResponsibleName, customerName, startOrderDate,
+					endOrderDate, mutiSearchColumn, clerk.getStoreId(), orderList);
+
 		} else if (Clerk.ROLE_TYPE_CLERK.equals(roleType)) {
-			
-			orders = findPersonal(roleType, orderSource, orderResponsibleName, customerName, startOrderDate, endOrderDate, mutiSearchColumn, clerk.getId(), orderList);
+
+			orders = findPersonal(roleType, orderSource, orderResponsibleName, customerName, startOrderDate,
+					endOrderDate, mutiSearchColumn, clerk.getId(), orderList);
 		} else {
 			orders = new ArrayList<>();
 		}
-		
+
 		return orders;
 	}
-	
+
 	public List<Order> findUnderBusiness(Integer type, Integer orderSource, String orderResponsibleName,
-			String customerName, String startOrderDate, String endOrderDate, String mutiSearchColumn,
-			String businessId, List<String> orderList) {
-		
-		return orderMapper.selectOrdersUnderBusiness(orderList, type, orderSource, orderResponsibleName, customerName, startOrderDate, endOrderDate, mutiSearchColumn, businessId);
-		
+			String customerName, String startOrderDate, String endOrderDate, String mutiSearchColumn, String businessId,
+			List<String> orderList) {
+
+		return orderMapper.selectOrdersUnderBusiness(orderList, type, orderSource, orderResponsibleName, customerName,
+				startOrderDate, endOrderDate, mutiSearchColumn, businessId);
+
 	}
-	
+
 	public List<Order> findUnderStore(Integer type, Integer orderSource, String orderResponsibleName,
-			String customerName, String startOrderDate, String endOrderDate, String mutiSearchColumn,
-			String storeId, List<String> orderList) {
-		
-		return orderMapper.selectOrdersUnderStore(orderList, type, orderSource, orderResponsibleName, customerName, startOrderDate, endOrderDate, mutiSearchColumn, storeId);
+			String customerName, String startOrderDate, String endOrderDate, String mutiSearchColumn, String storeId,
+			List<String> orderList) {
+
+		return orderMapper.selectOrdersUnderStore(orderList, type, orderSource, orderResponsibleName, customerName,
+				startOrderDate, endOrderDate, mutiSearchColumn, storeId);
 	}
-	
-	public List<Order> findPersonal(Integer type, Integer orderSource, String orderResponsibleName,
-			String customerName, String startOrderDate, String endOrderDate, String mutiSearchColumn,
-			String clerkId, List<String> orderList) {
-		
-		return orderMapper.selectOrdersPersonal(orderList, type, orderSource, orderResponsibleName, customerName, startOrderDate, endOrderDate, mutiSearchColumn, clerkId);
+
+	public List<Order> findPersonal(Integer type, Integer orderSource, String orderResponsibleName, String customerName,
+			String startOrderDate, String endOrderDate, String mutiSearchColumn, String clerkId,
+			List<String> orderList) {
+
+		return orderMapper.selectOrdersPersonal(orderList, type, orderSource, orderResponsibleName, customerName,
+				startOrderDate, endOrderDate, mutiSearchColumn, clerkId);
 	}
-	
+
 	/**
 	 * 根据角色类型获得分页订单数据
 	 * 
@@ -149,81 +166,87 @@ public class OrderService {
 	 * @param orderList
 	 * @return
 	 */
-	public Page<Order> paginationAll(Clerk clerk, Pageable pageable, Integer type, Integer orderSource, String orderResponsibleName,
-			String customerName, String startOrderDate, String endOrderDate, String mutiSearchColumn, List<String> orderList) {
+	public Page<Order> paginationAll(Clerk clerk, Pageable pageable, Integer type, Integer orderSource,
+			String orderResponsibleName, String customerName, String startOrderDate, String endOrderDate,
+			String mutiSearchColumn, List<String> orderList) {
 		Integer roleType = clerk.getRoleType();
 		Page<Order> orders = null;
-		
-		if (Clerk.ROLE_TYPE_ADMIN.equals(roleType) || Clerk.ROLE_TYPE_MANAGER.equals(roleType) 
-			|| Clerk.ROLE_TYPE_LOGISTIC.equals(roleType) || Clerk.ROLE_TYPE_AFTER_SALES.equals(roleType)
-			|| Clerk.ROLE_TYPE_WAREHOUSE.equals(roleType)) {
-			
-			orders = paginationUnderBusiness(pageable, type, orderSource, orderResponsibleName, customerName, startOrderDate, endOrderDate, mutiSearchColumn, clerk.getBusinessId(), orderList);
-		
+
+		if (Clerk.ROLE_TYPE_ADMIN.equals(roleType) || Clerk.ROLE_TYPE_MANAGER.equals(roleType)
+				|| Clerk.ROLE_TYPE_LOGISTIC.equals(roleType) || Clerk.ROLE_TYPE_AFTER_SALES.equals(roleType)
+				|| Clerk.ROLE_TYPE_WAREHOUSE.equals(roleType)) {
+
+			orders = paginationUnderBusiness(pageable, type, orderSource, orderResponsibleName, customerName,
+					startOrderDate, endOrderDate, mutiSearchColumn, clerk.getBusinessId(), orderList);
+
 		} else if (Clerk.ROLE_TYPE_STORE_MANAGER.equals(roleType)) {
-			
-			orders = paginationUnderStore(pageable, roleType, orderSource, orderResponsibleName, customerName, startOrderDate, endOrderDate, mutiSearchColumn, clerk.getStoreId(), orderList);
-		
+
+			orders = paginationUnderStore(pageable, roleType, orderSource, orderResponsibleName, customerName,
+					startOrderDate, endOrderDate, mutiSearchColumn, clerk.getStoreId(), orderList);
+
 		} else if (Clerk.ROLE_TYPE_CLERK.equals(roleType)) {
-			
-			orders = paginationPersonal(pageable, roleType, orderSource, orderResponsibleName, customerName, startOrderDate, endOrderDate, mutiSearchColumn, clerk.getId(), orderList);
+
+			orders = paginationPersonal(pageable, roleType, orderSource, orderResponsibleName, customerName,
+					startOrderDate, endOrderDate, mutiSearchColumn, clerk.getId(), orderList);
 		} else {
 			orders = PageUtil.pagination(pageable, new Callback<Order>() {
-				
+
 				public List<Order> getPageContent() {
 					return new ArrayList<>();
 				}
 			});
 		}
-		
+
 		return orders;
 	}
-	
-	public Page<Order> paginationUnderBusiness(Pageable pageable, Integer type, Integer orderSource, String orderResponsibleName,
-								String customerName, String startOrderDate, String endOrderDate, String mutiSearchColumn,
-								String businessId, List<String> orderList) {
-	
+
+	public Page<Order> paginationUnderBusiness(Pageable pageable, Integer type, Integer orderSource,
+			String orderResponsibleName, String customerName, String startOrderDate, String endOrderDate,
+			String mutiSearchColumn, String businessId, List<String> orderList) {
+
 		return PageUtil.pagination(pageable, orderList, new PageUtil.Callback<Order>() {
-		
+
 			@Override
 			public List<Order> getPageContent() {
-				return orderMapper.selectOrdersUnderBusiness(null, type, orderSource, orderResponsibleName, customerName, startOrderDate, endOrderDate, mutiSearchColumn, businessId);
+				return orderMapper.selectOrdersUnderBusiness(null, type, orderSource, orderResponsibleName,
+						customerName, startOrderDate, endOrderDate, mutiSearchColumn, businessId);
 			}
-		
+
 		});
 	}
-	
-	public Page<Order> paginationUnderStore(Pageable pageable, Integer type, Integer orderSource, String orderResponsibleName,
-								String customerName, String startOrderDate, String endOrderDate, String mutiSearchColumn,
-								String storeId, List<String> orderList) {
-	
+
+	public Page<Order> paginationUnderStore(Pageable pageable, Integer type, Integer orderSource,
+			String orderResponsibleName, String customerName, String startOrderDate, String endOrderDate,
+			String mutiSearchColumn, String storeId, List<String> orderList) {
+
 		return PageUtil.pagination(pageable, orderList, new PageUtil.Callback<Order>() {
-		
+
 			@Override
 			public List<Order> getPageContent() {
-				return orderMapper.selectOrdersUnderStore(null, type, orderSource, orderResponsibleName, customerName, startOrderDate, endOrderDate, mutiSearchColumn, storeId);
+				return orderMapper.selectOrdersUnderStore(null, type, orderSource, orderResponsibleName, customerName,
+						startOrderDate, endOrderDate, mutiSearchColumn, storeId);
 			}
-		
+
 		});
 	}
-	
-	public Page<Order> paginationPersonal(Pageable pageable, Integer type, Integer orderSource, String orderResponsibleName,
-								String customerName, String startOrderDate, String endOrderDate, String mutiSearchColumn,
-								String clerkId, List<String> orderList) {
-		
+
+	public Page<Order> paginationPersonal(Pageable pageable, Integer type, Integer orderSource,
+			String orderResponsibleName, String customerName, String startOrderDate, String endOrderDate,
+			String mutiSearchColumn, String clerkId, List<String> orderList) {
+
 		return PageUtil.pagination(pageable, orderList, new PageUtil.Callback<Order>() {
-			
+
 			@Override
 			public List<Order> getPageContent() {
-				return orderMapper.selectOrdersPersonal(null, type, orderSource, orderResponsibleName, customerName, startOrderDate, endOrderDate, mutiSearchColumn, clerkId);
+				return orderMapper.selectOrdersPersonal(null, type, orderSource, orderResponsibleName, customerName,
+						startOrderDate, endOrderDate, mutiSearchColumn, clerkId);
 			}
-			
+
 		});
 	}
-	
+
 	/**
-	 * 添加订单需要额外的数据
-	 * 1.付款状态
+	 * 添加订单需要额外的数据 1.付款状态
 	 * 
 	 * @param orders
 	 */
@@ -231,7 +254,7 @@ public class OrderService {
 		if (orders.isEmpty()) {
 			return;
 		}
-		
+
 		// 新增订金状态
 		for (Order order : orders) {
 			if (order.getSubscriptionIsFinish() == null || !order.getSubscriptionIsFinish()) {
@@ -251,7 +274,7 @@ public class OrderService {
 			}
 		}
 	}
-	
+
 	/**
 	 * 下订单
 	 * 
@@ -270,63 +293,62 @@ public class OrderService {
 		} else {
 			order.setType(Order.TYPE_PRE_ORDER);
 		}
-		
+
 		if (order.getIsNeedCostAduit() == null) {
 			order.setIsNeedCostAduit(Boolean.TRUE);
 		}
-		
+
 		if (order.getIsNeedDelivery() == null) {
 			order.setIsNeedDelivery(Boolean.TRUE);
 		}
-		
+
 		if (order.getIsNeedInstall() == null) {
 			order.setIsNeedInstall(Boolean.TRUE);
 		}
-		
+
 		if (order.getIsNeedMeasure() == null) {
 			order.setIsNeedMeasure(Boolean.TRUE);
 		}
-		
+
 		if (order.getIsNeedDesign() == null) {
 			order.setIsNeedDesign(Boolean.TRUE);
 		}
-		
-		
-		
+
 		// 订单商品数据处理
 		List<OrderGood> orderGoods = order.getOrderGoods();
 		List<String> storageGoodIds = Lists.newArrayList();
 		for (OrderGood orderGood : orderGoods) {
 			storageGoodIds.add(orderGood.getStorageGoodsId());
 		}
-		
-//		// 获得仓库商品数据
+
+		// // 获得仓库商品数据
 		Map<String, Good> storageGoodsMap = Maps.newHashMap();
 		List<Good> goods = goodMapper.findByIds(storageGoodIds);
 		for (Good good : goods) {
 			storageGoodsMap.put(good.getId(), good);
 		}
-		
-//		// 计算折前单价和折后单价
+
+		// // 计算折前单价和折后单价
 		BigDecimal priceBeforeDiscount = new BigDecimal(0);
 		BigDecimal priceAfterDiscount = new BigDecimal(0);
 		for (OrderGood orderGood : orderGoods) {
 			BigDecimal num = new BigDecimal(orderGood.getOrderGoodsNum());
-			priceBeforeDiscount = PriceUtils.add(priceBeforeDiscount, PriceUtils.mul(num, storageGoodsMap.get(orderGood.getStorageGoodsId()).getPrice()));
-			priceAfterDiscount = PriceUtils.add(priceAfterDiscount, PriceUtils.mul(num, orderGood.getStrikeUnitPrice()));
+			priceBeforeDiscount = PriceUtils.add(priceBeforeDiscount,
+					PriceUtils.mul(num, storageGoodsMap.get(orderGood.getStorageGoodsId()).getPrice()));
+			priceAfterDiscount = PriceUtils.add(priceAfterDiscount,
+					PriceUtils.mul(num, orderGood.getStrikeUnitPrice()));
 		}
-		
-		
+
 		order.setIsDel(Order.DEL_FALSE);
 		order.setPriceBeforeDiscount(priceBeforeDiscount);
 		order.setPriceAfterDiscount(priceAfterDiscount);
 		order.setCreateDate(date);
 		order.setModifyDate(date);
-		
+
 		if (orderMapper.insertSelective(order) != 1) {
 			return false;
 		}
-		
+
 		// 订单进度状态列表
 		List<OrderProcess> orderProcesses = Lists.newArrayList();
 		// 是否需要报价审核
@@ -334,42 +356,41 @@ public class OrderService {
 			// 添加报价审核
 			orderProcesses.add(buildOrderProcess(date, order.getId(), OrderProcess.STATUS_ADUIT));
 		}
-		
+
 		// 是否需要送货
 		if (order.getIsNeedDelivery()) {
 			// 是否需要送货
 			orderProcesses.add(buildOrderProcess(date, order.getId(), OrderProcess.STATUS_DELIVERY));
 		}
-		
+
 		// 是否需要安装
 		if (order.getIsNeedInstall()) {
 			// 是否需要安装
 			orderProcesses.add(buildOrderProcess(date, order.getId(), OrderProcess.STATUS_INSTALL));
 		}
-		
+
 		// 是否需要测量
 		if (order.getIsNeedMeasure()) {
 			// 是否需要测量
 			orderProcesses.add(buildOrderProcess(date, order.getId(), OrderProcess.STATUS_MEASURE));
 		}
-		
+
 		// 是否需要设计
 		if (order.getIsNeedDesign()) {
 			// 是否需要设计
 			orderProcesses.add(buildOrderProcess(date, order.getId(), OrderProcess.STATUS_DESIGN));
 		}
-		
+
 		orderProcesses.add(buildOrderProcess(date, order.getId(), OrderProcess.STATUS_SUBSCRIPTION));
 		orderProcesses.add(buildOrderProcess(date, order.getId(), OrderProcess.STATUS_PAYMENT));
 		orderProcesses.add(buildOrderProcess(date, order.getId(), OrderProcess.STATUS_FINISH));
-		
+
 		// 保存订单进度状态
 		if (orderProcessMapper.insertAllOrderProcess(orderProcesses) != orderProcesses.size()) {
 			TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
 			return false;
 		}
-		
-		
+
 		// 处理预留库存
 		// TODO 暂未支持预留库存操作 by wct
 		for (OrderGood orderGood : orderGoods) {
@@ -382,16 +403,16 @@ public class OrderService {
 			orderGood.setNeedInstallNum(orderGood.getOrderGoodsNum());
 			orderGood.setOutGoodsNum(0);
 		}
-		
+
 		// 订单商品保存
 		if (!orderGoods.isEmpty() && orderGoodMapper.insertAllOrderGoods(orderGoods) != orderGoods.size()) {
 			TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
 			return false;
 		}
-		
+
 		return true;
 	}
-	
+
 	private OrderProcess buildOrderProcess(Date date, String orderId, Integer type) {
 		OrderProcess orderProcess = new OrderProcess();
 		orderProcess.setCreateDate(date);
@@ -401,25 +422,67 @@ public class OrderService {
 		orderProcess.setIsFinish(Boolean.FALSE);
 		return orderProcess;
 	}
-	
+
 	@Transactional(readOnly = false)
 	public Boolean update(Order order, String operatorId) {
 		order.setModifyDate(new Date());
 		return orderMapper.updateByPrimaryKeySelective(order) == 1;
 	}
+
 	
-	
-	@Transactional(readOnly = false)
-	public Boolean delete(String id, Date date, String operatorId) {
-		return orderMapper.deleteById(id, date) == 1;
-	}
-	
+
 	public List<OrderProcess> getProcessWithOrderInfo(String orderId) {
 		return orderProcessMapper.selectAllWithOrdeInfo(orderId);
 	}
-	
+
+	/**
+	 * 订单删除
+	 * @param id
+	 * @param date
+	 * @param operatorId
+	 * @return
+	 */
 	@Transactional(readOnly = false)
-	public Boolean returnOrder(String orderId, String operatorId) {
+	public Boolean delete(String id,String operId) {
+		return orderMapper.deleteById(id, new Date()) == 1;
+	}
+	
+	/**
+	 * 订单完成
+	 * @param orderId
+	 * @return
+	 */
+	@Transactional(readOnly = false)
+	public Boolean finishOrder(Order order,String operId) {
+		Date date = new Date();
+		order.setModifyDate(date);
+		order.setType(Order.TYPE_FINISH_ORDER);
+
+		if (orderMapper.updateByPrimaryKeySelective(order) != 1) {
+			return false;
+		}
+
+		OrderProcess orderProcess = new OrderProcess();
+		orderProcess.setModifyDate(date);
+		orderProcess.setIsFinish(Boolean.TRUE);
+		Example example = new Example(OrderProcess.class);
+		example.createCriteria().andEqualTo("orderId", order.getId()).andEqualTo("type", OrderProcess.STATUS_FINISH);
+		if (orderProcessMapper.updateByExampleSelective(orderProcess, example) != 1) {
+			TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * 退单
+	 * @param orderId
+	 * @param operatorId
+	 * @return
+	 */
+	@Transactional(readOnly = false)
+	public Boolean cancelOrder(String orderId, String operatorId) {
 		Order order = new Order();
 		order.setId(orderId);
 		order.setModifyDate(new Date());
@@ -427,43 +490,20 @@ public class OrderService {
 		return orderMapper.updateByPrimaryKeySelective(order) == 1;
 	}
 	
-	@Transactional(readOnly = false)
-	public Boolean finishOrder(String orderId, String operatorId) {
-		Date date = new Date();
-		Order order = new Order();
-		order.setId(orderId);
-		order.setModifyDate(date);
-		order.setType(Order.TYPE_FINISH_ORDER);
-		
-		if (orderMapper.updateByPrimaryKeySelective(order) != 1) {
-			return false;
-		}
-		
-		OrderProcess orderProcess = new OrderProcess();
-		orderProcess.setModifyDate(date);
-		orderProcess.setIsFinish(Boolean.TRUE);
-		Example example = new Example(OrderProcess.class);
-		example.createCriteria().andEqualTo("orderId", orderId).andEqualTo("type", OrderProcess.STATUS_FINISH);
-		if (orderProcessMapper.updateByExampleSelective(orderProcess, example) != 1) {
-			TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-			return false;
-		}
-		
-		return true;
-	}
-	
 	/**
 	 * 根据查询条件查询订单极其关联明细信息
+	 * 
 	 * @param condition
 	 * @return
 	 */
-	public List<Order> selectOrdersAllWithDetailByCondition(Clerk clerk,OrderCondition condition,Pageable pageable){
-		
+	@Transactional(readOnly = true)
+	public List<Order> selectOrdersAllWithDetailByCondition(Clerk clerk, OrderCondition condition, Pageable pageable) {
+
 		Integer roleType = clerk.getRoleType();
-		
-		if (Clerk.ROLE_TYPE_ADMIN.equals(roleType) || Clerk.ROLE_TYPE_MANAGER.equals(roleType) 
-			|| Clerk.ROLE_TYPE_LOGISTIC.equals(roleType) || Clerk.ROLE_TYPE_AFTER_SALES.equals(roleType)
-			|| Clerk.ROLE_TYPE_WAREHOUSE.equals(roleType)) {
+
+		if (Clerk.ROLE_TYPE_ADMIN.equals(roleType) || Clerk.ROLE_TYPE_MANAGER.equals(roleType)
+				|| Clerk.ROLE_TYPE_LOGISTIC.equals(roleType) || Clerk.ROLE_TYPE_AFTER_SALES.equals(roleType)
+				|| Clerk.ROLE_TYPE_WAREHOUSE.equals(roleType)) {
 			condition.setBusinessId(clerk.getBusinessId());
 		} else if (Clerk.ROLE_TYPE_STORE_MANAGER.equals(roleType)) {
 			condition.setSotreId(clerk.getStoreId());
@@ -474,13 +514,15 @@ public class OrderService {
 		}
 		return this.orderMapper.selectOrdersAllWithDetailByCondition(condition);
 	}
-	
-	public Page<Order> paginationOrdersAllWithDetailByCondition(Clerk clerk,OrderCondition condition,Pageable pageable) {
+
+	@Transactional(readOnly = true)
+	public Page<Order> paginationOrdersAllWithDetailByCondition(Clerk clerk, OrderCondition condition,
+			Pageable pageable) {
 		Integer roleType = clerk.getRoleType();
-		
-		if (Clerk.ROLE_TYPE_ADMIN.equals(roleType) || Clerk.ROLE_TYPE_MANAGER.equals(roleType) 
-			|| Clerk.ROLE_TYPE_LOGISTIC.equals(roleType) || Clerk.ROLE_TYPE_AFTER_SALES.equals(roleType)
-			|| Clerk.ROLE_TYPE_WAREHOUSE.equals(roleType)) {
+
+		if (Clerk.ROLE_TYPE_ADMIN.equals(roleType) || Clerk.ROLE_TYPE_MANAGER.equals(roleType)
+				|| Clerk.ROLE_TYPE_LOGISTIC.equals(roleType) || Clerk.ROLE_TYPE_AFTER_SALES.equals(roleType)
+				|| Clerk.ROLE_TYPE_WAREHOUSE.equals(roleType)) {
 			condition.setBusinessId(clerk.getBusinessId());
 		} else if (Clerk.ROLE_TYPE_STORE_MANAGER.equals(roleType)) {
 			condition.setSotreId(clerk.getStoreId());
@@ -488,15 +530,15 @@ public class OrderService {
 			condition.setOrderResponsibleId(clerk.getId());
 		} else {
 			return PageUtil.pagination(pageable, new Callback<Order>() {
-				
+
 				public List<Order> getPageContent() {
 					return new ArrayList<>();
 				}
 			});
 		}
-		
+
 		List<String> orderList = null;
-		
+
 		// 排序处理
 		try {
 			orderList = ParamSceneUtils.toOrder(pageable, OrderOrderType.class);
@@ -505,15 +547,109 @@ public class OrderService {
 		} catch (NotFoundOrderDirectionException e) {
 			throw new RuntimeException("排序方向不符合要求");
 		}
-		
+
 		return PageUtil.pagination(pageable, orderList, new PageUtil.Callback<Order>() {
-			
+
 			@Override
 			public List<Order> getPageContent() {
 				return orderMapper.selectOrdersAllWithDetailByCondition(condition);
 			}
-		
+
 		});
 	}
+
+	@Transactional(readOnly = true)
+	public Order getOrderDetailForPrint(String businessId, String orderId) {
+		Order order = this.orderMapper.getOrdersForPrintByCondition(businessId, orderId);
+		if (null != order) {
+			OrderGoodCondition orderGoodCondition = new OrderGoodCondition();
+			orderGoodCondition.setOrderId(orderId);
+			orderGoodCondition.setBusinessId(businessId);
+			order.setOrderGoods(this.orderGoodMapper.selectOrderGoodsAllWithDetailByCondition(orderGoodCondition));
+			order.setPayedAmount(this.revenueAndRefundMapper.selectAmountStatistics(orderId));
+
+			return order;
+		}
+
+		return null;
+	}
+
+	@Transactional(readOnly = true)
+	public Order getOrderDetailForEdit(String businessId, String orderId) {
+		Order order = this.orderMapper.getOrdersForPrintByCondition(businessId, orderId);
+		if (null != order) {
+			OrderGoodCondition orderGoodCondition = new OrderGoodCondition();
+			orderGoodCondition.setOrderId(orderId);
+			orderGoodCondition.setBusinessId(businessId);
+			order.setOrderGoods(this.orderGoodMapper.selectOrderGoodsAllWithDetailByCondition(orderGoodCondition));
+			order.setPayedAmount(this.revenueAndRefundMapper.selectAmountStatistics(orderId));
+			
+			RevenueAndRefundCondition revenueAndRefundCondition = new RevenueAndRefundCondition();
+			revenueAndRefundCondition.setOrderId(orderId);
+			revenueAndRefundCondition.setBusinessId(businessId);
+			order.setOrderRevenueAndRefunds(this.revenueAndRefundMapper.selectRevenueAndRefundsAllWithDetailByCondition(revenueAndRefundCondition));
+			return order;
+		}
+
+		return null;
+	}
+
+	@Transactional(readOnly = false)
+	public boolean uploadOrderPicture(String orderId, MultipartFile picFile) {
+		// 判断文件是否存在
+		if (!picFile.isEmpty()) {
+			String newFileName = orderId + picFile.getOriginalFilename().substring(picFile.getOriginalFilename().lastIndexOf('.'),
+					picFile.getOriginalFilename().length());
+			String path = this.fileUploadService.getRootPath() + "images" ;
+			File dir = new File(path);
+			if (!dir.exists()) {
+				dir.mkdirs();
+			}
+			
+			File localFile = new File(path+"/"+ newFileName);
+			try {
+				if (!localFile.exists()) {
+					localFile.createNewFile();
+				}
+				picFile.transferTo(localFile);
+				
+				Order order = new Order();
+				order.setId(orderId);
+				order.setAttachment(newFileName);
+				order.setAttachmentName(newFileName);
+				return this.orderMapper.updateByPrimaryKeySelective(order) == 1;
+			} catch (IllegalStateException | IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
+		return false;
+	}
 	
+	/**
+	 * 根据订单查询条件查询相关统计结果
+	 * @param clerk
+	 * @param condition
+	 * @param pageable
+	 * @return
+	 */
+	@Transactional(readOnly = true)
+	public List<OrderTypeStatisticalResult> selectOrderTypeStatisticalResultByCondition(Clerk clerk, OrderCondition condition) {
+
+		Integer roleType = clerk.getRoleType();
+
+		if (Clerk.ROLE_TYPE_ADMIN.equals(roleType) || Clerk.ROLE_TYPE_MANAGER.equals(roleType)
+				|| Clerk.ROLE_TYPE_LOGISTIC.equals(roleType) || Clerk.ROLE_TYPE_AFTER_SALES.equals(roleType)
+				|| Clerk.ROLE_TYPE_WAREHOUSE.equals(roleType)) {
+			condition.setBusinessId(clerk.getBusinessId());
+		} else if (Clerk.ROLE_TYPE_STORE_MANAGER.equals(roleType)) {
+			condition.setSotreId(clerk.getStoreId());
+		} else if (Clerk.ROLE_TYPE_CLERK.equals(roleType)) {
+			condition.setOrderResponsibleId(clerk.getId());
+		} else {
+			return new ArrayList<>();
+		}
+		return this.orderMapper.selectOrderTypeStatisticalResultByCondition(condition);
+	}
 }

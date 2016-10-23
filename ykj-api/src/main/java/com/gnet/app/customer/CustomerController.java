@@ -139,7 +139,7 @@ public class CustomerController implements ResourceProcessor<RepositoryLinksReso
 		}else if(clerk.getRoleType().equals(Clerk.ROLE_TYPE_CLERK)){
 			customers = customerService.pagination(pageable, orderList, clerk.getId(), name, phone, buildingName);
 		}else{
-			customers = customerService.pagination(pageable, orderList, clerk.getRoleType(), clerk.getOfficeId(), name, phone, buildingName);
+			customers = customerService.pagination(pageable, orderList, clerk.getRoleType(), clerk.getBusinessId(), name, phone, buildingName);
 		}
 		
 		CustomerResourceAssembler customerResourceAssembler = new CustomerResourceAssembler();
@@ -185,12 +185,16 @@ public class CustomerController implements ResourceProcessor<RepositoryLinksReso
 	 */
 	@RequestMapping(method = RequestMethod.POST)
 	public ResponseEntity<?> createCustomer(
-			@RequestBody Customer customer	
+			@RequestBody Customer customer,
+			Authentication authentication
 	) {
-		Clerk clerk =  clerkService.findById(customer.getCustomerResponsibleId());
-		if(clerk == null){
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ClerkErrorBuilder(ClerkErrorBuilder.ERROR_CLERK_NULL, "公司人员信息为空").build());
-		}
+		CustomUser currCustomUser = (CustomUser) authentication.getPrincipal();
+		Clerk clerk = currCustomUser.getClerk();
+		customer.setCustomerResponsibleId(clerk.getId());
+//		Clerk clerk =  clerkService.findById(customer.getCustomerResponsibleId());
+//		if(clerk == null){
+//			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ClerkErrorBuilder(ClerkErrorBuilder.ERROR_CLERK_NULL, "公司人员信息为空").build());
+//		}
 	    Date date = new Date();
 	    customer.setCreateDate(date);
 	    customer.setModifyDate(date);

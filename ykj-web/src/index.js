@@ -37,12 +37,15 @@ app.model(require('./models/roles'));
 
 /**************订单管理*****************/
 app.model(require('./models/orders'));
+app.model(require('./models/orderService'));
 app.model(require('./models/measures'));
+
 app.model(require('./models/designs'));
 app.model(require('./models/deliverys'));
 app.model(require('./models/deliveryGoods'));
 app.model(require('./models/installations'));
 app.model(require('./models/installGoods'));
+ 
 
 /**************客户管理*****************/
 app.model(require('./models/customers'));

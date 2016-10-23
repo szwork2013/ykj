@@ -3,7 +3,8 @@ import { routerRedux } from 'dva/router';
 import { message } from 'antd';
 import request, { parseError } from '../../utils/request';
 import { root, search, view, create, update, remove, removeAll, searchCustomers, 
-       finishOrder, auditOrder, payOrder, viewGood, saveFillOrBack, uploadOrder, searchGoodsAllByModel,getOrderCurrentProcessStatus } from '../../services/order';
+       finishOrder, auditOrder, payOrder, viewGood, saveFillOrBack, uploadOrder, searchGoodsAllByModel,getOrderCurrentProcessStatus,revenueOrder,getOrderDetailForPrint,
+      getOrderDetailForEdit,cancelOrder,deleteOrder  } from '../../services/order';
 import {searchCustomersAllByName } from '../../services/customer';
 import pathToRegexp from 'path-to-regexp';
 import querystring from 'querystring';
@@ -91,8 +92,20 @@ export default {
           const match = pathToRegexp('/order/orders/edit/:id').exec(location.pathname);
           const id = match[1];
           dispatch({
-            type: 'view',
-            payload: id,
+            type: 'searchGoodsByModel',
+            payload: 'ALL'
+          });
+          dispatch({
+            type: 'searchCustomersByName',
+            payload: 'ALL'
+          });
+          dispatch({
+            type: 'codewords/setCodewordsByType',
+            payload: 'ORDER_SOURCE'
+          });
+          dispatch({
+             type : "toEdit",
+             payload : id
           });
         }
       });
@@ -119,7 +132,6 @@ export default {
                 }
             });
     },
-
     enterOutSubscriptions({ dispatch, history }) {
       history.listen((location, state) => {
         if (pathToRegexp('/order/orders/enterOut/:id/:goodId').test(location.pathname)) {
@@ -136,15 +148,18 @@ export default {
         }
       });
     },
-
+    /**
+     * 打印监听器
+     */
     printSubscriptions({ dispatch, history }) {
       history.listen((location, state) => {
         if (pathToRegexp('/order/orders/print/:id').test(location.pathname)) {
           const match = pathToRegexp('/order/orders/print/:id').exec(location.pathname);
           const id = match[1];
-          // dispatch({
-            
-          // });
+           dispatch({
+             type : "toPrint",
+             payload : id
+          });
         }
       });
     },
@@ -334,89 +349,6 @@ export default {
       yield message.error(`加载客户信息失败:${err.status} ${err.message}`, 3);
       return false;
     },
-    *finish({ payload: dataSourse }, {select, put}) {
-      yield put({
-        type: 'toggleSubmiting',
-        payload: true,
-      });
-
-      const { access_token, finishOption, query } = yield select( state => {
-        return {
-  	      access_token: state.oauth.access_token,
-          finishOption: {
-            id: state.orders.currentOrderId,
-            finishDate: dataSourse,
-          },
-          query: state.orders.query,
-        }
-      } );
-      const { data, error } = yield finishOrder(access_token, finishOption);
-
-      if (!error) {
-        yield message.success('完成操作成功', 2);
-        yield put({ type: 'setQuery', payload: query })
-        return true;
-      }
-
-      const err = yield parseError(error);
-      yield message.error(`完成操作失败:${err.status} ${err.message}`, 3);
-
-      yield put({
-        type: 'toggleSubmiting',
-        payload: false,
-      });
-
-      yield put({
-        type: 'toggleFinishModal',
-        payload: {
-          finishModalShow: false,
-        },
-      });
-
-      return false;
-    },
-    
-    *pay({ payload: dataSourse }, {select, put}) {
-      yield put({
-        type: 'toggleSubmiting',
-        payload: true,
-      });
-
-      const { access_token, payOption, query } = yield select( state => {
-        return {
-  	      access_token: state.oauth.access_token,
-          payOption: {
-            id: state.orders.currentOrderId,
-            payData: dataSourse,
-          },
-          query: state.orders.query,
-        }
-      } );
-      const { data, error } = yield payOrder(access_token, payOption);
-
-      if (!error) {
-        yield message.success('付款操作成功', 2);
-        yield put({ type: 'setQuery', payload: query })
-        return true;
-      }
-
-      const err = yield parseError(error);
-      yield message.error(`付款操作失败:${err.status} ${err.message}`, 3);
-
-      yield put({
-        type: 'toggleSubmiting',
-        payload: false,
-      });
-
-      yield put({
-        type: 'toggleFinishModal',
-        payload: {
-          payModalShow: false,
-        },
-      });
-
-      return false;
-    },
     *viewGoodInfo({ payload: dataSourse }, {select, put}) {
       yield put({
         type: 'toggleLoadding',
@@ -477,49 +409,6 @@ export default {
         payload: false,
       });
     },
-    *uploadOrder({ payload }, {select, put}) {
-      yield put({
-        type: 'toggleSubmiting',
-        payload: true,
-      });
-
-      const { access_token, uploadOption, query } = yield select( state => {
-        return {
-  	      access_token: state.oauth.access_token,
-          uploadOption: {
-            id: state.orders.currentOrderId,
-            orderPicture: payload,
-          },
-          query: state.orders.query,
-        }
-      } );
-      console.log(uploadOption);
-      const { data, error } = yield uploadOrder(access_token, uploadOption);
-
-      if (!error) {
-        yield message.success('上传纸质订单操作成功', 2);
-        yield put({ type: 'setQuery', payload: query })
-        return true;
-      }
-
-      const err = yield parseError(error);
-      yield message.error(`上传纸质订单操作失败:${err.status} ${err.message}`, 3);
-
-      yield put({
-        type: 'toggleSubmiting',
-        payload: false,
-      });
-
-      yield put({
-        type: 'toggleUploadModal',
-        payload: {
-          UploadModalShow: false,
-        },
-      });
-
-      return false;
-
-    },
     *queryFollowStatus({payload: dataSourse}, {select, put}) {
       const { access_token, id, query } = yield select( state => {
         return {
@@ -542,6 +431,208 @@ export default {
 
       const err = yield parseError(error);
       yield message.error(`跟踪订单状态失败:${err.status} ${err.message}`, 3);
+      return false;
+    },
+
+    /**
+     * 完成订单
+     */
+    *toFinishOrder({payload},{select,put}){
+      yield put({
+          type: 'merge',
+          payload: {
+            currentOrder : {}
+          },
+        })
+      
+      yield put({
+          type: 'merge',
+          payload: {
+            currentOrder : payload,
+            finishModalShow : true
+          },
+        })
+
+    },
+     /**
+     * 完成订单
+     */
+    *finishOrder({payload},{select,put}){
+      const access_token = yield select( state => state.oauth.access_token );
+      const { data, error } = yield finishOrder(access_token,payload);
+       if (!error) {
+        yield message.success('订单完成操作成功', 2);
+        yield put({
+          type: 'setQuery',
+          payload: {},
+        })
+        yield put({
+          type: 'toggleFinishModal',
+          payload: {
+            finishModalShow : false
+          },
+        })
+        return true;
+      }
+
+      const err = yield parseError(error);
+      yield message.error(`订单完成操作失败:${err.status} ${err.message}`, 3);
+
+      return false;
+    },
+     /**
+     * 删除订单
+     */
+    *deleteOrder({payload},{select,put}){
+      const access_token = yield select( state => state.oauth.access_token );
+      const { data, error } = yield deleteOrder(access_token,payload);
+
+       if (!error) {
+        yield message.success('订单删除操作成功', 2);
+        yield put({
+          type: 'setQuery',
+          payload: {},
+        })
+        return true;
+      }
+
+      const err = yield parseError(error);
+      yield message.error(`订单删除操作失败:${err.status} ${err.message}`, 3);
+
+      return false;
+    },
+    /**
+     * 退单
+     */
+    *cancelOrder({payload},{select,put}){
+      const access_token = yield select( state => state.oauth.access_token );
+      const { data, error } = yield cancelOrder(access_token,payload);
+
+       if (!error) {
+        yield message.success('订单退单操作成功', 2);
+        yield put({
+          type: 'setQuery',
+          payload: {},
+        })
+        return true;
+      }
+
+      const err = yield parseError(error);
+      yield message.error(`订单退单操作失败:${err.status} ${err.message}`, 3);
+
+      return false;
+    },
+    /**
+     * 准备编辑
+     */
+    *toEdit({payload},{select,put}){
+      const access_token = yield select( state => state.oauth.access_token );
+      const { data, error } = yield getOrderDetailForEdit(access_token,payload);
+
+       if (!error) {
+        yield message.success('获取订单信息操作成功', 2);
+        yield put({
+          type: 'merge',
+          payload: {
+            currentOrder : data
+          },
+        })
+        return true;
+      }
+
+      const err = yield parseError(error);
+      yield message.error(`获取订单信息失败:${err.status} ${err.message}`, 3);
+
+      return false;
+    },
+    /**
+     * 准备打印
+     */
+    *toPrint({payload},{select,put}){
+      const access_token = yield select( state => state.oauth.access_token );
+      const { data, error } = yield getOrderDetailForPrint(access_token,payload);
+
+       if (!error) {
+        yield message.success('获取订单打印信息操作成功', 2);
+        yield put({
+          type: 'merge',
+          payload: {
+            currentOrder : data
+          },
+        })
+        return true;
+      }
+
+      const err = yield parseError(error);
+      yield message.error(`获取订单打印信息失败:${err.status} ${err.message}`, 3);
+
+      return false;
+    },
+    /**
+     * 准备付款
+     */
+    *toRevenueOrder({payload},{select,put}){
+      yield put({
+        type: 'codewords/setCodewordsByType',
+        payload: 'PAYMENT_WAY'
+      });
+      yield put({
+        type: 'codewords/setCodewordsByType',
+        payload: 'CATEGORY'
+      });
+       yield put({
+        type: 'merge',
+        payload: {
+        currentOrder: {}
+        },
+      });  
+       yield put({
+          type: 'merge',
+          payload: {
+            currentOrder : payload.currentOrder
+          },
+        })
+        yield put({
+          type: 'togglePayModal',
+          payload: {
+            payModalShow : true
+          },
+        })
+    },
+    /**
+     * 订单付款
+     */
+    *revenueOrder({ payload }, {select, put}) {
+      yield put({
+        type: 'toggleSubmiting',
+        payload: true,
+      });
+      console.log(payload)
+
+      const access_token = yield select( state => state.oauth.access_token );
+      const { data, error } = yield revenueOrder(access_token, payload.orderId,payload);
+
+      if (!error) {
+        yield message.success('付款操作成功', 2);
+        
+        yield put({
+          type: 'togglePayModal',
+          payload: {
+            payModalShow: false,
+          },
+        });
+        return true;
+      }
+
+      const err = yield parseError(error);
+      yield message.error(`付款操作失败:${err.status} ${err.message}`, 3);
+
+      yield put({
+        type: 'toggleSubmiting',
+        payload: false,
+      });
+
+
       return false;
     },
     /**
@@ -585,11 +676,16 @@ export default {
             currentOrder : {}
           },
         })
+        const access_token = yield select( state => state.oauth.access_token );
+        const { data, error } = yield view(access_token, payload.currentOrder.id || '');
 
+        if (error) {
+          yield message.warn(`订单信息查询失败，若原有已上传图片，再次上传将会覆盖原图片`, 3);
+        }
         yield put({
           type: 'merge',
           payload: {
-            currentOrder : payload.currentOrder
+            currentOrder : data
           },
         })
         
@@ -603,9 +699,8 @@ export default {
      * 图片上传
      */
     *upload({ payload }, {select, put}) {
-      console.log(payload)
       const access_token = yield select( state => state.oauth.access_token );
-      const { data, error } = yield uploadOrder(access_token, payload.id);
+      const { data, error } = yield uploadOrder(access_token, payload);
 
       if (!error) {
         yield message.success('订单上传操作成功', 2);
@@ -667,6 +762,14 @@ export default {
             AuditModalShow: false, 
           },
         });
+
+        yield put({
+          type: 'setQuery',
+          payload: {
+          },
+        });
+
+        
         return true;
       }
 

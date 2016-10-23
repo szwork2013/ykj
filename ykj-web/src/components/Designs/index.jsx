@@ -7,7 +7,9 @@ import Box from '../Box';
 import BoxTable from '../BoxTable';
 import BoxTabs from '../BoxTabs';
 
-import OrderCustomerInfo from '../CustomerInfo/OrderCustomerInfo'
+
+import OrderCustomerInfo from '../OrderService/OrderCustomerInfo'
+import PositionModal from '../OrderService/PositionModal';
 
 import styles from './index.less';
 
@@ -42,7 +44,7 @@ const List = ({ customers, designs, form, children, dispatch, ...rest }) => {
       <br/>
       <OrderCustomerInfo
         dispatch={dispatch}
-        options={options}
+        currentOrder={designs.currentOrder}
       />
       <Row>
         <Col span={12}><h3>设计历史</h3></Col>
@@ -78,6 +80,22 @@ const List = ({ customers, designs, form, children, dispatch, ...rest }) => {
             title: '服务位置',
             dataIndex: 'servicePosition',
             key: 'servicePosition',
+            render: (text, record, index) => {
+               return <a href="javascript:void(0)"  onClick={()=>{
+                  dispatch({
+                    type: 'designs/merge',
+                    payload: {
+                      positionModalShow : true,
+                      currentItem : {
+                        servicePosition : text
+                      }
+                    },
+                  });    
+
+                }}>
+                <Icon type="environment" />
+                </a>
+            }
           },
           {
             title: '服务时间',
@@ -161,11 +179,33 @@ const List = ({ customers, designs, form, children, dispatch, ...rest }) => {
           }]
         }
         rowKey={ record => record.id }
-        dataSource={ designs.designs }
+        dataSource={ designs.list }
         pagination={ designs.pagination }
         loading={ designs.loading }
         onChange={ onTableChange }
       />
+       <PositionModal
+        data= {designs.currentItem.servicePosition}
+        visible={ designs.positionModalShow }
+        dispatch={ dispatch }
+        onOk = {()=>{
+          dispatch({
+            type: 'designs/merge',
+              payload: {
+                positionModalShow : false
+              },
+            });  
+          } } 
+          onCancle = {()=>{
+            dispatch({
+              type: 'designs/merge',
+              payload: {
+                positionModalShow : false
+              },
+            });  
+          }}
+      >
+      </PositionModal>
     </Container>
   )
 }
@@ -176,7 +216,6 @@ List.propTypes = {
 
 export default Form.create({
   mapPropsToFields: (props) => {
-    const query = props.designs.query;
     return {
     }
   }

@@ -3,7 +3,7 @@ import React, { PropTypes } from 'react';
 import Detail from './Detail';
 
 const Edit = (props) => {
-  const { dispatch } = props;
+  const { dispatch,measures } = props;
   return (
     <Detail
       {...props}
@@ -13,7 +13,7 @@ const Edit = (props) => {
         return {        }
       } }
       mapPropsToFields={ (measure) => ({}) }
-      onSubmit={ (e, form) => {
+      onSubmit={ (e, form , fileList) => {
         e.preventDefault();
         
         form.validateFieldsAndScroll((errors, values) => {
@@ -21,8 +21,8 @@ const Edit = (props) => {
             return;
           }
           let formData = form.getFieldsValue();
-          formData.id = props.params.id[1];
-          formData.orderId = props.params.id[0];
+          formData.fileList = fileList;
+          formData.orderId = measures.currentOrder.id;
           dispatch({
             type: 'measures/edit',
             payload: formData,

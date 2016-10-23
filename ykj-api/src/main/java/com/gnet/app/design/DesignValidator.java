@@ -31,12 +31,12 @@ public class DesignValidator {
 			return map;
 		}
 
-		// 测量单号不能为空过滤
-		if (StringUtils.isBlank(design.getServiceCode())) {
-			map.put("code", OrderServiceErrorBuilder.ERROR_SERVICECODE_NULL);
-			map.put("msg", "测量单号不能为空");
-			return map;
-		}
+//		// 测量单号不能为空过滤
+//		if (StringUtils.isBlank(design.getServiceCode())) {
+//			map.put("code", OrderServiceErrorBuilder.ERROR_SERVICECODE_NULL);
+//			map.put("msg", "测量单号不能为空");
+//			return map;
+//		}
 
 		// 测量名称不能为空过滤
 		if (StringUtils.isBlank(design.getName())) {
@@ -242,7 +242,7 @@ public class DesignValidator {
 	
 	public static Map<String, Object> validateBeforeUpdateCancelState(OrderSer measure) {
 		Map<String, Object> map = new HashMap<>();
-		if(measure.getIsClear()){
+		if(!measure.getIsClear()){
 			map.put("code", OrderServiceErrorBuilder.ERROR_CANCELSTATE);
 			map.put("msg", "还未结算的无法取消结算");
 			return map;

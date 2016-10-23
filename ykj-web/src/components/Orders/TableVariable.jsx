@@ -11,16 +11,16 @@ class TableVariable extends Component {
 
     constructor(props) {
         super(props);
-        if (props.dataSource == undefined && props.type == 'add') {
+        const dataSource = props.dataSource || [];
+        this.state = {};
+
+        if (props.type == 'add') {
             this.state = {
                 dataSource: [{Number: 1}]
             }
-        } else {
-            this.state = {
-                dataSource: props.dataSource,
-            }
         }
     }
+
 
     componentDidUpdate() {
        
@@ -104,7 +104,7 @@ class TableVariable extends Component {
                           <a href="javascript:void(0)" onClick={ () => {
                              
                               const newDataSource = this.removeRow(columns, dataSource, index)
-                             
+                                 console.log(newDataSource);
                               this.setState({
                                   dataSource: newDataSource,
                               })
@@ -126,9 +126,9 @@ class TableVariable extends Component {
                                 goodList.map(item => {
                                     if(item.id === value){
                                         this.changeValue(item.name, "goodName", index);
-                                        this.changeValue(item.unit, "unit", index);
-                                        this.changeValue(item.storeNow, "storeNow", index);
-                                        this.changeValue(item.price, "price", index);
+                                        this.changeValue(item.unit, "goodUnitName", index);
+                                        this.changeValue(item.storeNow, "goodStoreNow", index);
+                                        this.changeValue(item.price, "goodPrice", index);
                                         this.changeValue(value, "storageGoodsId", index);
                                     }
                                     })
@@ -259,7 +259,12 @@ class TableVariable extends Component {
 
 
     renderTable(props) {
-        const { dataSource, isAddable, goodsEditing, dispatch, type, columns, ...rest } = props;
+        const { dataSource=[], isAddable, goodsEditing, dispatch, type, columns, ...rest } = props;
+       
+        if(type=='edit'){
+            this.state.dataSource = dataSource;
+        }
+        
         return (
             type == 'edit' ?
             (
@@ -273,7 +278,7 @@ class TableVariable extends Component {
                                 dispatch({
                                     type: 'orders/toggleAuditModal',
                                     payload: {
-                                        currentOrderId: this.props.params.id,
+                                        currentOrderId: this.props.orderId,
                                         AuditModalShow: true,
                                     }
                                 });
@@ -329,10 +334,7 @@ class TableVariable extends Component {
                                         this.getEditColumns(columns, this.state.dataSource, type)
                                     } 
                                     dataSource={ 
-                                        isAddable ?
                                         this.state.dataSource
-                                        :
-                                        dataSource  
                                     }
                                     {...rest}
                                 >

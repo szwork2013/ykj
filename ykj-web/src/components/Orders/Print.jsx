@@ -15,7 +15,24 @@ const InputGroup = Input.Group;
 
 const Print = ({ orders, form, dispatch, ...rest }) => {
 
-    const { loading, submiting } = orders;
+    const { loading, submiting,currentOrder } = orders;
+console.log(currentOrder);
+
+    const getAmounInfo = ({orderGoods = [],payedAmount = 0}) => {
+        let amount = 0 ;
+        orderGoods.map((item,index) =>{
+            if(item.orderGoodsNum && item.strikeUnitPrice){
+                amount += item.orderGoodsNum*item.strikeUnitPrice;
+            }
+        });
+
+        return {
+            amount : amount,
+            payedAmount : payedAmount||0
+        }
+    }
+
+    const amount = getAmounInfo(currentOrder);
 
     const formItemLayout = {
       labelCol: { span: 6 },
@@ -34,12 +51,12 @@ const Print = ({ orders, form, dispatch, ...rest }) => {
                             <Row >
                                 <Col sm={8} >
                                     <div className={styles['orderNo']} >
-                                        <h3>订单号：212204006</h3>
+                                        <h3>订单号：{currentOrder.orderNo}</h3>
                                     </div>
                                 </Col>
                                 <Col sm={8} offset={1}>
                                     <div className={styles['company']} >
-                                        <h2>杭州高网信息公司&nbsp;&nbsp;&nbsp;&nbsp;销售服务单</h2>
+                                        <h2>{currentOrder.businessName}销售服务单</h2>
                                     </div>
                                 </Col>
                                 <Col sm={5} offset={11}>
@@ -53,15 +70,15 @@ const Print = ({ orders, form, dispatch, ...rest }) => {
                                     <tbody>
                                         <tr>
                                             <td colSpan="2" className={styles['tdBorder']}><h3>客户姓名</h3></td>
-                                            <td colSpan="3" className={styles['tdBorder']}>张伟刚</td>
+                                            <td colSpan="3" className={styles['tdBorder']}>{currentOrder.customerName}</td>
                                             <td colSpan="2" className={styles['tdBorder']}><h3>订单时间</h3></td>
-                                            <td colSpan="3" className={styles['tdBorder']}>2016-06-10</td>
+                                            <td colSpan="3" className={styles['tdBorder']}>{currentOrder.orderDate}</td>
                                         </tr>
                                         <tr>
                                             <td colSpan="2" className={styles['tdBorder']}><h3>客户电话</h3></td>
-                                            <td colSpan="3" className={styles['tdBorder']}>15456565676</td>
+                                            <td colSpan="3" className={styles['tdBorder']}>{currentOrder.customerPhone}</td>
                                             <td colSpan="2" className={styles['tdBorder']}><h3>订单地址</h3></td>
-                                            <td colSpan="3" className={styles['tdBorder']}>杭州西湖区留和路高网信息公司</td>
+                                            <td colSpan="3" className={styles['tdBorder']}>{currentOrder.address}</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -72,7 +89,7 @@ const Print = ({ orders, form, dispatch, ...rest }) => {
                                         <h3>订单说明：</h3>
                                     </Col>
                                     <Col sm={ 22 }>
-                                        <p className="ant-form-text" >订单说明订单说明订单说明订单说明订单说明订单说明订单说明订单说明订单说明订单说明订单说明订单说明订单说明订单说明订单说明订单说明订单说明订单说明订单说明订单说明</p>
+                                        <p className="ant-form-text" >{currentOrder.privateRemark}</p>
                                     </Col>
                                 </Row>
                                 <br/>
@@ -85,46 +102,51 @@ const Print = ({ orders, form, dispatch, ...rest }) => {
                                 <br/>
                                 <Row>
                                     <Table
+                                        pagination = {false}
+                                        dataSource = {currentOrder.orderGoods}
                                         columns={
                                             [{
                                                 title: '名称',
-                                                dataIndex: '1',
-                                                key: '1',
+                                                dataIndex: 'goodName',
+                                                key: 'goodName',
                                             },
                                             {
                                                 title: '型号',
-                                                dataIndex: '2',
-                                                key: '2',
+                                                dataIndex: 'goodModel',
+                                                key: 'goodModel',
                                             },
                                             {
                                                 title: '规格',
-                                                dataIndex: '3',
-                                                key: '3',
+                                                dataIndex: 'goodSpecification',
+                                                key: 'goodSpecification',
                                             },
                                             {
                                                 title: '位置',
-                                                dataIndex: '4',
-                                                key: '4',
+                                                dataIndex: 'initPosition',
+                                                key: 'initPosition',
                                             },
                                             {
                                                 title: '单价（元）',
-                                                dataIndex: '5',
-                                                key: '5',
+                                                dataIndex: 'strikeUnitPrice',
+                                                key: 'strikeUnitPrice',
                                             },
                                             {
                                                 title: '数量',
-                                                dataIndex: '6',
-                                                key: '6',
+                                                dataIndex: 'orderGoodsNum',
+                                                key: 'orderGoodsNum',
                                             },
                                             {
                                                 title: '单位',
-                                                dataIndex: '7',
-                                                key: '7',
+                                                dataIndex: 'goodUnitName',
+                                                key: 'goodUnitName',
                                             },
                                             {
                                                 title: '小计（元）',
                                                 dataIndex: '8',
                                                 key: '8',
+                                                render: (text, record, index) => {
+                                                    return record.orderGoodsNum * record.strikeUnitPrice
+                                                }
                                             },
                                             {
                                                 title: '备注',
@@ -142,10 +164,11 @@ const Print = ({ orders, form, dispatch, ...rest }) => {
                                         <h4>备注：</h4>
                                     </Col>
                                     <Col sm={ 11 }>
-                                        <p className="ant-form-text" >在订外卖的时候多带一份可乐和雪碧</p>
+                                        <p className="ant-form-text" >{currentOrder.customerRemark}</p>
                                     </Col>
                                     <Col sm={ 10 } offset={ 2 }>
-                                        <h4>{ `成交总价：10000元` }&nbsp;&nbsp;&nbsp;&nbsp;{ `已收（含定金）：90000元`}&nbsp;&nbsp;&nbsp;&nbsp;{ `未收款：90000元`}&nbsp;&nbsp;</h4>
+                                        <h4>成交总价：{amount.amount}元&nbsp;&nbsp;&nbsp;&nbsp;已收（含定金）：{amount.payedAmount}元
+                                        &nbsp;&nbsp;&nbsp;&nbsp;未收款：{amount.amount-amount.payedAmount}元&nbsp;&nbsp;</h4>
                                     </Col>
                                 </Row>
                                 <br/>
@@ -154,19 +177,19 @@ const Print = ({ orders, form, dispatch, ...rest }) => {
                                         <h4>跟单人：</h4>
                                     </Col>
                                     <Col sm={ 6 }>
-                                        <p className="ant-form-text" >张伟刚</p>
+                                        <p className="ant-form-text" >{currentOrder.orderResponsibleName}</p>
                                     </Col>
                                     <Col sm={ 3 }>
                                         <h4>售后服务电话：</h4>
                                     </Col>
                                     <Col sm={ 5 }>
-                                        <p className="ant-form-text" >16765656565</p>
+                                        <p className="ant-form-text" >{currentOrder.serviceCall}</p>
                                     </Col>
                                     <Col sm={ 3 }>
                                         <h4>跟单人电话：</h4>
                                     </Col>
                                     <Col sm={ 5 }>
-                                        <p className="ant-form-text" >16787878787</p>
+                                        <p className="ant-form-text" >{currentOrder.orderResponsiblePhone}</p>
                                     </Col>
                                 </Row>
                             </div> 

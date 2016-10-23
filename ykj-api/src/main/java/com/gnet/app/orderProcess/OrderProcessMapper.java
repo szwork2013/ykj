@@ -14,4 +14,12 @@ public interface OrderProcessMapper extends Mapper<OrderProcess> {
 	
 	public List<OrderProcess> selectAllWithOrdeInfo(@Param("orderId") String orderId);
 	
+	/**
+	 * 完成流程状态
+	 * @param orderId
+	 * @param type
+	 * @return
+	 */
+	public int updateProcessFinishStatus(@Param("orderId") String orderId, @Param("type") Integer type,@Param("isFinish") Integer isFinish);
+	
 }

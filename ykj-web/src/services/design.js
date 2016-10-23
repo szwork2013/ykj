@@ -10,7 +10,7 @@ export async function root(access_token, query) {
 }
 
 export async function search(access_token, payload) {
-  return request(`/api/orders/${payload}/designs`, {
+  return request(`/api/designs/${payload}/search`, {
     headers: {
       'Authorization': `Bearer ${access_token}`,
     }

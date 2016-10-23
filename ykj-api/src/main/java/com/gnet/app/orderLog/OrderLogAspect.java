@@ -101,7 +101,7 @@ public class OrderLogAspect {
 			Date date = new Date();
 			Object[] args = joinPoint.getArgs();
 			String orderId = (String) args[0];
-			String operatorId = (String) args[2];
+			String operatorId = (String) args[1];
 			OrderLog orderLog = new OrderLog();
 			
 			Example example = new Example(Order.class);
@@ -125,10 +125,10 @@ public class OrderLogAspect {
 		if (returnValue) {
 			Date date = new Date();
 			Object[] args = joinPoint.getArgs();
-			String orderId = (String) args[0];
+			Order order = (Order) args[0];
 			String operatorId = (String) args[1];
 			OrderLog orderLog = new OrderLog();
-			Order order = orderMapper.selectByPrimaryKey(orderId);
+			order = orderMapper.selectByPrimaryKey(order.getId());
 			
 			orderLog.setClerkId(operatorId);
 			orderLog.setOrderId(order.getId());

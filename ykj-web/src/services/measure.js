@@ -10,11 +10,11 @@ export async function root(access_token, query) {
 }
 
 export async function search(access_token, payload) {
-  return request(`/api/orders/${payload}/measures`, {
-    headers: {
-      'Authorization': `Bearer ${access_token}`,
-    }
-  });
+    return request(`/api/measures/${payload.orderId}/search`, {
+      headers: {
+        'Authorization': `Bearer ${access_token}`,
+      }
+    });
 }
 
 export async function view(access_token, id) {

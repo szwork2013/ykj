@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.gnet.app.revenueandrefund.RevenueAndRefundMapper" >
+    <resultMap id="BaseRevenueAndRefundMap" type="com.gnet.app.revenueandrefund.RevenueAndRefund" >
+        <id column="id" property="id" jdbcType="CHAR" />
+        <result column="create_date" property="createDate" />
+        <result column="modify_date" property="modifyDate" />
+        <result column="order_id" property="orderId" jdbcType="CHAR" />
+        <result column="category" property="category" jdbcType="INTEGER" />
+        <result column="category_name" property="categoryName" jdbcType="VARCHAR" />
+        <result column="payment" property="payment" jdbcType="DECIMAL" />
+        <result column="pay_way" property="payWay" jdbcType="INTEGER" />
+        <result column="pay_way_name" property="payWayName" jdbcType="VARCHAR" />
+        <result column="recorder" property="recorder" jdbcType="VARCHAR" />
+        <result column="recorderName" property="recorderName" jdbcType="VARCHAR" />
+        <result column="recorderDate" property="recorderDate" />
+        <result column="remark" property="remark" jdbcType="VARCHAR" />
+    </resultMap>
+    
+    <resultMap id="BaseAmountStatisticsMap" type="com.gnet.app.revenueandrefund.AmountStatistics" >
+        <id column="orderId" property="orderId" jdbcType="CHAR" />
+        <result column="category" property="category" jdbcType="INTEGER" />
+        <result column="categoryName" property="categoryName" jdbcType="VARCHAR" />
+         <result column="pay_way" property="payWay" jdbcType="INTEGER" />
+        <result column="pay_way_name" property="payWayName" jdbcType="VARCHAR" />
+        <result column="amount" property="amount" jdbcType="DECIMAL" />
+    </resultMap>
+    
+    
+	
+    <select id="findById" resultMap="BaseRevenueAndRefundMap" >
+		select t.*,(select s.value from sc_codeword s where s.code=t.category and s.codeword_type_id = '17') category_name,
+		(select s.value from sc_codeword s where s.code=t.pay_way and s.codeword_type_id = '3') pay_way_name 
+		 from ykj_revenue_and_refund t where t.id = #{id}
+	</select>
+
+    <select id="selectRevenueAndRefundsAllWithDetailByCondition" resultMap="BaseRevenueAndRefundMap" parameterType="com.gnet.app.revenueandrefund.RevenueAndRefundCondition">
+		select t.*,q.name recorderName,
+		(select s.value from sc_codeword s,sc_codeword_type w where w.id=s.codeword_type_id and s.code=t.category and w.type_value = 'CATEGORY') category_name,
+		(select s.value from sc_codeword s,sc_codeword_type w where w.id=s.codeword_type_id and s.code=t.pay_way and w.type_value = 'PAYMENT_WAY') pay_way_name 
+		 from ykj_revenue_and_refund t left join ykj_clerk q on q.id = t.recorder
+		<where>
+			<if test=" orderId != null and orderId != ''">
+                and order_id = #{orderId}
+            </if>
+		    <if test=" category != null ">
+                and category  = #{category}
+            </if>
+            <if test=" payWay != null">
+                and pay_way = #{payWay}
+            </if>
+		</where>
+	</select>
+	
+	<select id="selectAmountStatistics" resultType="DECIMAL">
+		select sum(case t.category when ${@com.gnet.app.revenueandrefund.RevenueAndRefund@TYPE_CATEGORY_REFUND} then -payment else payment end) amount 
+		from ykj_revenue_and_refund t 
+		where t.order_id = #{orderId}
+	</select>
+	
+	<select id="selectAmountStatisticsByCategory" resultMap="BaseAmountStatisticsMap">
+		select t.category,sum(case t.category when ${@com.gnet.app.revenueandrefund.RevenueAndRefund@TYPE_CATEGORY_REFUND} then -payment else payment end) amount 
+		from ykj_revenue_and_refund t 
+		where t.order_id = #{orderId}
+		group by t.category
+	</select>
+	
+	<select id="selectAmountStatisticsByPayWay" resultMap="BaseAmountStatisticsMap">
+		select t.pay_way,sum(case t.category when ${@com.gnet.app.revenueandrefund.RevenueAndRefund@TYPE_CATEGORY_REFUND} then -payment else payment end) amount 
+		from ykj_revenue_and_refund t 
+		where t.order_id = #{orderId}
+		group by t.pay_way
+	</select>
+	
+	<select id="selectAmountStatisticsByCategoryAndPayWay" resultMap="BaseAmountStatisticsMap">
+		select t.category,t.pay_way,sum(case t.category when ${@com.gnet.app.revenueandrefund.RevenueAndRefund@TYPE_CATEGORY_REFUND} then -payment else payment end) amount 
+		from ykj_revenue_and_refund t 
+		where t.order_id = #{orderId}
+		group by t.pay_way,t.category
+	</select>
+    
+</mapper>

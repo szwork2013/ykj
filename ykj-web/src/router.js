@@ -8,10 +8,16 @@ import LoginPage from './routes/LoginPage';
 
 /*--------------------------------订单管理-------------------------------------- */
 import OrderPage, { OrderAdd, OrderEdit, OrderPrint, OrderEnterOut, OverOrderPage  } from './routes/OrdersPage'
+/*
+import { MeasureIndexComponent, MeasureAddComponent, MeasureEditComponent } from './routes/orderService'
+*/
+
 import MeasuresPage, { MeasureAdd, MeasureEdit } from './routes/MeasuresPage'
+
 import DesignsPage, { DesignAdd, DesignEdit } from './routes/DesignsPage'
 import DeliverysPage, { DeliveryAdd, DeliveryEdit, DeliveryNote } from './routes/DeliverysPage'
 import InstallationsPage, { InstallationAdd, InstallationEdit, InstallationCharges, InstallationNote } from './routes/InstallationsPage'
+
 
 /*--------------------------------通用设置-------------------------------------- */
 import UserPage, { UserAdd, UserEdit } from './routes/UserPage';
@@ -44,12 +50,6 @@ export default ({ history }) => {
               <Route breadcrumbName="编辑订单" path="edit/:id" component={ OrderEdit } />
               <Route breadcrumbName="打印订单" path="print/:id" component={ OrderPrint } />
               <Route breadcrumbName="退补货" path="enterOut/:id/:goodId" component={ OrderEnterOut } />
-
-              <Route breadcrumbName="测量安排" path=":id/measures" >
-                <IndexRoute component={ MeasuresPage }  />
-                <Route breadcrumbName="添加测量安排" path="add" component={ MeasureAdd } />
-                <Route breadcrumbName="编辑测量安排" path="edit/:id" component={ MeasureEdit } />
-              </Route>
               <Route breadcrumbName="设计安排" path=":id/designs" >
                 <IndexRoute component={ DesignsPage }  />
                 <Route breadcrumbName="添加设计安排" path="add" component={ DesignAdd } />
@@ -68,8 +68,13 @@ export default ({ history }) => {
                 <Route breadcrumbName="安装安排服务单" path="note/:id" component={ InstallationNote } />
                 <Route breadcrumbName="服务费计算" path="charges/:id" component={ InstallationCharges } />
               </Route>
-
+              <Route  breadcrumbName="订单服务" path=":id/measures">
+                <IndexRoute breadcrumbName="测量安排"  component={ MeasuresPage } />
+                <Route breadcrumbName="添加测量安排" path="add" component={ MeasureAdd } />
+                <Route breadcrumbName="编辑测量安排" path="edit/:id" component={ MeasureEdit } />
+              </Route>
             </Route>
+            
           </Route>
 
           <Route breadcrumbName="客户管理" path="customers">

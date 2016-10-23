@@ -3,8 +3,9 @@ import { Modal, Form, Cascader, InputNumber, Row, Col, Input, DatePicker } from 
 
 const FormItem = Form.Item;
 
-const FinishModal = ({ form, dispatch, submiting, onOk, ...rest }) => {
+const FinishModal = ({ currnetOrder ,form, dispatch, submiting, onOk, ...rest }) => {
     const { getFieldProps, getFieldError, isFieldValidating } = form;
+    const {id : orderId} = currnetOrder
 
     const finishDateProps = getFieldProps('finishDate', {
         rules: [
@@ -27,18 +28,18 @@ const FinishModal = ({ form, dispatch, submiting, onOk, ...rest }) => {
                         return false;
                     }
                     const formData = form.getFieldsValue();
-                    onOk(formData);
+                    formData.id = orderId;
+                    console.log(formData)
+                    dispatch({
+                        type: 'orders/finishOrder',
+                        payload: formData,
+                    });
+
                     form.resetFields();
                 });
             }}
             onCancel= { () => {
-                dispatch({
-                    type: 'orders/toggleFinishModal',
-                    payload: {
-                        currentOrderId: undefined,
-                        finishModalShow: false,
-                    },
-                });
+               
                 form.resetFields();   
             }}
         >

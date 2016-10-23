@@ -27,6 +27,7 @@ export async function view(access_token, id) {
 }
 
 export async function create(access_token, order) {
+  console.log(JSON.stringify(order));
   return request(`/api/orders`, {
     method: 'POST',
     headers: {
@@ -76,30 +77,57 @@ export async function searchCustomers(access_token, query) {
   })
 }
 
-export async function finishOrder(access_token, finishOption) {
-  return request(`/api/orders/${finishOption.id}/finish_result`, {
-    method: 'PUT',
+
+/**
+ * 订单删除
+ */
+export async function deleteOrder(access_token, orderId) {
+  return request(`/api/orders/${orderId}`, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${access_token}`,
+    },
+  })
+}
+/**
+ * 订单完成
+ */
+export async function finishOrder(access_token, payload) {
+  return request(`/api/orders/${payload.id}/finish`, {
+    method: 'POST',
     headers: {
       'Authorization': `Bearer ${access_token}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(finishOption)
+    body: JSON.stringify(payload)
   })
 }
-
 /**
- * 订单审核
+ * 订单退单
  */
-export async function auditOrder(access_token, id) {
-  return request(`/api/orders/${id}/audit`, {
+export async function cancelOrder(access_token, id) {
+  return request(`/api/orders/${id}/cancel`, {
+    method:'PATCH',
     headers: {
       'Authorization': `Bearer ${access_token}`,
     },
   })
 }
-
-export async function payOrder(access_token, payOption) {
-  return request(`/api/orders/${payOption.id}/trade`, {
+/**
+ * 订单审核
+ */
+export async function auditOrder(access_token, id) {
+  return request(`/api/orderProcesses/${id}/auditSuccess`, {
+    headers: {
+      'Authorization': `Bearer ${access_token}`,
+    },
+  })
+}
+/**
+ * 订单付款
+ */
+export async function revenueOrder(access_token,orderId, payOption) {
+  return request(`/api/revenueAndRefunds/${orderId}/revenue`, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${access_token}`,
@@ -108,6 +136,30 @@ export async function payOrder(access_token, payOption) {
     body: JSON.stringify(payOption)
   })
 }
+
+/**
+ * 获取用于打印的订单嘻嘻你
+ */
+export async function getOrderDetailForPrint(access_token, id) {
+  return request(`/api/orders/${id}/forPrint`, {
+    headers: {
+      'Authorization': `Bearer ${access_token}`,
+    },
+  })
+}
+
+/**
+ * 获取用于编辑的订单信息
+ */
+export async function getOrderDetailForEdit(access_token, id) {
+  return request(`/api/orders/${id}/forEdit`, {
+    headers: {
+      'Authorization': `Bearer ${access_token}`,
+    },
+  })
+}
+
+
 
 export async function viewGood(access_token, id, goodId) {
   return request(`/api/orders/${id}/goods/${goodId}`, {
@@ -133,7 +185,7 @@ export async function saveFillOrBack(access_token, fillBackRecord) {
  */
 export async function uploadOrder(access_token, uploadOption) {
   const formData = new FormData();
-  formData.append('orderPicture', uploadOption.orderPicture);
+  formData.append('fileUpload', uploadOption.orderPicture);
   return request(`/api/orders/${uploadOption.id}/upload`, {
     method: 'POST',
     headers: {

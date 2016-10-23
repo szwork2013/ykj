@@ -126,7 +126,7 @@ const Search = ({  orders, form, dispatch, ...rest }) => {
 
                 const formData = form.getFieldsValue();
                 
-                if(formData.date){
+                if(formData.date && formData.date.length == 2){
                   formData.customDateStart = formatDate(formData.date[0],'yyyy-MM-dd');
                   formData.customDateEnd = formatDate(formData.date[1],'yyyy-MM-dd');
                  // delete formData.date

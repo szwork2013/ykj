@@ -11,6 +11,8 @@ import javax.persistence.Transient;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.gnet.app.orderGood.OrderGood;
+import com.gnet.app.revenueandrefund.AmountStatistics;
+import com.gnet.app.revenueandrefund.RevenueAndRefund;
 import com.gnet.mybatis.BaseEntity;
 
 import lombok.Getter;
@@ -103,17 +105,38 @@ public class Order extends BaseEntity {
 	/** 是否需要设计 **/
 	private Boolean isNeedDesign;
 	
+	private Date finishDate;
+	
+	private String attachment;
+	
+	private String attachmentName;
+	
 	/** 是否已经删除 **/
 	private @JsonIgnore Boolean isDel;
 	
 	/** 外置参数：订单负责人  **/
 	private @Transient String orderResponsibleName;
 	
+	/** 外置参数：订单负责人电话  **/
+	private @Transient String orderResponsiblePhone;
+	
+	/** 外置参数 : 订单来源名称  **/
+	private @Transient String orderSourceName;
+	
+	/** 外置参数 : 状态名称  **/
+	private @Transient String typeName;
+	
 	/** 外置参数：客户名称  **/
 	private @Transient String customerName;
 	
 	/** 外置参数：客户联系方式  **/
 	private @Transient String customerPhone;
+	
+	private @Transient String businessName;
+	
+	private @Transient String businessLogo;
+	
+	private @Transient String businessServiceCall;
 	
 	/** 外置参数: 付款状态  **/
 	private @Transient String payStatus;
@@ -123,5 +146,26 @@ public class Order extends BaseEntity {
 	
 	/** 外置参数: 订单商品 **/
 	private @Transient List<OrderGood> orderGoods;
+	
+	/**
+	 * 外置参数 : 订单收付款记录
+	 */
+	private @Transient List<RevenueAndRefund> orderRevenueAndRefunds;
+	
+	/**
+	 * 外置参数 : 订单服务记录
+	 */
+	private @Transient List<OrderService> orderServices;
+	
+	/**
+	 * 外置参数 已付总额
+	 */
+	private @Transient BigDecimal payedAmount;
+	
+	/**
+	 * 外置参数 金额统计
+	 */
+	private @Transient AmountStatistics amountStatistics;
+	
 	
 }

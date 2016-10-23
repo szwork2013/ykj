@@ -17,6 +17,7 @@ import com.gnet.app.noticeMsg.NoticeMsgService;
 import com.gnet.app.orderProcess.OrderProcess;
 import com.gnet.app.orderProcess.OrderProcessMapper;
 import com.gnet.app.orderService.OrderSer;
+import com.gnet.app.orderService.OrderSerService;
 import com.gnet.app.orderService.OrderServiceMapper;
 import com.gnet.app.orderServiceAttachment.OrderServiceAttachment;
 import com.gnet.app.orderServiceAttachment.OrderServiceAttachmentService;
@@ -27,7 +28,7 @@ import com.gnet.utils.spring.SpringContextHolder;
 
 @Service
 @Transactional(readOnly = true)
-public class DesignService {
+public class DesignService extends OrderSerService{
 	
 	@Autowired
 	private OrderServiceMapper orderServiceMapper;

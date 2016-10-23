@@ -3,7 +3,7 @@ import React, { PropTypes } from 'react';
 import Detail from './Detail';
 
 const Edit = (props) => {
-  const { dispatch } = props;
+  const { dispatch,designs } = props;
   return (
     <Detail
       {...props}
@@ -22,6 +22,7 @@ const Edit = (props) => {
 		  }
 		  
 		  const formData = form.getFieldsValue();
+         formData.orderId = designs.currentOrder.id;
           dispatch({
             type: 'designs/edit',
             payload: formData,

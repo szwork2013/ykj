@@ -28,4 +28,11 @@ public interface OrderGoodMapper extends Mapper<OrderGood> {
 	public Integer needServiceNum(@Param("orderId") String orderId, @Param("type") Integer type);
 	
 	public Integer goodsNum(@Param("orderId") String orderId);
+	
+	/**
+	 * 根据查询条件获取所有订单商品信息及其详情
+	 * @param condition
+	 * @return
+	 */
+	public List<OrderGood> selectOrderGoodsAllWithDetailByCondition(OrderGoodCondition condition);
 }

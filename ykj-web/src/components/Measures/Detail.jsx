@@ -4,17 +4,19 @@ import { routerRedux } from 'dva/router';
 
 import Container from '../Container';
 import Box from '../Box';
-import OrderCustomerInfo from '../CustomerInfo/OrderCustomerInfo'
+import OrderCustomerInfo from '../OrderService/OrderCustomerInfo'
 import UploadBox from '../UploadBox';
+import TreeBox from '../TreeBox';
+import PositionModal from '../OrderService/PositionModal';
 
 const FormItem = Form.Item;
 const CheckboxGroup = Checkbox.Group;
 const Option = Select.Option;
-const Detail = ({ measures, customers, form, type, onSubmit, moreProps, dispatch, ...rest }) => {
+const Detail = ({ measures, orderService,form, type, onSubmit, moreProps, dispatch, ...rest }) => {
     const { loading } = measures;
     const { getFieldProps, getFieldError, isFieldValidating, setFieldsValue } = form;
-    const measure = measures.current
-    const customer = customers.current
+    const measure = measures.currentItem;
+    let fileList = [];
 
     const nameProps = getFieldProps('name', {
         rules: [
@@ -29,12 +31,9 @@ const Detail = ({ measures, customers, form, type, onSubmit, moreProps, dispatch
     });
 
     const clerkPhoneProps = getFieldProps('clerkPhone', {
-        rules: [
-            { pattern: /^1[0-9]{10}$/, message: '请填写有效手机号' },
-        ]
     });
 
-    const attachmentIdProps = getFieldProps('attachmentId', {
+    const attachmentFileProps = getFieldProps('attachmentFile', {
         rules: [
         ],
         valuePropName: 'fileList',
@@ -59,6 +58,11 @@ const Detail = ({ measures, customers, form, type, onSubmit, moreProps, dispatch
         ]
     });
 
+    const idProps = getFieldProps('id', {
+        rules: [
+        ]
+    });
+
     const costProps = getFieldProps('cost', {
         rules: [
             { required: true, type: 'number', message: '费用必须填写' }
@@ -66,16 +70,6 @@ const Detail = ({ measures, customers, form, type, onSubmit, moreProps, dispatch
     });
 
     const servicePositionProps = getFieldProps('servicePosition', {
-        rules: [
-        ]
-    });
-
-    const isFinishProps = getFieldProps('isFinish', {
-        rules: [
-        ]
-    });
-
-    const isSignProps = getFieldProps('isSign', {
         rules: [
         ]
     });
@@ -90,6 +84,16 @@ const Detail = ({ measures, customers, form, type, onSubmit, moreProps, dispatch
         labelCol: { span: 3 },
         wrapperCol: { span: 18 },
     }
+
+    const treeData = [
+      { name: '杭州', id: '1' },
+      { name: '台州', id: '2' },
+      { name: '湖州', id: '3' },
+      { name: '张伟刚', id: '4', pId: '1' },
+      { name: '许照亮', id: '5', pId: '2' },
+      { name: '其味无穷', id: '6', pId: '5' },
+    ]
+
     return (
         <Container
             {...rest}
@@ -100,10 +104,10 @@ const Detail = ({ measures, customers, form, type, onSubmit, moreProps, dispatch
                     <Form horizontal >
                         <h3>订单客户资料</h3>
                         <br/>
-                        <OrderCustomerInfo
+                       <OrderCustomerInfo
                             dispatch={dispatch}
-                            options={customer}
-                            />
+                            currentOrder={measures.currentOrder}
+                        />
                         <h3>测量内容</h3>
                         <br/>
                         <Box>
@@ -115,6 +119,7 @@ const Detail = ({ measures, customers, form, type, onSubmit, moreProps, dispatch
                                         hasFeedback
                                         help={isFieldValidating('name') ? '校验中...' : (getFieldError('name') || []).join(', ') }
                                         >
+                                         <Input type='hidden' {...idProps} disabled={ measures.submiting } />
                                         <Input {...nameProps} disabled={ measures.submiting } />
                                     </FormItem>
                                 </Col>
@@ -143,7 +148,20 @@ const Detail = ({ measures, customers, form, type, onSubmit, moreProps, dispatch
                                         hasFeedback
                                         help={isFieldValidating('clerkId') ? '校验中...' : (getFieldError('clerkId') || []).join(', ') }
                                         >
-                                        <Input {...clerkIdProps} disabled={ measures.submiting } />
+                                        <TreeBox 
+                                            treeData={treeData}
+                                            multiple={ false }
+                                            checkable={ false }
+                                            changeable={ true }
+                                            treeProps={ clerkIdProps }
+                                            onOk={(value) => {
+                                                alert(value)
+                                            const { setFieldsValue } = form
+                                            setFieldsValue({
+                                                clerkId: value
+                                            })
+                                            }}
+                                        /> 
                                     </FormItem>
                                 </Col>
                                 <Col span="12">
@@ -153,7 +171,8 @@ const Detail = ({ measures, customers, form, type, onSubmit, moreProps, dispatch
                                         hasFeedback
                                         help={isFieldValidating('clerkPhone') ? '校验中...' : (getFieldError('clerkPhone') || []).join(', ') }
                                         >
-                                        <Input {...clerkPhoneProps} disabled={ measures.submiting } />
+
+                                        <Input {...clerkPhoneProps} />
                                     </FormItem>
                                 </Col>
                             </Row>
@@ -175,7 +194,21 @@ const Detail = ({ measures, customers, form, type, onSubmit, moreProps, dispatch
                                         hasFeedback
                                         help={isFieldValidating('servicePosition') ? '校验中...' : (getFieldError('servicePosition') || []).join(', ') }
                                         >
-                                        <Input {...servicePositionProps} disabled={ measures.submiting } />
+                                        <a href="javascript:void(0)"  onClick={()=>{
+                                            dispatch({
+                                                type: 'measures/merge',
+                                                payload: {
+                                                    positionModalShow : true
+                                                },
+                                            });    
+
+                                        }}>
+                                            签到<Icon type="environment" />
+                                        </a>
+                                        <span className="ant-divider"></span>
+                                        <a>
+                                            完成<Icon type="environment" />
+                                        </a>
                                     </FormItem>
                                 </Col>
                             </Row>
@@ -199,19 +232,21 @@ const Detail = ({ measures, customers, form, type, onSubmit, moreProps, dispatch
                                         hasFeedback
                                         help={isFieldValidating('attachmentId') ? '校验中...' : (getFieldError('attachmentId') || []).join(', ') }
                                         >
-                                        <UploadBox
-                                            {...attachmentIdProps}
+                                        <Upload
+                                            name= "orderUpload"
                                             showUploadList={ false }
-                                            fileList={measures.fileList}
-                                            fileNumber={1}
-                                            upload={(uploadFile) => {
-                                                dispatch({
-                                                    type: 'measures/upload',
-                                                    payload: uploadFile
+                                            disabled={ measures.submiting }
+                                            beforeUpload={ file => {
+                                                form.setFieldsValue({
+                                                    'orderPicture': file
                                                 })
-                                            } }
-                                            >
-                                        </UploadBox>
+                                                return false;
+                                            }}
+                                        >
+                                            <Button type="ghost">
+                                                <Icon type="upload" /> upload
+                                            </Button>
+                                        </Upload>
                                     </FormItem>
                                 </Col>
                             </Row>
@@ -223,7 +258,21 @@ const Detail = ({ measures, customers, form, type, onSubmit, moreProps, dispatch
                                         hasFeedback
                                         help={isFieldValidating('isFinish') ? '校验中...' : (getFieldError('isFinish') || []).join(', ') }
                                         >
-                                        <Checkbox  {...isFinishProps} defaultChecked={measure.isFinish || false}
+                                        <Checkbox disabled={true} defaultChecked={measure.status=='已安排' || false}
+                                            onChange={(e) => {
+                                                setFieldsValue({
+                                                    isFinish: e.target.checked
+                                                })
+                                            } }
+                                            >已安排</Checkbox>
+                                        <Checkbox disabled={true} defaultChecked={measure.status=='已签到' || false}
+                                            onChange={(e) => {
+                                                setFieldsValue({
+                                                    isFinish: e.target.checked
+                                                })
+                                            } }
+                                            >已签到</Checkbox>
+                                        <Checkbox disabled={true} defaultChecked={measure.status=='已完成' || false}
                                             onChange={(e) => {
                                                 setFieldsValue({
                                                     isFinish: e.target.checked
@@ -235,13 +284,36 @@ const Detail = ({ measures, customers, form, type, onSubmit, moreProps, dispatch
                             </Row>
                         </Box>
                         <FormItem wrapperCol={{ span: 20, offset: 4 }} style={{ marginTop: 24 }}>
-                            <Button type="primary" htmlType="submit" loading={ measures.submiting } onClick={ (e) => onSubmit(e, form) }>确定</Button>
+                            <Button type="primary" htmlType="submit" loading={ measures.submiting } onClick={ (e) => onSubmit(e, form,fileList) }>确定</Button>
                             &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
                             <Button type="ghost" onClick={ () => dispatch(routerRedux.goBack()) }>返回</Button>
                         </FormItem>
                     </Form>
                 </Box>
             </Spin>
+            <PositionModal
+                data= {measure.servicePosition}
+                visible={ measures.positionModalShow }
+                dispatch={ dispatch }
+                onOk = {()=>{
+                    dispatch({
+                                                type: 'measures/merge',
+                                                payload: {
+                                                    positionModalShow : false
+                                                },
+                                            });  
+                                            console.log("1231231");
+                } } 
+                onCancle = {()=>{
+                  dispatch({
+                                                type: 'measures/merge',
+                                                payload: {
+                                                    positionModalShow : false
+                                                },
+                                            });  
+                }}
+            >
+            </PositionModal>
         </Container>
     )
 }
@@ -260,13 +332,21 @@ Detail.defaultProps = {
 
 export default Form.create({
     mapPropsToFields: (props) => {
-        const measure = props.measures.current;
+        console.log(props.measures.currentItem)
+        const measure = props.measures.currentItem;
+        
         return {
+            id: {
+                value : measure.id
+            },
             name: {
                 value: measure.name
             },
             clerkId: {
                 value: measure.clerkId
+            },
+            clerkPhone : {
+                value : measure.clerkPhone
             },
             attachmentId: {
                 value: measure.attachmentId

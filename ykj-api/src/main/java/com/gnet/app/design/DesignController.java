@@ -2,6 +2,7 @@ package com.gnet.app.design;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
@@ -11,10 +12,15 @@ import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.rest.webmvc.RepositoryLinksResource;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.ResourceProcessor;
+import org.springframework.hateoas.Resources;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,8 +32,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.gnet.app.Constant;
 import com.gnet.app.clerk.Clerk;
 import com.gnet.app.orderService.OrderSer;
+import com.gnet.app.orderService.OrderServiceCondition;
 import com.gnet.app.orderService.OrderServiceErrorBuilder;
 import com.gnet.app.orderService.OrderServiceResource;
 import com.gnet.app.orderServiceAttachment.OrderServiceAttachment;
@@ -35,6 +43,7 @@ import com.gnet.app.orderServiceAttachment.OrderServiceAttachmentController;
 import com.gnet.app.orderServiceAttachment.OrderServiceAttachmentErrorBuilder;
 import com.gnet.app.orderServiceAttachment.OrderServiceAttachmentService;
 import com.gnet.resource.boolResource.BooleanResourceAssembler;
+import com.gnet.resource.listResource.ListResourcesAssembler;
 import com.gnet.security.user.CustomUser;
 import com.gnet.upload.FileUploadService;
 import com.gnet.utils.download.DownResponseBuilder;
@@ -50,6 +59,11 @@ public class DesignController implements ResourceProcessor<RepositoryLinksResour
 	private DesignService designService;
 	@Autowired
 	private OrderServiceAttachmentService orderServiceAttachmentService;
+	
+	@Autowired
+	private PagedResourcesAssembler<OrderSer> pagedResourcesAssembler;
+	@Autowired
+	private ListResourcesAssembler<OrderSer> listResourcesAssembler;
 
 	/**
 	 * 设计详细信息
@@ -74,6 +88,32 @@ public class DesignController implements ResourceProcessor<RepositoryLinksResour
 		return ResponseEntity.ok(orderServiceResource);
 	}
 	
+	@RequestMapping(value = "{orderId}/search", method = RequestMethod.GET)
+	public ResponseEntity<?> searchDesgins(@PageableDefault Pageable pageable,
+			@RequestParam(name = "isall", required = false) Boolean isAll,
+			@PathVariable("orderId") String orderId,
+			OrderServiceCondition orderServiceCondition,
+			Authentication authentication) {
+		CustomUser customUser = (CustomUser) authentication.getPrincipal();
+
+		orderServiceCondition.setIsDel(Constant.isNotDeleted);
+		orderServiceCondition.setType(OrderSer.TYPE_DESIGN);
+		orderServiceCondition.setOrderId(orderId);
+		// 判断是否分页
+		Resources<OrderServiceResource> resources = null;
+		if (isAll != null && isAll) {
+			List<OrderSer> orders = designService.selectOrderServiceWithDetailByCondition(customUser.getClerk(),
+					orderServiceCondition);
+			resources = listResourcesAssembler.toResource(orders, new DesignResourceAssembler());
+		} else {
+			Page<OrderSer> orders = designService.paginationOrderServiceWithDetailByCondition(customUser.getClerk(),
+					orderServiceCondition, pageable);
+			resources = pagedResourcesAssembler.toResource(orders, new DesignResourceAssembler());
+		}
+
+		return ResponseEntity.ok(resources);
+	}
+	
 	
 	/**
 	 * 增加设计服务
@@ -94,12 +134,13 @@ public class DesignController implements ResourceProcessor<RepositoryLinksResour
 		design.setType(OrderSer.TYPE_DESIGN);
 		design.setIsDel(Boolean.FALSE);
 		design.setIsClear(Boolean.FALSE);
+		design.setIsFinish(Boolean.FALSE);
 		
 		Map<String, Object> error = DesignValidator.validateBeforeCreateDesign(design, clerk.getBusinessId());
 		if (error != null) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new OrderServiceErrorBuilder(Integer.valueOf(error.get("code").toString()), error.get("msg").toString()).build());
 		}
-		Boolean result = designService.create(design);
+		Boolean result = designService.createOrderService(clerk,design,null);
 		
 		if (result) {
 			return ResponseEntity.created(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(DesignController.class).getDesign(design.getId())).toUri()).build();
@@ -133,7 +174,7 @@ public class DesignController implements ResourceProcessor<RepositoryLinksResour
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new OrderServiceErrorBuilder(Integer.valueOf(error.get("code").toString()), error.get("msg").toString()).build());
 		}
 		
-		Boolean result = designService.update(design);
+		Boolean result = designService.updateOrderService(clerk,design,null);
 		
 		if (result) {
 			return ResponseEntity.noContent().location(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(DesignController.class).getDesign(id)).toUri()).build();
@@ -185,7 +226,7 @@ public class DesignController implements ResourceProcessor<RepositoryLinksResour
 	 * @return
 	 */
 	@RequestMapping(value = "/{id}/cancelStatement", method = RequestMethod.PATCH)
-	public ResponseEntity<?> cacelStateDesign(
+	public ResponseEntity<?> cancelStateDesign(
 		@PathVariable("id") String id
 	){
 		if(StringUtils.isBlank(id)){

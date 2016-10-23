@@ -32,11 +32,11 @@ public class MeasureValidator {
 		}
 
 		// 测量单号不能为空过滤
-		if (StringUtils.isBlank(measure.getServiceCode())) {
-			map.put("code", OrderServiceErrorBuilder.ERROR_SERVICECODE_NULL);
-			map.put("msg", "测量单号不能为空");
-			return map;
-		}
+//		if (StringUtils.isBlank(measure.getServiceCode())) {
+//			map.put("code", OrderServiceErrorBuilder.ERROR_SERVICECODE_NULL);
+//			map.put("msg", "测量单号不能为空");
+//			return map;
+//		}
 
 		// 测量名称不能为空过滤
 		if (StringUtils.isBlank(measure.getName())) {
@@ -53,11 +53,11 @@ public class MeasureValidator {
 		}
 
 		// 是否已经完成不能为空过滤
-		if (measure.getIsFinish() == null) {
-			map.put("code", OrderServiceErrorBuilder.ERROR_ISFINISH_NULL);
-			map.put("msg", "是否已经完成不能为空");
-			return map;
-		}
+//		if (measure.getIsFinish() == null) {
+//			map.put("code", OrderServiceErrorBuilder.ERROR_ISFINISH_NULL);
+//			map.put("msg", "是否已经完成不能为空");
+//			return map;
+//		}
 
 		// 类型不能为空过滤
 		if (measure.getType() == null) {
@@ -67,11 +67,11 @@ public class MeasureValidator {
 		}
 
 		// 是否已经结算不能为空过滤
-		if (measure.getIsClear() == null) {
-			map.put("code", OrderServiceErrorBuilder.ERROR_ISCLEAR_NULL);
-			map.put("msg", "是否已经结算不能为空");
-			return map;
-		}
+//		if (measure.getIsClear() == null) {
+//			map.put("code", OrderServiceErrorBuilder.ERROR_ISCLEAR_NULL);
+//			map.put("msg", "是否已经结算不能为空");
+//			return map;
+//		}
 				
 		if (StringUtils.isNotBlank(measure.getClerkId()) && measure.getClerkId().length() > 36 ) {
 			map.put("code", OrderServiceErrorBuilder.ERROR_CLERKID_TOOLONG);
@@ -141,11 +141,11 @@ public class MeasureValidator {
 		}
 		OrderSer oldMeasure = measureService.findById(measure.getId());
 		
-		if (StringUtils.isNotBlank(measure.getServiceCode()) && measure.getServiceCode().length() > 20 ) {
-			map.put("code", OrderServiceErrorBuilder.ERROR_SERVICECODE_TOOLONG);
-			map.put("msg", "长度不能超过20");
-			return map;
-		}
+//		if (StringUtils.isNotBlank(measure.getServiceCode()) && measure.getServiceCode().length() > 20 ) {
+//			map.put("code", OrderServiceErrorBuilder.ERROR_SERVICECODE_TOOLONG);
+//			map.put("msg", "长度不能超过20");
+//			return map;
+//		}
 		
 		// 费用不能为空过滤
 		if (measure.getCost() == null) {
@@ -248,7 +248,7 @@ public class MeasureValidator {
 	
 	public static Map<String, Object> validateBeforeUpdateCancelState(OrderSer measure) {
 		Map<String, Object> map = new HashMap<>();
-		if(measure.getIsClear()){
+		if(!measure.getIsClear()){
 			map.put("code", OrderServiceErrorBuilder.ERROR_CANCELSTATE);
 			map.put("msg", "还未结算的无法取消结算");
 			return map;

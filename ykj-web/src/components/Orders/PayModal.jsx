@@ -50,13 +50,12 @@ const PayModal = ({ form, dispatch, submiting, codewordTypes,onOk,currnetOrder, 
                         return false;
                     }
                     const formData = form.getFieldsValue();
-                    formData.orderId = orders.currentOrder.id;
+                    formData.orderId = currnetOrder.id;
                     console.log(formData);
                     dispatch({
-                        type: 'orders/payOrder',
+                        type: 'orders/revenueOrder',
                         payload: formData
                     }) 
-                    form.resetFields();
                 });
             }}
             onCancel= { () => {
@@ -64,7 +63,6 @@ const PayModal = ({ form, dispatch, submiting, codewordTypes,onOk,currnetOrder, 
                 dispatch({
                     type: 'orders/togglePayModal',
                     payload: {
-                        currentOrderId: undefined,
                         payModalShow: false,
                     },
                 })    

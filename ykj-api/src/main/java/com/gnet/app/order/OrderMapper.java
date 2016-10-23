@@ -1,12 +1,11 @@
 package com.gnet.app.order;
 
-import tk.mybatis.mapper.common.Mapper;
 import java.util.Date;
-
-
 import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
+
+import tk.mybatis.mapper.common.Mapper;
 
 public interface OrderMapper extends Mapper<Order> {
 	
@@ -34,4 +33,20 @@ public interface OrderMapper extends Mapper<Order> {
 	 * @return
 	 */
 	public List<Order> selectOrdersAllWithDetailByCondition(OrderCondition condition);
+	
+	/**
+	 * 获取用于打印的订单信息
+	 * @param businessId
+	 * @param orderId
+	 * @return
+	 */
+	public Order getOrdersForPrintByCondition(@Param("businessId")String businessId,@Param("orderId")String orderId);
+	
+	
+	/**
+	 * 根据订单查询条件查询相关统计结果
+	 * @param condition
+	 * @return
+	 */
+	public List<OrderTypeStatisticalResult> selectOrderTypeStatisticalResultByCondition(OrderCondition condition);
 }

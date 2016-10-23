@@ -20,6 +20,10 @@
 		<result column="out_goods_num" property="outGoodsNum" jdbcType="INTEGER"/>
 		<result column="good_name" property="goodName" jdbcType="VARCHAR"/>
 		<result column="good_model" property="goodModel" jdbcType="VARCHAR"/>
+		<result column="goodPrice" property="goodPrice" jdbcType="DECIMAL"/>
+		<result column="goodStoreNow" property="goodStoreNow" jdbcType="DECIMAL"/>
+		<result column="goodUnit" property="goodUnit" jdbcType="INTEGER"/>
+		<result column="goodUnitName" property="goodUnitName" jdbcType="VARCHAR"/>
 		<result column="supplier_name" property="supplierName" jdbcType="VARCHAR"/>
     </resultMap>
    
@@ -105,4 +109,22 @@
    select count(1) from ykj_order_goods where order_id = #{orderId}
    </select>
    
+   <select id="selectOrderGoodsAllWithDetailByCondition" resultMap="BaseOrderGoodMap" parameterType="com.gnet.app.orderGood.OrderGoodCondition">
+   		select t.*,s.name goodName,s.model goodModel,s.specification goodSpecification,s.price goodPrice,w.store_now goodStoreNow,s.unit goodUnit,
+   			(select a.value from sc_codeword a,sc_codeword_type b where b.id=a.codeword_type_id and a.code=s.unit and b.type_value = 'GOOD_UNIT') goodUnitName 
+   		from ykj_order_goods t 
+   		left join ykj_storage_goods s on t.storage_goods_id = s.id 
+   		left join ykj_storage_goods_status w on w.id = t.storage_goods_id
+   		<where>
+   			<if test="orderId != null and orderId !=''">
+   				and t.order_id = #{orderId}
+   			</if>
+   			<if test="businessId != null and businessId !=''">
+   				and s.business_id = #{businessId}
+   			</if>
+   			<if test="storageGoodsId != null and storageGoodsId !=''">
+   				and t.storage_goods_id = #{storageGoodsId}
+   			</if>
+   		</where>
+   </select>
 </mapper>

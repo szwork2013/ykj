@@ -27,7 +27,6 @@ const AuditModal = ({ form, dispatch, orders, ...rest }) => {
                 dispatch({
                     type: 'orders/toggleAuditModal',
                     payload: {
-                        currentOrder : {},
                         AuditModalShow: false,
                     },
                 })    

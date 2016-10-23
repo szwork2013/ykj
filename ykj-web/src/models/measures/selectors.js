@@ -1,7 +1,8 @@
 
 export default state => {
   return {
+    orderService : state.orderService,
     measures: state.measures,
-    customers: state.customers
+    codewordTypes: state.codewords.codewordTypes
   }
 }

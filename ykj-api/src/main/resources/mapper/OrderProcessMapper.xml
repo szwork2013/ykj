@@ -19,6 +19,10 @@
         </foreach>
     </insert>
     
+    <update id="updateProcessFinishStatus">
+    	update ykj_order_process set is_finish = #{isFinish} where order_id = #{orderId} and type = #{type}
+    </update>
+    
     <select id="selectAllWithOrdeInfo" resultMap="BaseOrderProcessMap">
         select yop.*, yo.order_no as order_no, yo.address as address from ykj_order_process yop 
         inner join ykj_order yo on yo.id = yop.order_id

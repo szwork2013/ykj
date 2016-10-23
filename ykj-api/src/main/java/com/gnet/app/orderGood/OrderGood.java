@@ -24,52 +24,67 @@ public class OrderGood extends BaseEntity {
 
 	/** 创建日期 **/
 	private Date createDate;
-	
+
 	/** 修改日期 **/
 	private Date modifyDate;
-	
+
 	/** 订单编号 **/
 	private String orderId;
-	
+
 	/** 仓库商品编号 **/
 	private String storageGoodsId;
-	
+
 	/** 订单数量 **/
 	private Integer orderGoodsNum;
-	
+
 	/** 默认1.00 **/
 	private BigDecimal discountRate;
-	
+
 	/** 默认原价 **/
 	private BigDecimal strikeUnitPrice;
-	
+
 	/** 预留库存 **/
 	private Integer reservedGoods;
-	
+
 	/** 预留到期时间 **/
 	private Date reservedDate;
-	
+
 	/** 位置 **/
 	private String initPosition;
-	
+
 	/** 剩余需送货数 **/
 	private Integer needDeliverNum;
-	
+
 	/** 剩余需安装数 **/
 	private Integer needInstallNum;
-	
+
 	/** 订单商品出库数 **/
 	private Integer outGoodsNum;
-	
+
 	/** 备注 **/
 	private String remark;
-	
+
 	/** 商品名称 **/
 	private @Transient String goodName;
-	
+
 	/** 商品型号 **/
 	private @Transient String goodModel;
+
+	/** 商品规则 **/
+	private @Transient String goodSpecification;
+
+	/** 商品单价 **/
+	private @Transient BigDecimal goodPrice;
 	
+	/** 商品当前库存 **/
+	private @Transient BigDecimal goodStoreNow;
+	
+	/** 商品单位 **/
+	private @Transient Integer goodUnit;
+	
+	/** 商品单位名称 **/
+	private @Transient String goodUnitName;
+
 	/** 商品供货商名称 **/
 	private @Transient String supplierName;
 }

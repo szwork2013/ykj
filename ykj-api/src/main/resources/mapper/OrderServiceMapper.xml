@@ -25,6 +25,7 @@
 		<result column="order_id" property="orderId" jdbcType="CHAR"/>
 		<result column="need_time" property="needTime" />
 		<result column="service_code" property="serviceCode" jdbcType="CHAR"/>
+		<result column="attachmentName" property="attachmentName" jdbcType="CHAR"/>
     </resultMap>
     	
     <select id="findAll" resultMap="BaseOrderServiceMap">
@@ -49,9 +50,13 @@
     </select>
     
     <select id="findById" resultMap="BaseOrderServiceMap">
-    select yos.*, yc.name clerkName, yc.phone clerkPhone from ykj_order_service yos
-    left join ykj_clerk yc on yc.id = yos.clerk_id
-    where yos.id = #{id} and yos.is_del = 0 and yc.is_del = 0
+     SELECT
+		  yos.*, yc.name clerkName, yc.phone clerkPhone,yd.attachment_filename attachmentName
+		FROM
+		  ykj_order_service yos
+		    LEFT JOIN ykj_clerk yc ON  yos.clerk_id = yc.id
+		    LEFT JOIN ykj_order_service_attachment yd ON yd.id = yos.attachment_id
+    where yos.id = #{id} and yos.is_del = 0
     </select>	
     	
     <select id="isCreateExist" resultType="Integer">
@@ -80,6 +85,48 @@
         or type = ${@com.gnet.app.orderService.OrderSer@TYPE_INSTALLATION}) 
         and is_finish = ${@java.lang.Boolean@FALSE}
         limit 1
+    </select>
+    
+    <select id="selectMaxServiceCodeToday" resultType="String">
+        select max(service_code) from ykj_order_service where create_date >=  curdate()
+    </select>
+    
+    <select id="selectOrderServiceWithDetailByCondition" resultMap="BaseOrderServiceMap" parameterType="com.gnet.app.orderService.OrderServiceCondition">
+        SELECT
+		  t.*, s.name clerkName, s.phone clerkPhone,w.attachment_filename attachmentName
+		FROM
+		  ykj_order_service t
+		    LEFT JOIN ykj_clerk s ON t.clerk_id = s.id
+		    LEFT JOIN ykj_order_service_attachment w ON w.id = t.attachment_id
+		<where>
+			<if test="type != null">
+				and t.type = #{type}
+			</if>
+			<if test="orderId != null and orderId !='' ">
+				and t.order_id = #{orderId}
+			</if>
+			<if test="serviceCode != null and serviceCode !='' ">
+				and t.service_code = #{serviceCode}
+			</if>
+			<if test="clerkId != null and clerkId !='' ">
+				and t.clerk_id = #{clerkId}
+			</if>
+			<if test="isDel != null ">
+				and t.is_del = #{isDel}
+			</if>
+			<if test="isClear != null ">
+				and t.is_clear = #{isClear}
+			</if>
+			<if test="isFinish != null ">
+				and t.is_finish = #{isFinish}
+			</if>
+			<if test="types != null ">
+				<foreach item="item" collection="types" open="and t.type in ("
+					separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+		</where>
     </select>
     	
 </mapper>

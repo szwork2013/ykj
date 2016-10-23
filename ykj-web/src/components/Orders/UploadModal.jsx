@@ -14,7 +14,7 @@ class UploadModal extends Component {
 
     render() {
         const { orders, form, dispatch, submiting, onOk, ...rest } = this.props;
-
+        
         const { getFieldProps, getFieldError, isFieldValidating } = form;
 
         const orderPictureProps = getFieldProps('orderPicture', {
@@ -23,8 +23,6 @@ class UploadModal extends Component {
             ]
         })
 
-        const url=  "/api/orders/"+orders.currentOrder.id+"/upload";
-        console.log(url)
         const formItemLayout = {
             labelCol: { span: 9 },
             wrapperCol: { span: 15 },
@@ -41,9 +39,13 @@ class UploadModal extends Component {
                             return false;
                         }
                         const formData = form.getFieldsValue();
-                        console.log(formData);
-                        form.submiting();
-                        form.resetFields();
+                        dispatch({
+                        type: 'orders/upload',
+                        payload: {
+                                orderPicture : formData.orderPicture,
+                                id : orders.currentOrder.id
+                        }
+                    })   
                     });
                 }}
                 onCancel= { () => {
@@ -80,8 +82,6 @@ class UploadModal extends Component {
                                 >
                                     <Upload
                                         name= "orderUpload"
-                                        action = "/api/orders/upload"
-                                        data={orders.currentOrder}
                                         showUploadList={ false }
                                         disabled={ submiting }
                                         beforeUpload={ file => {
@@ -118,12 +118,8 @@ class UploadModal extends Component {
                                 <img src={ this.state.orderSrc || orders.orderPicture } style={ {width:'100%', height: '100%'} } />
                             </div>
                             :
-                            undefined
+                            ''
                         }
-                        <FormItem wrapperCol={{ span: 16, offset: 8 }} style={{ marginTop: 24 }}>
-                            <Button  htmlType="submit">取消</Button>
-                            <Button type="primary" htmlType="submit">上传</Button>
-                        </FormItem>
                      
                 </Form>
             </Modal>

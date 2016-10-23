@@ -1,6 +1,5 @@
 package com.gnet.app.order;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -24,12 +23,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
-import com.gnet.app.orderService.OrderServiceErrorBuilder;
-import com.gnet.app.orderService.OrderSer;
-import com.gnet.app.orderService.OrderServiceOrderType;
-import com.gnet.app.orderService.OrderServiceResource;
-import com.gnet.codeword.CodewordGetter;
 import com.gnet.app.Constant;
 import com.gnet.app.codeword.Codeword;
 import com.gnet.app.delivery.DeliveryResourceAssembler;
@@ -47,6 +42,11 @@ import com.gnet.app.orderGood.OrderGoodService;
 import com.gnet.app.orderProcess.OrderProcess;
 import com.gnet.app.orderProcess.OrderProcessResource;
 import com.gnet.app.orderProcess.OrderProcessResourceAssembler;
+import com.gnet.app.orderService.OrderSer;
+import com.gnet.app.orderService.OrderServiceErrorBuilder;
+import com.gnet.app.orderService.OrderServiceOrderType;
+import com.gnet.app.orderService.OrderServiceResource;
+import com.gnet.codeword.CodewordGetter;
 import com.gnet.resource.boolResource.BooleanResourceAssembler;
 import com.gnet.resource.listResource.ListResourcesAssembler;
 import com.gnet.security.user.CustomUser;
@@ -54,7 +54,6 @@ import com.gnet.utils.sort.ParamSceneUtils;
 import com.gnet.utils.sort.exception.NotFoundOrderDirectionException;
 import com.gnet.utils.sort.exception.NotFoundOrderPropertyException;
 import com.gnet.utils.spring.SpringContextHolder;
-
 
 @RepositoryRestController
 @ExposesResourceFor(Order.class)
@@ -85,454 +84,474 @@ public class OrderController implements ResourceProcessor<RepositoryLinksResourc
 	private PagedResourcesAssembler<OrderGood> pagedOrderGoodResourcesAssembler;
 	@Autowired
 	private ListResourcesAssembler<OrderGood> listOrderGoodResourcesAssembler;
-	
-	
 
 	@RequestMapping(method = RequestMethod.GET)
-	public ResponseEntity<?> getOrders(
-			@PageableDefault Pageable pageable,
-			@RequestParam(name = "isall", required = false) Boolean isAll,
-			OrderCondition orderCondition,
-			Authentication authentication
-	) {
-		return searchOrders(pageable,isAll,orderCondition,authentication);
+	public ResponseEntity<?> getOrders(@PageableDefault Pageable pageable,
+			@RequestParam(name = "isall", required = false) Boolean isAll, OrderCondition orderCondition,
+			Authentication authentication) {
+		return searchOrders(pageable, isAll, orderCondition, authentication);
 	}
-	
+
 	@RequestMapping(value = "/search", method = RequestMethod.GET)
-	public ResponseEntity<?> searchOrders(
-		@PageableDefault Pageable pageable,
-		@RequestParam(name = "isall", required = false) Boolean isAll,
-		OrderCondition orderCondition,
-		Authentication authentication
-	){
+	public ResponseEntity<?> searchOrders(@PageableDefault Pageable pageable,
+			@RequestParam(name = "isall", required = false) Boolean isAll, OrderCondition orderCondition,
+			Authentication authentication) {
 		CustomUser customUser = (CustomUser) authentication.getPrincipal();
+
+		orderCondition.setIsDel(Constant.isNotDeleted);
 		
 		// 判断是否分页
 		Resources<OrderResource> resources = null;
 		if (isAll != null && isAll) {
-			List<Order> orders = orderService.selectOrdersAllWithDetailByCondition(customUser.getClerk(),orderCondition,pageable);
+			List<Order> orders = orderService.selectOrdersAllWithDetailByCondition(customUser.getClerk(),
+					orderCondition, pageable);
 			orderService.addSearchExtraData(orders);
 			resources = listResourcesAssembler.toResource(orders, new OrderResourceAssembler());
 		} else {
-			Page<Order> orders = orderService.paginationOrdersAllWithDetailByCondition(customUser.getClerk(),orderCondition,pageable);
+			Page<Order> orders = orderService.paginationOrdersAllWithDetailByCondition(customUser.getClerk(),
+					orderCondition, pageable);
 			orderService.addSearchExtraData(orders.getContent());
 			resources = pagedResourcesAssembler.toResource(orders, new OrderResourceAssembler());
 		}
-		
+
 		return ResponseEntity.ok(resources);
 	}
-	
-//	@RequestMapping(value = "/search", method = RequestMethod.GET)
-//	public ResponseEntity<?> searchOrders(
-//		@PageableDefault Pageable pageable,
-//		@RequestParam(name = "isall", required = false) Boolean isAll,
-//		@RequestParam(name = "type", required = false) Integer type,
-//		@RequestParam(name = "orderSource", required = false) Integer orderSource,
-//		@RequestParam(name = "orderResponsibleName", required = false) String orderResponsibleName,
-//		@RequestParam(name = "customerName", required = false) String customerName,
-//		@RequestParam(name = "startOrderDate", required = false) String startOrderDate,
-//		@RequestParam(name = "endOrderDate", required = false) String endOrderDate,
-//		@RequestParam(name = "mutiSearchColumn", required = false) String mutiSearchColumn,
-//		Authentication authentication
-//	){
-//		CustomUser customUser = (CustomUser) authentication.getPrincipal();
-//		List<String> orderList = null;
-//		
-//		// 排序处理
-//		try {
-//			orderList = ParamSceneUtils.toOrder(pageable, OrderOrderType.class);
-//		} catch (NotFoundOrderPropertyException e) {
-//			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new OrderErrorBuilder(OrderErrorBuilder.ERROR_SORT_PROPERTY_NOTFOUND, "排序字段不符合要求").build());
-//		} catch (NotFoundOrderDirectionException e) {
-//			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new OrderErrorBuilder(OrderErrorBuilder.ERROR_SORT_DIRECTION_NOTFOUND, "排序方向不符合要求").build());
-//		}
-//		
-//		
-//		// 判断是否分页
-//		Resources<OrderResource> resources = null;
-//		if (isAll != null && isAll) {
-//			List<Order> orders = orderService.findAll(customUser.getClerk(), type, orderSource, orderResponsibleName,
-//					customerName, startOrderDate, endOrderDate, mutiSearchColumn, orderList);
-//			
-//			orderService.addSearchExtraData(orders);
-//			resources = listResourcesAssembler.toResource(orders, new OrderResourceAssembler());
-//		} else {
-//			Page<Order> orders = orderService.paginationAll(customUser.getClerk(), pageable, type, orderSource, 
-//					orderResponsibleName, customerName, startOrderDate, endOrderDate, mutiSearchColumn, orderList);
-//			
-//			orderService.addSearchExtraData(orders.getContent());
-//			resources = pagedResourcesAssembler.toResource(orders, new OrderResourceAssembler());
-//		}
-//		
-//		return ResponseEntity.ok(resources);
-//	}
-	
+
+	// @RequestMapping(value = "/search", method = RequestMethod.GET)
+	// public ResponseEntity<?> searchOrders(
+	// @PageableDefault Pageable pageable,
+	// @RequestParam(name = "isall", required = false) Boolean isAll,
+	// @RequestParam(name = "type", required = false) Integer type,
+	// @RequestParam(name = "orderSource", required = false) Integer
+	// orderSource,
+	// @RequestParam(name = "orderResponsibleName", required = false) String
+	// orderResponsibleName,
+	// @RequestParam(name = "customerName", required = false) String
+	// customerName,
+	// @RequestParam(name = "startOrderDate", required = false) String
+	// startOrderDate,
+	// @RequestParam(name = "endOrderDate", required = false) String
+	// endOrderDate,
+	// @RequestParam(name = "mutiSearchColumn", required = false) String
+	// mutiSearchColumn,
+	// Authentication authentication
+	// ){
+	// CustomUser customUser = (CustomUser) authentication.getPrincipal();
+	// List<String> orderList = null;
+	//
+	// // 排序处理
+	// try {
+	// orderList = ParamSceneUtils.toOrder(pageable, OrderOrderType.class);
+	// } catch (NotFoundOrderPropertyException e) {
+	// return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new
+	// OrderErrorBuilder(OrderErrorBuilder.ERROR_SORT_PROPERTY_NOTFOUND,
+	// "排序字段不符合要求").build());
+	// } catch (NotFoundOrderDirectionException e) {
+	// return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new
+	// OrderErrorBuilder(OrderErrorBuilder.ERROR_SORT_DIRECTION_NOTFOUND,
+	// "排序方向不符合要求").build());
+	// }
+	//
+	//
+	// // 判断是否分页
+	// Resources<OrderResource> resources = null;
+	// if (isAll != null && isAll) {
+	// List<Order> orders = orderService.findAll(customUser.getClerk(), type,
+	// orderSource, orderResponsibleName,
+	// customerName, startOrderDate, endOrderDate, mutiSearchColumn, orderList);
+	//
+	// orderService.addSearchExtraData(orders);
+	// resources = listResourcesAssembler.toResource(orders, new
+	// OrderResourceAssembler());
+	// } else {
+	// Page<Order> orders = orderService.paginationAll(customUser.getClerk(),
+	// pageable, type, orderSource,
+	// orderResponsibleName, customerName, startOrderDate, endOrderDate,
+	// mutiSearchColumn, orderList);
+	//
+	// orderService.addSearchExtraData(orders.getContent());
+	// resources = pagedResourcesAssembler.toResource(orders, new
+	// OrderResourceAssembler());
+	// }
+	//
+	// return ResponseEntity.ok(resources);
+	// }
+
 	/**
 	 * 返回订单的测量列表
+	 * 
 	 * @param pageable
 	 * @param isAll
 	 * @return
 	 */
-	@RequestMapping(value = "/{id}/measures",  method = RequestMethod.GET)
-	public ResponseEntity<?> getMeasures(
-		@PageableDefault Pageable pageable,
-		@PathVariable("id") String orderId,
-		@RequestParam(name = "isall", required = false) Boolean isAll
-	) {
-		if(StringUtils.isBlank(orderId)){
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new OrderErrorBuilder(OrderErrorBuilder.ERROR_ID_NULL, "订单编号为空").build());
+	@RequestMapping(value = "/{id}/measures", method = RequestMethod.GET)
+	public ResponseEntity<?> getMeasures(@PageableDefault Pageable pageable, @PathVariable("id") String orderId,
+			@RequestParam(name = "isall", required = false) Boolean isAll) {
+		if (StringUtils.isBlank(orderId)) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND)
+					.body(new OrderErrorBuilder(OrderErrorBuilder.ERROR_ID_NULL, "订单编号为空").build());
 		}
 		List<String> orderList = null;
-		
+
 		// 排序处理
 		try {
 			orderList = ParamSceneUtils.toOrder(pageable, OrderServiceOrderType.class);
 		} catch (NotFoundOrderPropertyException e) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_SORT_PROPERTY_NOTFOUND, "排序字段不符合要求").build());
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+					new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_SORT_PROPERTY_NOTFOUND, "排序字段不符合要求")
+							.build());
 		} catch (NotFoundOrderDirectionException e) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_SORT_DIRECTION_NOTFOUND, "排序方向不符合要求").build());
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+					new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_SORT_DIRECTION_NOTFOUND, "排序方向不符合要求")
+							.build());
 		}
-		
+
 		// 判断是否分页
 		Resources<OrderServiceResource> resources = null;
 		if (isAll != null && isAll) {
 			List<OrderSer> measures = measureService.findAll(orderList, orderId, OrderSer.TYPE_MEASURE);
-			
+
 			MeasureResourceAssembler orderServiceResourceAssembler = new MeasureResourceAssembler();
 			resources = listServiceResourcesAssembler.toResource(measures, orderServiceResourceAssembler);
 		} else {
 			Page<OrderSer> measures = measureService.pagination(pageable, orderList, orderId, OrderSer.TYPE_MEASURE);
-		
+
 			MeasureResourceAssembler orderServiceResourceAssembler = new MeasureResourceAssembler();
 			resources = pagedServiceResourcesAssembler.toResource(measures, orderServiceResourceAssembler);
 		}
-		
+
 		return ResponseEntity.ok(resources);
 	}
-	
+
 	/**
 	 * 返回订单的设计列表
+	 * 
 	 * @param pageable
 	 * @param isAll
 	 * @return
 	 */
-	@RequestMapping(value = "/{id}/designs",  method = RequestMethod.GET)
-	public ResponseEntity<?> getDesigns(
-		@PageableDefault Pageable pageable,
-		@PathVariable("id") String orderId,
-		@RequestParam(name = "isall", required = false) Boolean isAll
-	) {
-		if(StringUtils.isBlank(orderId)){
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new OrderErrorBuilder(OrderErrorBuilder.ERROR_ID_NULL, "订单编号为空").build());
+	@RequestMapping(value = "/{id}/designs", method = RequestMethod.GET)
+	public ResponseEntity<?> getDesigns(@PageableDefault Pageable pageable, @PathVariable("id") String orderId,
+			@RequestParam(name = "isall", required = false) Boolean isAll) {
+		if (StringUtils.isBlank(orderId)) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND)
+					.body(new OrderErrorBuilder(OrderErrorBuilder.ERROR_ID_NULL, "订单编号为空").build());
 		}
 		List<String> orderList = null;
-		
+
 		// 排序处理
 		try {
 			orderList = ParamSceneUtils.toOrder(pageable, OrderServiceOrderType.class);
 		} catch (NotFoundOrderPropertyException e) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_SORT_PROPERTY_NOTFOUND, "排序字段不符合要求").build());
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+					new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_SORT_PROPERTY_NOTFOUND, "排序字段不符合要求")
+							.build());
 		} catch (NotFoundOrderDirectionException e) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_SORT_DIRECTION_NOTFOUND, "排序方向不符合要求").build());
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+					new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_SORT_DIRECTION_NOTFOUND, "排序方向不符合要求")
+							.build());
 		}
-		
+
 		// 判断是否分页
 		Resources<OrderServiceResource> resources = null;
 		if (isAll != null && isAll) {
 			List<OrderSer> designs = designService.findAll(orderList, orderId, OrderSer.TYPE_DESIGN);
-			
+
 			DesignResourceAssembler orderServiceResourceAssembler = new DesignResourceAssembler();
 			resources = listServiceResourcesAssembler.toResource(designs, orderServiceResourceAssembler);
 		} else {
 			Page<OrderSer> designs = designService.pagination(pageable, orderList, orderId, OrderSer.TYPE_DESIGN);
-		
+
 			DesignResourceAssembler orderServiceResourceAssembler = new DesignResourceAssembler();
 			resources = pagedServiceResourcesAssembler.toResource(designs, orderServiceResourceAssembler);
 		}
-		
+
 		return ResponseEntity.ok(resources);
 	}
-	
-	
+
 	/**
 	 * 返回订单的送货服务列表
+	 * 
 	 * @param pageable
 	 * @param orderId
 	 * @param isAll
 	 * @return
 	 */
-	@RequestMapping(value = "/{id}/deliverys",  method = RequestMethod.GET)
-	public ResponseEntity<?> getDelivery(
-		@PageableDefault Pageable pageable,
-		@PathVariable("id") String orderId,
-		@RequestParam(name = "isall", required = false) Boolean isAll
-	) {
-		if(StringUtils.isBlank(orderId)){
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new OrderErrorBuilder(OrderErrorBuilder.ERROR_ID_NULL, "订单编号为空").build());
+	@RequestMapping(value = "/{id}/deliverys", method = RequestMethod.GET)
+	public ResponseEntity<?> getDelivery(@PageableDefault Pageable pageable, @PathVariable("id") String orderId,
+			@RequestParam(name = "isall", required = false) Boolean isAll) {
+		if (StringUtils.isBlank(orderId)) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND)
+					.body(new OrderErrorBuilder(OrderErrorBuilder.ERROR_ID_NULL, "订单编号为空").build());
 		}
-		
+
 		Order order = orderService.findById(orderId);
 		Map<String, Object> error = OrderValidator.validateBeforeDelivery(order);
 		if (error != null) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new OrderErrorBuilder(Integer.valueOf(error.get("code").toString()), error.get("msg").toString()).build());
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+					new OrderErrorBuilder(Integer.valueOf(error.get("code").toString()), error.get("msg").toString())
+							.build());
 		}
-		
+
 		List<String> orderList = null;
-		
+
 		// 排序处理
 		try {
 			orderList = ParamSceneUtils.toOrder(pageable, OrderServiceOrderType.class);
 		} catch (NotFoundOrderPropertyException e) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_SORT_PROPERTY_NOTFOUND, "排序字段不符合要求").build());
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+					new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_SORT_PROPERTY_NOTFOUND, "排序字段不符合要求")
+							.build());
 		} catch (NotFoundOrderDirectionException e) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_SORT_DIRECTION_NOTFOUND, "排序方向不符合要求").build());
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+					new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_SORT_DIRECTION_NOTFOUND, "排序方向不符合要求")
+							.build());
 		}
-		
+
 		// 判断是否分页
 		Resources<OrderServiceResource> resources = null;
 		if (isAll != null && isAll) {
 			List<OrderSer> deliverys = deliveryService.findAll(orderList, orderId, OrderSer.TYPE_DELIVERY);
-			
+
 			DeliveryResourceAssembler orderServiceResourceAssembler = new DeliveryResourceAssembler();
 			resources = listServiceResourcesAssembler.toResource(deliverys, orderServiceResourceAssembler);
 		} else {
 			Page<OrderSer> deliverys = deliveryService.pagination(pageable, orderList, orderId, OrderSer.TYPE_DELIVERY);
-		
+
 			DeliveryResourceAssembler orderServiceResourceAssembler = new DeliveryResourceAssembler();
 			resources = pagedServiceResourcesAssembler.toResource(deliverys, orderServiceResourceAssembler);
 		}
-		
+
 		return ResponseEntity.ok(resources);
 	}
-	
+
 	/**
 	 * 返回订单的安装服务列表
+	 * 
 	 * @param pageable
 	 * @param orderId
 	 * @param isAll
 	 * @return
 	 */
 	@RequestMapping(value = "/{id}/installations", method = RequestMethod.GET)
-	public ResponseEntity<?> getInstallations(
-		@PageableDefault Pageable pageable,
-		@PathVariable("id") String orderId,
-		@RequestParam(name = "isall", required = false) Boolean isAll
-	) {
-		if(StringUtils.isBlank(orderId)){
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new OrderErrorBuilder(OrderErrorBuilder.ERROR_ID_NULL, "订单编号为空").build());
+	public ResponseEntity<?> getInstallations(@PageableDefault Pageable pageable, @PathVariable("id") String orderId,
+			@RequestParam(name = "isall", required = false) Boolean isAll) {
+		if (StringUtils.isBlank(orderId)) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND)
+					.body(new OrderErrorBuilder(OrderErrorBuilder.ERROR_ID_NULL, "订单编号为空").build());
 		}
-		
+
 		Order order = orderService.findById(orderId);
 		Map<String, Object> error = OrderValidator.validateBeforeInstallation(order);
 		if (error != null) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new OrderErrorBuilder(Integer.valueOf(error.get("code").toString()), error.get("msg").toString()).build());
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+					new OrderErrorBuilder(Integer.valueOf(error.get("code").toString()), error.get("msg").toString())
+							.build());
 		}
-		
+
 		List<String> orderList = null;
-		
+
 		// 排序处理
 		try {
 			orderList = ParamSceneUtils.toOrder(pageable, OrderServiceOrderType.class);
 		} catch (NotFoundOrderPropertyException e) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_SORT_PROPERTY_NOTFOUND, "排序字段不符合要求").build());
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+					new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_SORT_PROPERTY_NOTFOUND, "排序字段不符合要求")
+							.build());
 		} catch (NotFoundOrderDirectionException e) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_SORT_DIRECTION_NOTFOUND, "排序方向不符合要求").build());
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+					new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_SORT_DIRECTION_NOTFOUND, "排序方向不符合要求")
+							.build());
 		}
-		
+
 		// 判断是否分页
 		Resources<OrderServiceResource> resources = null;
 		if (isAll != null && isAll) {
 			List<OrderSer> installations = installationService.findAll(orderList, orderId, OrderSer.TYPE_INSTALLATION);
-			
+
 			DeliveryResourceAssembler orderServiceResourceAssembler = new DeliveryResourceAssembler();
 			resources = listServiceResourcesAssembler.toResource(installations, orderServiceResourceAssembler);
 		} else {
-			Page<OrderSer> installations = installationService.pagination(pageable, orderList, orderId, OrderSer.TYPE_INSTALLATION);
-		
+			Page<OrderSer> installations = installationService.pagination(pageable, orderList, orderId,
+					OrderSer.TYPE_INSTALLATION);
+
 			DeliveryResourceAssembler orderServiceResourceAssembler = new DeliveryResourceAssembler();
 			resources = pagedServiceResourcesAssembler.toResource(installations, orderServiceResourceAssembler);
 		}
-		
+
 		return ResponseEntity.ok(resources);
 	}
-	
-	
+
 	/**
 	 * 返回订单的未送货数量大于0的商品列表
+	 * 
 	 * @param pageable
 	 * @param isAll
 	 * @return
 	 */
-	@RequestMapping(value = "/{id}/goods_shipment",  method = RequestMethod.GET)
-	public ResponseEntity<?> getGoodsShipment(
-		@PageableDefault Pageable pageable,
-		@PathVariable("id") String orderId,
-		@RequestParam(name = "isall", required = false) Boolean isAll
-	) {
-		if(StringUtils.isBlank(orderId)){
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new OrderErrorBuilder(OrderErrorBuilder.ERROR_ID_NULL, "订单编号为空").build());
+	@RequestMapping(value = "/{id}/goods_shipment", method = RequestMethod.GET)
+	public ResponseEntity<?> getGoodsShipment(@PageableDefault Pageable pageable, @PathVariable("id") String orderId,
+			@RequestParam(name = "isall", required = false) Boolean isAll) {
+		if (StringUtils.isBlank(orderId)) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND)
+					.body(new OrderErrorBuilder(OrderErrorBuilder.ERROR_ID_NULL, "订单编号为空").build());
 		}
 		List<String> orderList = null;
-		
+
 		// 排序处理
 		try {
 			orderList = ParamSceneUtils.toOrder(pageable, OrderGoodOrderType.class);
 		} catch (NotFoundOrderPropertyException e) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_SORT_PROPERTY_NOTFOUND, "排序字段不符合要求").build());
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+					new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_SORT_PROPERTY_NOTFOUND, "排序字段不符合要求")
+							.build());
 		} catch (NotFoundOrderDirectionException e) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_SORT_DIRECTION_NOTFOUND, "排序方向不符合要求").build());
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+					new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_SORT_DIRECTION_NOTFOUND, "排序方向不符合要求")
+							.build());
 		}
-		
+
 		// 判断是否分页
 		Resources<OrderGoodResource> resources = null;
 		if (isAll != null && isAll) {
 			List<OrderGood> goods = orderGoodService.findAll(orderList, orderId, OrderSer.TYPE_DELIVERY);
-			
+
 			OrderGoodResourceAssembler orderGoodResourceAssembler = new OrderGoodResourceAssembler();
 			resources = listOrderGoodResourcesAssembler.toResource(goods, orderGoodResourceAssembler);
 		} else {
 			Page<OrderGood> goods = orderGoodService.pagination(pageable, orderList, orderId, OrderSer.TYPE_DELIVERY);
-		
+
 			OrderGoodResourceAssembler orderGoodResourceAssembler = new OrderGoodResourceAssembler();
 			resources = pagedOrderGoodResourcesAssembler.toResource(goods, orderGoodResourceAssembler);
 		}
-		
+
 		return ResponseEntity.ok(resources);
 	}
-	
-	
+
 	/**
 	 * 返回订单的未安装数量大于0的商品信息
+	 * 
 	 * @param pageable
 	 * @param isAll
 	 * @return
 	 */
-	@RequestMapping(value = "/{id}/uninstall_goods",  method = RequestMethod.GET)
-	public ResponseEntity<?> getGoodsUninstall(
-		@PageableDefault Pageable pageable,
-		@PathVariable("id") String orderId,
-		@RequestParam(name = "isall", required = false) Boolean isAll
-	) {
-		if(StringUtils.isBlank(orderId)){
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new OrderErrorBuilder(OrderErrorBuilder.ERROR_ID_NULL, "订单编号为空").build());
+	@RequestMapping(value = "/{id}/uninstall_goods", method = RequestMethod.GET)
+	public ResponseEntity<?> getGoodsUninstall(@PageableDefault Pageable pageable, @PathVariable("id") String orderId,
+			@RequestParam(name = "isall", required = false) Boolean isAll) {
+		if (StringUtils.isBlank(orderId)) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND)
+					.body(new OrderErrorBuilder(OrderErrorBuilder.ERROR_ID_NULL, "订单编号为空").build());
 		}
 		List<String> orderList = null;
-		
+
 		// 排序处理
 		try {
 			orderList = ParamSceneUtils.toOrder(pageable, OrderGoodOrderType.class);
 		} catch (NotFoundOrderPropertyException e) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_SORT_PROPERTY_NOTFOUND, "排序字段不符合要求").build());
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+					new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_SORT_PROPERTY_NOTFOUND, "排序字段不符合要求")
+							.build());
 		} catch (NotFoundOrderDirectionException e) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_SORT_DIRECTION_NOTFOUND, "排序方向不符合要求").build());
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+					new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_SORT_DIRECTION_NOTFOUND, "排序方向不符合要求")
+							.build());
 		}
-		
+
 		// 判断是否分页
 		Resources<OrderGoodResource> resources = null;
 		if (isAll != null && isAll) {
 			List<OrderGood> goods = orderGoodService.findAll(orderList, orderId, OrderSer.TYPE_INSTALLATION);
-			
+
 			OrderGoodResourceAssembler orderGoodResourceAssembler = new OrderGoodResourceAssembler();
 			resources = listOrderGoodResourcesAssembler.toResource(goods, orderGoodResourceAssembler);
 		} else {
-			Page<OrderGood> goods = orderGoodService.pagination(pageable, orderList, orderId, OrderSer.TYPE_INSTALLATION);
-		
+			Page<OrderGood> goods = orderGoodService.pagination(pageable, orderList, orderId,
+					OrderSer.TYPE_INSTALLATION);
+
 			OrderGoodResourceAssembler orderGoodResourceAssembler = new OrderGoodResourceAssembler();
 			resources = pagedOrderGoodResourcesAssembler.toResource(goods, orderGoodResourceAssembler);
 		}
-		
+
 		return ResponseEntity.ok(resources);
 	}
-	
-	
+
 	@RequestMapping(value = "/{id}", method = RequestMethod.GET)
-	public ResponseEntity<?> getOrder(
-		@PathVariable("id") String id
-	){
+	public ResponseEntity<?> getOrder(@PathVariable("id") String id) {
 		Order order = orderService.findById(id);
 		if (order == null) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new OrderErrorBuilder(OrderErrorBuilder.ERROR_ORDER_NULL, "找不到该订单").build());
+			return ResponseEntity.status(HttpStatus.NOT_FOUND)
+					.body(new OrderErrorBuilder(OrderErrorBuilder.ERROR_ORDER_NULL, "找不到该订单").build());
 		}
-		
+
 		OrderResourceAssembler orderResourceAssembler = new OrderResourceAssembler();
 		OrderResource orderResource = orderResourceAssembler.toResource(order);
-		
+
 		return ResponseEntity.ok(orderResource);
 	}
-	
+
 	@RequestMapping(method = RequestMethod.POST)
-	public ResponseEntity<?> createOrder(
-		@RequestBody Order order,
-		Authentication authentication
-	) {
-		
+	public ResponseEntity<?> createOrder(@RequestBody Order order, Authentication authentication) {
+
 		CustomUser customUser = (CustomUser) authentication.getPrincipal();
-		 order.setBusinessId(customUser.getClerk().getBusinessId());
-		
+		order.setBusinessId(customUser.getClerk().getBusinessId());
+
 		Map<String, Object> error = OrderValidator.validateBeforeCreateOrder(order);
 		if (error != null) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new OrderErrorBuilder(Integer.valueOf(error.get("code").toString()), error.get("msg").toString()).build());
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+					new OrderErrorBuilder(Integer.valueOf(error.get("code").toString()), error.get("msg").toString())
+							.build());
 		}
 		Boolean result = orderService.create(order, customUser.getClerk().getId());
 		if (result) {
-			return ResponseEntity.created(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(OrderController.class).getOrder(order.getId())).toUri()).build();
+			return ResponseEntity.created(ControllerLinkBuilder
+					.linkTo(ControllerLinkBuilder.methodOn(OrderController.class).getOrder(order.getId())).toUri())
+					.build();
 		}
-		
-		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new OrderErrorBuilder(OrderErrorBuilder.ERROR_CREATED, "创建错误").build());
+
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+				.body(new OrderErrorBuilder(OrderErrorBuilder.ERROR_CREATED, "创建错误").build());
 	}
-	
+
 	@RequestMapping(value = "/{id}", method = RequestMethod.PUT)
-	public ResponseEntity<?> updateOrder(
-		@PathVariable("id") String id,
-		@RequestBody Order order,
-		Authentication authentication
-	){
-		
+	public ResponseEntity<?> updateOrder(@PathVariable("id") String id, @RequestBody Order order,
+			Authentication authentication) {
+
 		CustomUser customUser = (CustomUser) authentication.getPrincipal();
 		order.setId(id);
-		
+
 		Map<String, Object> error = OrderValidator.validateBeforeUpdateOrder(order);
 		if (error != null) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new OrderErrorBuilder(Integer.valueOf(error.get("code").toString()), error.get("msg").toString()).build());
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+					new OrderErrorBuilder(Integer.valueOf(error.get("code").toString()), error.get("msg").toString())
+							.build());
 		}
-		
+
 		Boolean result = orderService.update(order, customUser.getClerk().getId());
-		
+
 		if (result) {
-			return ResponseEntity.noContent().location(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(OrderController.class).getOrder(id)).toUri()).build();
+			return ResponseEntity.noContent()
+					.location(ControllerLinkBuilder
+							.linkTo(ControllerLinkBuilder.methodOn(OrderController.class).getOrder(id)).toUri())
+					.build();
 		}
-		
-		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new OrderErrorBuilder(OrderErrorBuilder.ERROR_EDITED, "更新错误").build());
+
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+				.body(new OrderErrorBuilder(OrderErrorBuilder.ERROR_EDITED, "更新错误").build());
 	}
-	
-	@RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
-	public ResponseEntity<?> deleteOrder(
-		@PathVariable("id") String id,
-		Authentication authentication
-	){
-		CustomUser customUser = (CustomUser) authentication.getPrincipal();
-		
-		if (orderService.delete(id, new Date(), customUser.getClerk().getId())) {
-			BooleanResourceAssembler booleanResourceAssembler = new BooleanResourceAssembler();
-			return ResponseEntity.ok(booleanResourceAssembler.toResource(Boolean.TRUE));
-		}
-		
-		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new OrderErrorBuilder(OrderErrorBuilder.ERROR_DELETED, "删除错误").build());
-	}
-	
+
 	/**
 	 * 获得订单下的订单商品列表
+	 * 
 	 * @return
 	 */
 	@RequestMapping(value = "/{id}/goods", method = RequestMethod.GET)
-	public ResponseEntity<?> selectOrderGoods(
-		@PathVariable("id") String id
-	){
+	public ResponseEntity<?> selectOrderGoods(@PathVariable("id") String id) {
 		List<OrderGood> list = orderGoodService.selectAllUnderOrderWithGoodInfo(id);
-		Resources<OrderGoodResource> resources = new ListResourcesAssembler<OrderGood>().toResource(list, new OrderGoodResourceAssembler());
+		Resources<OrderGoodResource> resources = new ListResourcesAssembler<OrderGood>().toResource(list,
+				new OrderGoodResourceAssembler());
 		return ResponseEntity.ok(resources);
 	}
-	
+
 	/**
 	 * 批量更新订单商品
 	 * 
@@ -540,27 +559,27 @@ public class OrderController implements ResourceProcessor<RepositoryLinksResourc
 	 * @return
 	 */
 	@RequestMapping(value = "/{id}/goods/batch_update", method = RequestMethod.POST)
-	public ResponseEntity<?> updateOrderGoods(
-		@PathVariable("id") String id,
-		@RequestBody List<OrderGood> orderGoods,
-		Authentication authentication
-	){
-		
+	public ResponseEntity<?> updateOrderGoods(@PathVariable("id") String id, @RequestBody List<OrderGood> orderGoods,
+			Authentication authentication) {
+
 		CustomUser customUser = (CustomUser) authentication.getPrincipal();
-		
+
 		Map<String, Object> error = OrderValidator.validateUpdateOrderGoods(orderGoods);
 		if (error != null) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new OrderErrorBuilder(Integer.valueOf(error.get("code").toString()), error.get("msg").toString()).build());
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+					new OrderErrorBuilder(Integer.valueOf(error.get("code").toString()), error.get("msg").toString())
+							.build());
 		}
-		
+
 		if (orderGoodService.batchSaveOrUpdate(orderGoods, id, customUser.getClerk().getId())) {
 			BooleanResourceAssembler booleanResourceAssembler = new BooleanResourceAssembler();
 			return ResponseEntity.ok(booleanResourceAssembler.toResource(Boolean.TRUE));
 		}
-		
-		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new OrderErrorBuilder(OrderErrorBuilder.ERROR_DELETED, "删除错误").build());
+
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+				.body(new OrderErrorBuilder(OrderErrorBuilder.ERROR_DELETED, "删除错误").build());
 	}
-	
+
 	/**
 	 * 获得订单状态信息
 	 * 
@@ -568,74 +587,186 @@ public class OrderController implements ResourceProcessor<RepositoryLinksResourc
 	 * @return
 	 */
 	@RequestMapping(value = "/{id}/statuses", method = RequestMethod.GET)
-	public ResponseEntity<?> getStatuses(
-		@PathVariable("id") String id
-	){
+	public ResponseEntity<?> getStatuses(@PathVariable("id") String id) {
 		List<OrderProcess> orderProcesses = orderService.getProcessWithOrderInfo(id);
-		Resources<OrderProcessResource> resources = new ListResourcesAssembler<OrderProcess>().toResource(orderProcesses, new OrderProcessResourceAssembler());
+		Resources<OrderProcessResource> resources = new ListResourcesAssembler<OrderProcess>()
+				.toResource(orderProcesses, new OrderProcessResourceAssembler());
 		return ResponseEntity.ok(resources);
 	}
-	
+
 	/**
-	 * 订单退单
-	 * 退单条件1: 所有服务全部完成
+	 * 删除订单
+	 * 
+	 * @param id
+	 * @param authentication
+	 * @return
+	 */
+	@RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
+	public ResponseEntity<?> deleteOrder(@PathVariable("id") String id, Authentication authentication) {
+		CustomUser customUser = (CustomUser) authentication.getPrincipal();
+		if (orderService.delete(id, customUser.getClerk().getId())) {
+			BooleanResourceAssembler booleanResourceAssembler = new BooleanResourceAssembler();
+			return ResponseEntity.ok(booleanResourceAssembler.toResource(Boolean.TRUE));
+		}
+
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+				.body(new OrderErrorBuilder(OrderErrorBuilder.ERROR_DELETED, "删除错误").build());
+	}
+
+	/**
+	 * 订单退单 退单条件1: 所有服务全部完成
 	 * 
 	 * @param id
 	 * @return
 	 */
-	@RequestMapping(value = "/{id}/return_result", method = RequestMethod.PATCH)
-	public ResponseEntity<?> getReturnResult(
-		@PathVariable("id") String id,
-		Authentication authentication
-	){
-		
+	@RequestMapping(value = "/{id}/cancel", method = RequestMethod.PATCH)
+	public ResponseEntity<?> cancelOrder(@PathVariable("id") String id, Authentication authentication) {
+
 		CustomUser customUser = (CustomUser) authentication.getPrincipal();
-		
+
 		if (!orderService.orderServiceAllFinish(id)) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_DELETED, "订单下中的服务未全部完成").build());
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+					.body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_DELETED, "订单下中的服务未全部完成").build());
 		}
-		
-		if (orderService.returnOrder(id, customUser.getClerk().getId())) {
+
+		if (orderService.cancelOrder(id, customUser.getClerk().getId())) {
 			BooleanResourceAssembler booleanResourceAssembler = new BooleanResourceAssembler();
 			return ResponseEntity.ok(booleanResourceAssembler.toResource(Boolean.TRUE));
 		}
-		
-		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_EDITED, "退单失败").build());
+
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+				.body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_EDITED, "退单失败").build());
 	}
-	
+
 	/**
 	 * 完成订单
 	 * 
 	 * @param id
 	 * @return
 	 */
-	@RequestMapping(value = "/{id}/finish_result", method = RequestMethod.PATCH)
-	public ResponseEntity<?> getFinishResult(
-		@PathVariable("id") String id,
-		Authentication authentication
-	){
+	@RequestMapping(value = "/{id}/finish", method = RequestMethod.POST)
+	public ResponseEntity<?> finishOrder(@RequestBody Order order, Authentication authentication) {
+
 		CustomUser customUser = (CustomUser) authentication.getPrincipal();
-		
-		OrderSer orderSer = orderService.getServiceWithoutMaintenanceUnFinish(id);
+		OrderSer orderSer = orderService.getServiceWithoutMaintenanceUnFinish(order.getId());
 		CodewordGetter codewordGetter = SpringContextHolder.getBean(CodewordGetter.class);
 		if (orderSer != null) {
-			Codeword serviceTypeCodeword = codewordGetter.getCodewordByKey(Constant.ORDER_SERVICE_TYPE, orderSer.getType().toString());
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_EDITED, "订单下中的" + serviceTypeCodeword.getValue() + "服务未全部完成").build());
+			Codeword serviceTypeCodeword = codewordGetter.getCodewordByKey(Constant.ORDER_SERVICE_TYPE,
+					orderSer.getType().toString());
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+					.body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_EDITED,
+							"订单下中的" + serviceTypeCodeword.getValue() + "服务未全部完成").build());
 		}
-		
-		if (orderService.finishOrder(id, customUser.getClerk().getId())) {
+
+		if (orderService.finishOrder(order, customUser.getClerk().getId())) {
 			BooleanResourceAssembler booleanResourceAssembler = new BooleanResourceAssembler();
 			return ResponseEntity.ok(booleanResourceAssembler.toResource(Boolean.TRUE));
 		}
-		
-		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_EDITED, "完成订单失败").build());
+
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+				.body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_EDITED, "完成订单失败").build());
 	}
-	
-	
+
+	/**
+	 * 订单支付
+	 * 
+	 * @param id
+	 * @param authentication
+	 * @return
+	 */
+	@RequestMapping(value = "/{id}/pay", method = RequestMethod.PATCH)
+	public ResponseEntity<?> toPay(@PathVariable("id") String id, Authentication authentication) {
+		return null;
+
+	}
+
+	/**
+	 * 获取用于打印的订单详情
+	 * 
+	 * @author JunLin.Yang
+	 * @param id
+	 * @param authentication
+	 * @return
+	 */
+	@RequestMapping(value = "/{id}/forPrint", method = RequestMethod.GET)
+	public ResponseEntity<?> getOrderDetailForPrint(@PathVariable("id") String id, Authentication authentication) {
+
+		CustomUser customUser = (CustomUser) authentication.getPrincipal();
+		Order order = orderService.getOrderDetailForPrint(customUser.getClerk().getBusinessId(), id);
+		if (order == null) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND)
+					.body(new OrderErrorBuilder(OrderErrorBuilder.ERROR_ORDER_NULL, "找不到该订单").build());
+		}
+
+		OrderResourceAssembler orderResourceAssembler = new OrderResourceAssembler();
+		OrderResource orderResource = orderResourceAssembler.toResource(order);
+
+		return ResponseEntity.ok(orderResource);
+
+	}
+
+	/**
+	 * 获取用于编辑的订单详情
+	 * 
+	 * @author JunLin.Yang
+	 * @param id
+	 * @param authentication
+	 * @return
+	 */
+	@RequestMapping(value = "/{id}/forEdit", method = RequestMethod.GET)
+	public ResponseEntity<?> getOrderDetailForEdit(@PathVariable("id") String id, Authentication authentication) {
+
+		CustomUser customUser = (CustomUser) authentication.getPrincipal();
+		Order order = orderService.getOrderDetailForEdit(customUser.getClerk().getBusinessId(), id);
+		if (order == null) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND)
+					.body(new OrderErrorBuilder(OrderErrorBuilder.ERROR_ORDER_NULL, "找不到该订单").build());
+		}
+
+		OrderResourceAssembler orderResourceAssembler = new OrderResourceAssembler();
+		OrderResource orderResource = orderResourceAssembler.toResource(order);
+
+		return ResponseEntity.ok(orderResource);
+
+	}
+
+	/**
+	 * 获取用于上传订单图片
+	 * 
+	 * @author JunLin.Yang
+	 * @param id
+	 * @param authentication
+	 * @return
+	 */
+	@RequestMapping(value = "/{id}/upload", method = RequestMethod.POST)
+	public ResponseEntity<?> orderUpload(@PathVariable("id") String id, @RequestParam("fileUpload") MultipartFile file,
+			Authentication authentication) {
+
+		if (orderService.uploadOrderPicture(id, file)) {
+			BooleanResourceAssembler booleanResourceAssembler = new BooleanResourceAssembler();
+			return ResponseEntity.ok(booleanResourceAssembler.toResource(Boolean.TRUE));
+		}
+
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+				.body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_EDITED, "完成订单失败").build());
+
+	}
+
+	@RequestMapping(value = "/getTypeStatisticalResult", method = RequestMethod.GET)
+	public List<OrderTypeStatisticalResult> getOrderTypeStatisticalResult(OrderCondition orderCondition,
+			Authentication authentication) {
+		CustomUser customUser = (CustomUser) authentication.getPrincipal();
+
+		// 判断是否分页
+		Resources<OrderResource> resources = null;
+		List<OrderTypeStatisticalResult> orderTypeStatisticalResults = orderService.selectOrderTypeStatisticalResultByCondition(customUser.getClerk(), orderCondition);
+		return orderTypeStatisticalResults;
+	}
+
 	@Override
 	public RepositoryLinksResource process(RepositoryLinksResource resource) {
 		resource.add(ControllerLinkBuilder.linkTo(OrderController.class).withRel("orders"));
 		return resource;
 	}
-	
+
 }
