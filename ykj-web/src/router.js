@@ -19,6 +19,8 @@ import UserPage, { UserAdd, UserEdit } from './routes/UserPage';
 
 /*--------------------------------客户管理-------------------------------------- */
 import CustomersPage, { CustomerAdd, CustomerEdit, CustomerHouses, CustomerTracks } from './routes/CustomersPage';
+import GroupPage, { GroupAdd, GroupEdit } from './routes/GroupPage';
+import CustomersGroupPage, { CustomerGroupAdd, CustomerGroupEdit, CustomerGroupHouses, CustomerGroupTracks } from './routes/CustomersGroupPage';
 
 /*--------------------------------采购管理-------------------------------------- */
 import SuppliersPage, { SupplierAdd, SupplierEdit } from './routes/SuppliersPage';
@@ -81,11 +83,16 @@ export default ({ history }) => {
               <Route breadcrumbName="房产信息" path=":id/houses" component={ CustomerHouses } />
               <Route breadcrumbName="跟进记录" path=":id/tracks" component={ CustomerTracks } />
             </Route>
-            <Route breadcrumbName="团购列表" path="groupon" >
-              <IndexRoute component={ CustomersPage }  />
-              <Route breadcrumbName="添加客户信息" path="add" component={ CustomerAdd } />
-              <Route breadcrumbName="编辑客户信息" path="edit/:id" component={ CustomerEdit } />
-              <Route breadcrumbName="房产信息" path="houses/:id" component={ CustomerHouses } />
+            <Route breadcrumbName="团购订单列表" path="groupon" >
+              <IndexRoute component={ CustomersGroupPage }  />
+              <Route breadcrumbName="添加团购信息" path="add" component={ CustomerGroupAdd } />
+              <Route breadcrumbName="编辑团购信息" path="edit/:id" component={ CustomerGroupEdit } />
+              <Route breadcrumbName="房产信息" path="houses/:id" component={ CustomerGroupHouses } />
+            </Route>
+            <Route breadcrumbName="团购发布列表" path="grouporder" >
+              <IndexRoute component={ GroupPage }  />
+              <Route breadcrumbName="添加团购信息" path="add" component={ GroupAdd } />
+              <Route breadcrumbName="编辑团购信息" path="edit/:id" component={ GroupEdit } />
             </Route>
           </Route>
           <Route breadcrumbName="采购管理" path="indents">

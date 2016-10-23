@@ -97,7 +97,10 @@ const GuideMenu = ({ menuCurrent, menuOpenKeys, dispatch }) => {
           <Link to="/customers/customers">客户列表</Link>
         </Menu.Item>
         <Menu.Item key="/customers/groupon">
-          <Link to="/customers/groupon">团购列表</Link>
+          <Link to="/customers/groupon">团购发布列表</Link>
+        </Menu.Item>
+        <Menu.Item key="/customers/grouporder">
+          <Link to="/customers/grouporder">团购订单列表</Link>
         </Menu.Item>
       </Menu.SubMenu>
       <Menu.SubMenu

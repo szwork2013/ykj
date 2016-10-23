@@ -49,6 +49,7 @@ app.model(require('./models/customers'));
 app.model(require('./models/houses'));
 app.model(require('./models/tracks'));
 app.model(require('./models/tags'));
+app.model(require('./models/group'));
 
 /**************采购管理*****************/
 app.model(require('./models/suppliers'));
