@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.gnet.app.group.GroupMapper" >
+    <resultMap id="BaseGroupMapper" type="com.gnet.app.group.Group" >
+        <id column="id" property="id" jdbcType="VARCHAR" />
+        <result column="create_date" property="createDate" jdbcType="TIMESTAMP" />
+        <result column="modify_date" property="modifyDate" jdbcType="TIMESTAMP"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="content" property="content" jdbcType="VARCHAR"/>
+        <result column="photo" property="photo" jdbcType="VARCHAR"/>
+        <result column="good_id" property="goodId" jdbcType="VARCHAR" />
+        <result column="group_price" property="groupPrice" jdbcType="DECIMAL"/>
+        <result column="group_limit" property="groupLimit" jdbcType="INTEGER" />
+        <result column="group_limit_surplus" property="groupLimitSurplus" jdbcType="VARCHAR"/>
+
+    </resultMap>
+
+
+    
+    <select id="selectGroupAll" resultMap="BaseGroupMapper">
+		select * from ykj_groupbuy
+		<where>
+			<if test=" name != null and name != ''">
+                and name like CONCAT('%',CONCAT(#{name},'%'))
+            </if>
+            <if test=" goodId != null and goodId != ''">
+                and good_id like CONCAT('%',CONCAT(#{goodId},'%'))
+            </if>
+		</where>
+	</select>
+</mapper>
