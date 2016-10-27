@@ -20,17 +20,17 @@ const Add = (props) => {
         })
       
         form.validateFieldsAndScroll((errors, values) => {
-          if (!!errors) {
-            return;
-          }
+          // if (!!errors) {
+          //   return;
+          // }
 		  
           const formData = form.getFieldsValue();
 		      formData.orderGoods = orderGoods;
           console.log(formData)
-          dispatch({
-            type: 'orders/add',
-            payload: formData,
-          })
+          // dispatch({
+          //   type: 'orders/add',
+          //   payload: formData,
+          // })
         });
 		
       } }

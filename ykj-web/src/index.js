@@ -1,3 +1,4 @@
+
 import './index.html';
 import './index.less';
 import dva, { connect } from 'dva';
@@ -24,6 +25,7 @@ app.use({
   //   console.log(sagaWithCatch)
   // }
 });
+
 
 // 3. Model
 app.model(require('./models/role'));
@@ -52,6 +54,8 @@ app.model(require('./models/customers'));
 app.model(require('./models/houses'));
 app.model(require('./models/tracks'));
 app.model(require('./models/tags'));
+app.model(require('./models/group'));
+
 
 /**************采购管理*****************/
 app.model(require('./models/suppliers'));
@@ -60,8 +64,11 @@ app.model(require('./models/suppliers'));
 app.model(require('./models/codewords'));
 app.model(require('./models/users'))
 
+app.model(require('./models/componentDataSource'));
+
 // 4. Router
 app.router(require('./router'));
 
 // 5. Start
 app.start(document.getElementById('root'));
+
