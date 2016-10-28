@@ -10,6 +10,7 @@ import Box from '../Box';
 import TreeBox from '../TreeBox';
 import TableVariable from './TableVariable';
 import CustomerSelect from '../Common/CustomerSelect';
+import CodewordSelect from '../Common/CodewordSelect';
 
 const FormItem = Form.Item;
 const CheckboxGroup = Checkbox.Group;
@@ -170,7 +171,6 @@ class Detail extends Component {
                     <CustomerSelect
                       style={{ width: '80%'}}
                       elementProps={customerIdProps}
-                      selectProps={nameProps}
                       dispatch={dispatch}
                       componentDataSource={componentDataSource}
                       onSelect={(item) => {
@@ -244,13 +244,14 @@ class Detail extends Component {
                     hasFeedback
                     help={isFieldValidating('orderType') ? '校验中...' : (getFieldError('orderType') || []).join(', ')}
                     >
-                    <Select {...orderSourceProps} style={{ width: '80%' }} size="default" disabled={orders.submiting}>
-                      {
-                        orderSources.map(item => {
-                          return <Option key={item.code} value={item.code}>{item.value}</Option>
-                        })
-                      }
-                    </Select>
+                    <CodewordSelect 
+                      style={{ width: '80%'}}
+                      elementProps={orderSourceProps}
+                      type={"ORDER_SOURCE"}
+                      dispatch={dispatch}
+                      componentDataSource={componentDataSource}
+                    >
+                    </CodewordSelect>
                   </FormItem>
                 </Col>
               </Row>

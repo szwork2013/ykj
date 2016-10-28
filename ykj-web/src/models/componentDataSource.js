@@ -7,7 +7,24 @@ export default {
   namespace: 'componentDataSource',
 
   state: {
-    dataSource: {}
+    dataSource: {
+      "CUSTOMERS" : [{
+        id : '1',
+        name : '用户A'
+      },{
+        id : '2',
+        name : '用户B'
+      }],
+      CODEWORDS : {
+        "ORDER_SOURCE" : [{
+          id : '1',
+          name : '同行介绍'
+        },{
+          id : '2',
+          name : '网站'
+        }]
+      }
+    }
   },
 
   effects: {

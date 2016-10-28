@@ -4,13 +4,16 @@ import { routerRedux } from 'dva/router';
 import { Link } from 'dva/router';
 
 /**
- * 客户下拉框组件
+ * 数据字典下拉框组件
  */
-class CustomerSelect extends Component {
+class CodewordSelect extends Component {
 
     constructor(props) {
         super(props);
-        this.componentDataSourceName = "CUSTOMERS";
+        this.componentDataSourceName = "CODEWORDS";
+        this.state = {
+            type : this.props.type
+        }
     }
 
 
@@ -22,11 +25,10 @@ class CustomerSelect extends Component {
 
     componentWillMount() {
         this.props.dispatch({
-            type: 'componentDataSource/loadCustomersData',
-            payload: "ALL",
+            type: 'componentDataSource/loadCodewordData',
+            payload: this.state.type,
         });
         console.log("数据加载完成")
-
     }
 
     componentWillUpdate() {
@@ -36,7 +38,7 @@ class CustomerSelect extends Component {
 
     handleSelect(onSelect, value, option) {
         if (this.props.onSelect) {
-            const dataSource = this.props.componentDataSource[this.componentDataSourceName] || [];
+            const dataSource = this.props.componentDataSource[this.componentDataSourceName][this.state.type] || [];
 
             dataSource.map(item => {
                 if (item.id === value) {
@@ -48,10 +50,10 @@ class CustomerSelect extends Component {
         }
 
     }
-
+    
     render() {
 
-        const dataSource = this.props.componentDataSource[this.componentDataSourceName] || [];
+        const dataSource =  this.props.componentDataSource[this.componentDataSourceName][this.state.type] || [];
         return (
             <Select showSearch
                 {...this.props.elementProps}
@@ -74,7 +76,7 @@ class CustomerSelect extends Component {
     }
 }
 
-CustomerSelect.propTypes = {
+CodewordSelect.propTypes = {
 }
 
-export default CustomerSelect;
+export default CodewordSelect;

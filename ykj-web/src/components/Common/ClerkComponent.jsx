@@ -1,16 +1,16 @@
 import React, { PropTypes, Component } from 'react';
-import { Select, Input } from 'antd';
+import { Tree, Input } from 'antd';
 import { routerRedux } from 'dva/router';
 import { Link } from 'dva/router';
 
 /**
- * 客户下拉框组件
+ * 员工树组件
  */
-class CustomerSelect extends Component {
+export class ClerkTree extends Component {
 
     constructor(props) {
         super(props);
-        this.componentDataSourceName = "CUSTOMERS";
+        this.componentDataSourceName = "CLERKS";
     }
 
 
@@ -22,11 +22,10 @@ class CustomerSelect extends Component {
 
     componentWillMount() {
         this.props.dispatch({
-            type: 'componentDataSource/loadCustomersData',
+            type: 'componentDataSource/loadClerksData',
             payload: "ALL",
         });
         console.log("数据加载完成")
-
     }
 
     componentWillUpdate() {
@@ -46,35 +45,32 @@ class CustomerSelect extends Component {
         } else {
             return true;
         }
-
     }
 
-    render() {
 
-        const dataSource = this.props.componentDataSource[this.componentDataSourceName] || [];
+
+    render() {
+        const treeData = this.props.componentDataSource[this.componentDataSourceName] || [];
+        const loop = data => data.map((item) => {
+            if (item.children) {
+                return <TreeNode title={item.name} key={item.key}>{loop(item.children)}</TreeNode>;
+            }
+            return <TreeNode title={item.name} key={item.key} isLeaf={item.isLeaf} disabled={item.key === '0-0-0'} />;
+        });
+        const treeNodes = loop(treeData);
         return (
-            <Select showSearch
+            <Tree
                 {...this.props.elementProps}
                 style={this.props.style}
-                onSelect={(value, option) => {
-                    this.handleSelect(this.props.onSelect, value, option)
-                    return true;
-                } }
-                optionFilterProp = {"children"}
-                defaultActiveFirstOption = {false}
-                disabled = {this.props.disabled}
+                treeData={}
                 >
-                {
-                    dataSource.map(item => {
-                        return <Select.Option key={item.id} value={item.id}>{item.name}</Select.Option>
-                    })
-                }
-            </Select >
+                {treeNodes}
+            </Tree>
         )
     }
 }
 
-CustomerSelect.propTypes = {
+ClerkTreeBox.propTypes = {
 }
 
-export default CustomerSelect;
+export default ClerkTreeBox;

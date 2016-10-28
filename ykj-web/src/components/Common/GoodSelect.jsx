@@ -4,13 +4,13 @@ import { routerRedux } from 'dva/router';
 import { Link } from 'dva/router';
 
 /**
- * 客户下拉框组件
+ * 商品下拉框组件
  */
-class CustomerSelect extends Component {
+class GoodSelect extends Component {
 
     constructor(props) {
         super(props);
-        this.componentDataSourceName = "CUSTOMERS";
+        this.componentDataSourceName = "GOODS";
     }
 
 
@@ -22,7 +22,7 @@ class CustomerSelect extends Component {
 
     componentWillMount() {
         this.props.dispatch({
-            type: 'componentDataSource/loadCustomersData',
+            type: 'componentDataSource/loadGoodsData',
             payload: "ALL",
         });
         console.log("数据加载完成")
@@ -51,7 +51,7 @@ class CustomerSelect extends Component {
 
     render() {
 
-        const dataSource = this.props.componentDataSource[this.componentDataSourceName] || [];
+        const dataSource =  this.props.componentDataSource[this.componentDataSourceName] || [];
         return (
             <Select showSearch
                 {...this.props.elementProps}
@@ -74,7 +74,7 @@ class CustomerSelect extends Component {
     }
 }
 
-CustomerSelect.propTypes = {
+GoodSelect.propTypes = {
 }
 
-export default CustomerSelect;
+export default GoodSelect;
