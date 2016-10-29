@@ -14,7 +14,7 @@ const TabPane = Tabs.TabPane;
 const FormItem = Form.Item;
 const SelectOption = Select.Option;
 const RangePicker = DatePicker.RangePicker;
-const GroupList = ({ form, group, children, dispatch, ...rest }) => {
+const GroupList = ({ form, cgroup, children, dispatch, ...rest }) => {
   const { getFieldProps } = form;
 
   const formItemLayout = {
@@ -27,9 +27,6 @@ const GroupList = ({ form, group, children, dispatch, ...rest }) => {
       toolbar={ () => {
         return (
           <div>
-            <Button type="primary" size="large">
-              <Link to="/customers/grouporder/add">新增</Link>
-            </Button>
             <Button type="ghost" size="large"><Icon type="reload"></Icon>刷新</Button>
           </div>
         )
@@ -47,7 +44,7 @@ const GroupList = ({ form, group, children, dispatch, ...rest }) => {
 
                 const formData = form.getFieldsValue();
                 dispatch({
-                  type: 'group/query',
+                  type: 'cgroup/query',
                   payload: formData,
                 });
 
@@ -88,47 +85,36 @@ const GroupList = ({ form, group, children, dispatch, ...rest }) => {
                             render: (text, record, index) => index+1,
                         },
                         {
+                            title: '姓名',
+                            dataIndex: 'username',
+                            key: 'username',
+                            sorter: false,
+                        },
+                        {
+                            title: '手机号码',
+                            dataIndex: 'mobile',
+                            key: 'mobile',
+                            sorter: false,
+                        },
+                        {
                             title: '团购名称',
-                            dataIndex: 'name',
-                            key: 'name',
-                            sorter: false,
-                        },
-                        {
-                            title: '产品名称',
-                            dataIndex: 'goodId',
-                            key: 'goodId',
-                            sorter: false,
-                        },
-                        {
-                            title: '产品规格',
-                            dataIndex: 'content',
-                            key: 'content',
-                            sorter: false,
-                        },
-                        {
-                            title: '市场价',
-                            dataIndex: 'groupPrice',
-                            key: 'groupPrice',
+                            dataIndex: 'groupname',
+                            key: 'groupname',
                             sorter: false,
                         },
                         {
                             title: '团购价',
-                            dataIndex: 'photo',
-                            key: 'photo',
+                            dataIndex: 'groupprice',
+                            key: 'groupprice',
                             sorter: false,
                         },
                         {
-                            title: '团购限额',
-                            dataIndex: 'groupLimit',
-                            key: 'groupLimit',
+                            title: '订金（元）',
+                            dataIndex: 'payment',
+                            key: 'payment',
                             sorter: false,
                         },
-                        {
-                            title: '剩余团购额度',
-                            dataIndex: 'groupLimitSurplus',
-                            key: 'groupLimitSurplus',
-                            sorter: false,
-                        },
+                        
                         {
                             title: '操作',
                             key: 'operation',
@@ -136,10 +122,9 @@ const GroupList = ({ form, group, children, dispatch, ...rest }) => {
                             render: (text, record) => (
                                 <table>
                                     <tbody>
-                                       
                                         <tr>
-                                            <td><Link to={`/customers/grouporder/edit/${record.id}`}><Icon type="edit" />编辑</Link></td>
-                                            <td><Link to={`/customers/grouporder/${record.id}/tracks`}><Icon type="edit1" />发布</Link></td>
+                                            <td><Link to={`/customers/groupon/edit/${record.id}`}><Icon type="edit" />编辑</Link></td>
+                                            <td><Link to={`/customers/groupon/${record.id}/tracks`}><Icon type="edit1" />下订单</Link></td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -148,9 +133,9 @@ const GroupList = ({ form, group, children, dispatch, ...rest }) => {
                     ]
                 }
                 rowKey={ record => record.id }
-                dataSource={ group.group }
-                pagination={ group.pagination }
-                loading={ group.loading }
+                dataSource={ cgroup.cgroup }
+                pagination={ cgroup.pagination }
+                loading={ cgroup.loading }
       />
     </Container>
   )
@@ -162,7 +147,7 @@ GroupList.propTypes = {
 
 export default Form.create({
     mapPropsToFields: (props) => {
-        const query = props.group.query;
+        const query = props.cgroup.query;
         return {
             
         }

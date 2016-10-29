@@ -28,7 +28,9 @@ import UserPage, { UserAdd, UserEdit } from './routes/UserPage';
 /*--------------------------------客户管理-------------------------------------- */
 import CustomersPage, { CustomerAdd, CustomerEdit, CustomerHouses, CustomerTracks } from './routes/CustomersPage';
 import GroupPage, { GroupAdd, GroupEdit } from './routes/GroupPage';
-import CustomersGroupPage, { CustomerGroupAdd, CustomerGroupEdit, CustomerGroupHouses, CustomerGroupTracks } from './routes/CustomersGroupPage';
+import CgroupPage, {CgroupEdit } from './routes/CgroupPage';
+
+
 /*--------------------------------采购管理-------------------------------------- */
 import SuppliersPage, { SupplierAdd, SupplierEdit } from './routes/SuppliersPage';
 
@@ -77,11 +79,11 @@ export default ({ history }) => {
                 <Route breadcrumbName="编辑测量安排" path="edit/:id" component={ MeasureEdit } />
               </Route>
             </Route>
-            
+
           </Route>
 
-          <Route breadcrumbName="客户管理" path="customers">
-            <IndexRedirect to="customers" />
+        <Route breadcrumbName="客户管理" path="customers">
+          <IndexRedirect to="customers" />
             <Route breadcrumbName="客户列表" path="customers" >
               <IndexRoute component={ CustomersPage }  />
               <Route breadcrumbName="添加客户信息" path="add" component={ CustomerAdd } />
@@ -90,17 +92,15 @@ export default ({ history }) => {
               <Route breadcrumbName="跟进记录" path=":id/tracks" component={ CustomerTracks } />
             </Route>
             <Route breadcrumbName="团购订单列表" path="groupon" >
-              <IndexRoute component={ CustomersGroupPage }  />
-              <Route breadcrumbName="添加团购信息" path="add" component={ CustomerGroupAdd } />
-              <Route breadcrumbName="编辑团购信息" path="edit/:id" component={ CustomerGroupEdit } />
-              <Route breadcrumbName="房产信息" path="houses/:id" component={ CustomerGroupHouses } />
+              <IndexRoute component={ CgroupPage }  />
+              <Route breadcrumbName="编辑团购订单信息" path="edit/:id" component={ CgroupEdit } />
             </Route>
-           <Route breadcrumbName="团购发布列表" path="grouporder" >
+            <Route breadcrumbName="团购发布列表" path="grouporder" >
               <IndexRoute component={ GroupPage }  />
               <Route breadcrumbName="添加团购信息" path="add" component={ GroupAdd } />
               <Route breadcrumbName="编辑团购信息" path="edit/:id" component={ GroupEdit } />
-            </Route>
           </Route>
+        </Route>
           <Route breadcrumbName="采购管理" path="indents">
             <IndexRedirect to="indents" />
             <Route breadcrumbName="采购列表" path="indents" >
@@ -132,13 +132,13 @@ export default ({ history }) => {
               <Route breadcrumbName="创建员工账号" path="add" component={ UserAdd } />
               <Route breadcrumbName="编辑员工账号" path="edit/:id" component={ UserEdit } />
             </Route>
-            
+
             <Route breadcrumbName="角色" path="role">
               <IndexRoute component={ RoleListPage } />
               <Route breadcrumbName="新增角色" path="add" component={ RoleAddPage } />
               <Route breadcrumbName="编辑角色" path="edit/:id" component={ RoleEditPage } />
             </Route>
-          </Route> 
+          </Route>
         </Route>
       </Route>
     </Router>

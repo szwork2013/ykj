@@ -21,7 +21,7 @@ const Edit = (props) => {
           formData.id = props.params.id;
           console.log(formData);
           dispatch({
-              type: 'group/update',
+              type: 'cgroup/update',
               payload: formData,
           })  
 		});
