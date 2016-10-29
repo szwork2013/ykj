@@ -1,6 +1,5 @@
 package com.gnet.app.group;
 
-import com.gnet.app.customer.Customer;
 import com.gnet.utils.page.PageUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -29,5 +28,31 @@ public class GroupService {
 
             }
         });
+    }
+
+
+    public Group findDetailById(String id) {
+        return groupMapper.selectByPrimaryKey(id);
+    }
+
+    public Group findById(String id) {
+        return groupMapper.selectByPrimaryKey(id);
+    }
+
+    @Transactional(readOnly = false)
+    public Boolean create(Group group) {
+        Boolean result;
+
+        result = groupMapper.insertSelective(group) == 1;
+        if(!result){
+            return false;
+        }
+
+        return true;
+    }
+
+    @Transactional(readOnly = false)
+    public Boolean update(Group group) {
+        return groupMapper.updateByPrimaryKeySelective(group) == 1;
     }
 }

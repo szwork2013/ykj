@@ -1,4 +1,4 @@
-package com.gnet.app.group;
+package com.gnet.app.customerGroup;
 
 import com.alibaba.fastjson.JSONObject;
 import com.gnet.app.customer.CustomerOrderType;
@@ -29,18 +29,30 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * Created by yaoping on 16/10/23.
+ * Created by yaoping on 16/10/27.
  */
 @RepositoryRestController
-@ExposesResourceFor(Group.class)
-@RequestMapping("/api/customers/group")
-public class GroupController implements ResourceProcessor<RepositoryLinksResource> {
+@ExposesResourceFor(CustomerGroup.class)
+@RequestMapping(value = "/api/customers/groupon")
+public class CustomerGroupController implements ResourceProcessor<RepositoryLinksResource> {
 
     @Autowired
-    private GroupService groupService;
+    private CustomerGroupService customerGroupService;
     @Autowired
-    private PagedResourcesAssembler<Group> pagedResourcesAssembler;
+    private PagedResourcesAssembler<CustomerGroup> pagedResourcesAssembler;
 
+    @Override
+    public RepositoryLinksResource process(RepositoryLinksResource resource) {
+        resource.add(ControllerLinkBuilder.linkTo(CustomerGroupController.class).withRel("customers/groupon"));
+        return resource;
+    }
+
+    public JSONObject build(String code , String msg) {
+        JSONObject result = new JSONObject();
+        result.put("code", code);
+        result.put("message", msg);
+        return result;
+    }
 
     @RequestMapping(method = RequestMethod.GET)
     public ResponseEntity<?> getGroups(
@@ -69,85 +81,58 @@ public class GroupController implements ResourceProcessor<RepositoryLinksResourc
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(build("20001", "排序方向不符合要求"));
         }
 
-        Page<Group> groups = null;
+        Page<CustomerGroup> customerGroups = null;
 
-        groups = groupService.pagination(pageable, orderList,  name, phone);
+        customerGroups = customerGroupService.pagination(pageable, orderList,  name, phone);
 
 
-        GroupResourceAssembler groupResourceAssembler = new GroupResourceAssembler();
-        PagedResources<GroupResource> pagedResources = pagedResourcesAssembler.toResource(groups, groupResourceAssembler);
+        CustomerGroupAssembler customerGroupAssembler = new CustomerGroupAssembler();
+        PagedResources<CustomerGroupResource> pagedResources = pagedResourcesAssembler.toResource(customerGroups, customerGroupAssembler);
 
         return ResponseEntity.ok(pagedResources);
 
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
-    public ResponseEntity<?> getGroup(
+    public ResponseEntity<?> getCustomerGroup(
             @PathVariable("id") String id
     ){
-        Group group =groupService.findById(id);
-        if (group == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(build("20002", "信息为空"));
+        CustomerGroup customerGroup =customerGroupService.findDetailById(id);
+        if (customerGroup == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(build("10003", "信息为空"));
         }
 
-        GroupResourceAssembler groupResourceAssembler = new GroupResourceAssembler();
-        GroupResource groupResource = groupResourceAssembler.toResource(group);
+        CustomerGroupAssembler customerGroupAssembler = new CustomerGroupAssembler();
+        CustomerGroupResource customerGroupResource = customerGroupAssembler.toResource(customerGroup);
 
-        return ResponseEntity.ok(groupResource);
-    }
-
-    @RequestMapping(value = "add", method = RequestMethod.POST)
-    public ResponseEntity<?> createGroup(
-            @RequestBody Group group
-    ) {
-
-        Date date = new Date();
-        group.setCreateDate(date);
-        group.setModifyDate(date);
-
-
-        Boolean result = groupService.create(group);
-        if (result) {
-            return ResponseEntity.created(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(GroupController.class).getGroup(group.getId())).toUri()).build();
-        }
-
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(build("20003","创建错误"));
-    }
-    public JSONObject build(String code , String msg) {
-        JSONObject result = new JSONObject();
-        result.put("code", code);
-        result.put("message", msg);
-        return result;
+        return ResponseEntity.ok(customerGroupResource);
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
     public ResponseEntity<?> updateGroup(
             @PathVariable("id") String id,
-            @RequestBody Group group
+            @RequestBody CustomerGroup customerGroup
     ){
-        Group oldGroup =groupService.findById(id);
-        if(oldGroup == null){
+        CustomerGroup oldCustomerGroup =customerGroupService.findById(id);
+        if(oldCustomerGroup == null){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(build("20002", "信息为空"));
         }
 
         Date date = new Date();
-        group.setModifyDate(date);
-        group.setId(id);
+        customerGroup.setModifyDate(date);
+        customerGroup.setId(id);
+        customerGroup.setCreateDate(oldCustomerGroup.getCreateDate());
+        customerGroup.setCustomerId(oldCustomerGroup.getCustomerId());
 
-        Boolean result =  groupService.update(group);
+
+        Boolean result =  customerGroupService.update(customerGroup);
 
         if(result) {
-            return ResponseEntity.noContent().location(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(GroupController.class).getGroup(id)).toUri()).build();
+            return ResponseEntity.noContent().location(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(CustomerGroupController.class).getCustomerGroup(id)).toUri()).build();
         }
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(build("20004", "更新错误"));
 
     }
 
-
-    @Override
-    public RepositoryLinksResource process(RepositoryLinksResource resource) {
-        resource.add(ControllerLinkBuilder.linkTo(GroupController.class).withRel("customers/group"));
-        return resource;
-    }
 }

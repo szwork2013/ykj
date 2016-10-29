@@ -35,7 +35,82 @@ public class Group extends BaseEntity {
 
     private BigDecimal groupPrice;
 
+    public Date getCreateDate() {
+        return createDate;
+    }
+
+    public void setCreateDate(Date createDate) {
+        this.createDate = createDate;
+    }
+
+    public Date getModifyDate() {
+        return modifyDate;
+    }
+
+    public void setModifyDate(Date modifyDate) {
+        this.modifyDate = modifyDate;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public String getPhoto() {
+        return photo;
+    }
+
+    public void setPhoto(String photo) {
+        this.photo = photo;
+    }
+
+    public String getGoodId() {
+        return goodId;
+    }
+
+    public void setGoodId(String goodId) {
+        this.goodId = goodId;
+    }
+
+    public BigDecimal getGroupPrice() {
+        return groupPrice;
+    }
+
+    public void setGroupPrice(BigDecimal groupPrice) {
+        this.groupPrice = groupPrice;
+    }
+
+    public Integer getGroupLimit() {
+        return groupLimit;
+    }
+
+    public void setGroupLimit(Integer groupLimit) {
+        this.groupLimit = groupLimit;
+    }
+
+    public Integer getGroupLimitSurplus() {
+        return groupLimitSurplus;
+    }
+
+    public void setGroupLimitSurplus(Integer groupLimitSurplus) {
+        this.groupLimitSurplus = groupLimitSurplus;
+    }
+
     private Integer groupLimit;
 
     private Integer groupLimitSurplus;
+
+
+
 }
