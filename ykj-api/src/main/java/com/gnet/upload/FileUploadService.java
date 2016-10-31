@@ -151,6 +151,56 @@ public class FileUploadService {
 	}
 	
 	/**
+	 * 上传单个文件
+	 * 
+	 * @param multiFile 上传文件
+	 * @return
+	 */
+	public Resource getResourceWithoutFileType(MultipartFile multiFile,String fileType) {
+		Date date = new Date();
+		String dateString = DateFormatUtils.format(date, "yyyyMM");
+		String uuid = UUID.randomUUID().toString();
+		String filename = multiFile.getOriginalFilename();
+		StringBuilder destPathBuilder = new StringBuilder(rootPath).append("upload").append(File.separator);
+		
+		
+		
+		destPathBuilder.append(fileType).append(File.separator);
+			
+		
+		String destPath = destPathBuilder.append(dateString).append(File.separator)
+						.append(uuid).append(File.separator)
+						.append(filename)
+						.toString();
+		
+		LOG.info("上传文件存储至" + destPath);
+		
+		// 创建上传文件
+		File file = new File(destPath);
+		if (!file.getParentFile().exists()) {
+			file.getParentFile().mkdirs();
+		}
+
+		
+		try {
+			if (!file.exists()) {
+				file.createNewFile();
+			}
+			
+			multiFile.transferTo(file);
+		} catch (IllegalStateException e) {
+			LOG.error(file.getName() + " has already been moved in the filesystem and is not available anymore for another transfer", e);
+			return null;
+		} catch (IOException e) {
+			LOG.error(file.getName() + " have reading or writing errors", e);
+			return null;
+		}
+		
+		return new FileSystemResource(file);
+		
+	}
+	
+	/**
 	 * 获取上传文件的相对路径
 	 * 
 	 * @param realPath 绝对路径
