@@ -31,7 +31,7 @@
     update ykj_office set modify_date = #{date}, is_del = 1 where id = #{id} 
     </update>
     
-    <select id="selectOfficesAllByCondition" resultMap="BaseOfficeMap" parameterType="com.gnet.app.office.OfficeCondition">
+    <select id="selectOfficesByCondition" resultMap="BaseOfficeMap" parameterType="com.gnet.app.office.OfficeCondition">
 		select * from ykj_office 
 		<where>
 			<if test=" fuzzyName != null and fuzzyName != ''">
@@ -41,7 +41,6 @@
                 and code  = #{code}
             </if>
             <if test=" level != null ">
-                and level  = #{level}
             </if>
             <if test=" type != null ">
                 and type  = #{type}
@@ -51,9 +50,6 @@
             </if>
             <if test=" isDel != null">
                 and is_del = #{isDel}
-            </if>
-            <if test=" businessId != null and businessId != ''">
-                and business_id = #{businessId}
             </if>
 		</where>
 	</select>

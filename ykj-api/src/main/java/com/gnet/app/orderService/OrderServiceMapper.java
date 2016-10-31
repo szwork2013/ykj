@@ -36,4 +36,5 @@ public interface OrderServiceMapper extends Mapper<OrderSer> {
 	 * @return
 	 */
 	public String selectMaxServiceCodeToday();
+	
 }

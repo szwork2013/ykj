@@ -84,3 +84,4 @@ export async function cancelStatement(access_token, id) {
     }
   })
 }
+

@@ -11,7 +11,7 @@ import TreeBox from '../TreeBox';
 import TableVariable from './TableVariable';
 import CustomerSelect from '../Common/CustomerComponent';
 import CodewordSelect from '../Common/CodewordComponent';
-import { ClerkSelectTreeModal } from '../Common/ClerkComponent'
+import { ClerkSelectModalInput } from '../Common/ClerkComponent'
 
 const FormItem = Form.Item;
 const CheckboxGroup = Checkbox.Group;
@@ -68,6 +68,14 @@ class Detail extends Component {
         { pattern: new RegExp(/^[0-9]+$/), message: '请填写正确的QQ' },
       ],
     });
+
+    const orderResponsibleNameProps = getFieldProps('orderResponsibleName', {
+      rules: [
+        { pattern: new RegExp(/^[0-9]+$/), message: '请填写正确的QQ' },
+      ],
+    });
+
+    
 
     const orderSourceProps = getFieldProps('orderSource', {
       rules: [
@@ -215,12 +223,16 @@ class Detail extends Component {
                     hasFeedback
                     help={isFieldValidating('orderResponsibleId') ? '校验中...' : (getFieldError('orderResponsibleId') || []).join(', ')}
                     >
-                    <ClerkSelectTreeModal
+                    <ClerkSelectModalInput
+                      idProps={orderResponsibleIdProps}
+                      nameProps={orderResponsibleNameProps}
                       style={{ width: '80%' }}
                       dispatch={dispatch}
                       componentDataSource={componentDataSource}
+                      onOk={(value) => {
+                      } }
                       >
-                    </ClerkSelectTreeModal>
+                    </ClerkSelectModalInput>
                   </FormItem>
                 </Col>
                 <Col sm={12}>

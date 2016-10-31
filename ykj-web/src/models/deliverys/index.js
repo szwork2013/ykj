@@ -3,6 +3,7 @@ import { routerRedux } from 'dva/router';
 import { message } from 'antd';
 import request, { parseError } from '../../utils/request';
 import { root, search, view, create, update, remove, removeAll, statement, cancelStatement, upload } from '../../services/delivery';
+import { getOrderGoodsListWithDetailByOrderId} from '../../services/deliveryGoods';
 import { getOrderDetailForEdit } from '../../services/order';
 import pathToRegexp from 'path-to-regexp';
 import querystring from 'querystring';
@@ -57,6 +58,14 @@ const initialState = {
      * 是否显示附件窗口
      */
     attachmentModalShow: false,
+    /**
+     * 订单商品信息
+     */
+    orderGoods : [],
+    /**
+     * 送货单商品信息
+     */
+    deliveryGoods  : []
 }
 
 export default {
@@ -130,6 +139,13 @@ export default {
                             orderId: orderId
                         },
                     });
+                    dispatch({
+                        type: 'getOrderGoods',
+                        payload: {
+                            orderId: orderId,
+                            isNeedCalc : false
+                        },
+                    });
                 }
             });
         }
@@ -143,7 +159,7 @@ export default {
         *initOrderInfo({ payload }, { put, select }) {
             const access_token = yield select(state => state.oauth.access_token);
             const { data, error } = yield getOrderDetailForEdit(access_token, payload.orderId);
-
+            console.log(data);
             if (!error) {
                 yield put({
                     type: 'merge',
@@ -156,6 +172,24 @@ export default {
             } else {
                 const err = yield parseError(error);
                 yield message.error(`获取订单信息失败:${err.status} ${err.message}`, 3);
+            }
+            return false;
+        },
+        *getOrderGoods({ payload }, { put, select }) {
+            const access_token = yield select(state => state.oauth.access_token);
+            const { data, error } = yield getOrderGoodsListWithDetailByOrderId(access_token, payload);
+            console.log(data);
+            if (!error) {
+                yield put({
+                    type: 'merge',
+                    payload: {
+                        orderGoods: data
+                    }
+                })
+                return true;
+            } else {
+                const err = yield parseError(error);
+                yield message.error(`获取订单商品信息失败:${err.status} ${err.message}`, 3);
             }
             return false;
         },

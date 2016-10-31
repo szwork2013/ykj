@@ -23,6 +23,7 @@ const Add = (props) => {
           }
 		  
           const formData = form.getFieldsValue();
+          console.log(formData);
           dispatch({
             type: 'deliverys/add',
             payload: formData,

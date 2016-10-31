@@ -22,29 +22,15 @@ const Detail = (props) => {
   const delivery = deliverys.currentItem
   const customer = customers.current
 
-
-  const nameProps = getFieldProps('name', {
-    rules: [
-      { required: true, message: '测量名称必须填写' }
-    ]
-  });
-
   const clerkIdProps = getFieldProps('clerkId', {
     rules: [
       { required: true, message: '服务人员必须选择' }
     ]
   });
 
-
   const clerkNameProps = getFieldProps('clerkName', {
     rules: [
       { required: true, message: '服务人员必须选择' }
-    ]
-  });
-
-  const orderGoodNumProps = getFieldProps('orderGoodNum', {
-    rules: [
-      { required: true, message: '订单商品数必须填写' }
     ]
   });
 
@@ -58,11 +44,6 @@ const Detail = (props) => {
     ]
   });
 
-  const serviceCostProps = getFieldProps('serviceCost', {
-    rules: [
-      { required: false }
-    ]
-  });
 
   const remarkProps = getFieldProps('remark', {
     rules: [
@@ -71,14 +52,10 @@ const Detail = (props) => {
 
   const costProps = getFieldProps('cost', {
     rules: [
-      { required: true, type: 'number', message: '费用必须填写' }
+      { required: true, message: '费用必须填写' }
     ]
   });
 
-  const servicePositionProps = getFieldProps('servicePosition', {
-    rules: [
-    ]
-  });
 
   const isFinishProps = getFieldProps('isFinish', {
     rules: [
@@ -243,13 +220,6 @@ const Detail = (props) => {
                 </Col>
               </Row>
             </Box>
-            <FormItem wrapperCol={{ span: 20, offset: 4 }} style={{ marginTop: 24 }}>
-              <Button type="primary" htmlType="submit" loading={deliverys.submiting} onClick={(e) => onSubmit(e, form)}>确定</Button>
-              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            <Button type="ghost" onClick={() => dispatch(routerRedux.goBack())}>返回</Button>
-            </FormItem>
-          </Form>
-          <Form horizontal >
             <h3>本次送货的商品列表</h3>
             <br />
             <BoxTable
@@ -265,63 +235,64 @@ const Detail = (props) => {
                   },
                   {
                     title: '商品名称',
-                    dataIndex: 'name',
-                    key: 'name',
+                    dataIndex: 'goodName',
+                    key: 'goodName',
                   },
                   {
                     title: '商品型号',
-                    dataIndex: 'model',
-                    key: 'model',
+                    dataIndex: 'goodModel',
+                    key: 'goodModel',
                   },
                   {
                     title: '单位',
-                    dataIndex: 'unit',
-                    key: 'unit'
+                    dataIndex: 'goodUnitName',
+                    key: 'goodUnitName'
                   },
                   {
                     title: '订货数量',
-                    dataIndex: 'clerkName',
-                    key: 'clerkName',
+                    dataIndex: 'orderGoodsNum',
+                    key: 'orderGoodsNum',
                   },
                   {
                     title: '未送货数量',
-                    dataIndex: 'clerkPhone',
-                    key: 'clerkPhone',
+                    dataIndex: 'needDeliverNum',
+                    key: 'needDeliverNum',
                   },
                   {
                     title: '本次送货数量',
-                    dataIndex: 'starLevel',
-                    key: 'starLevel',
+                    dataIndex: 'deliverNum',
+                    key: 'deliverNum',
                     render: (text, record, index) => {
                       return (
-                        <InputNumber>
+                        <InputNumber {...getFieldProps('serviceGoods['+index+'].deliverNum')}>
 
                         </InputNumber>
                       )
                     }
                   },
                   {
-                    title: '当前库存',
-                    dataIndex: 'cost',
-                    key: 'cost',
+              title: '当前库存',
+                    dataIndex: 'goodStoreNow',
+                    key: 'goodStoreNow',
                   },
                   {
-                    title: '备注',
-                    dataIndex: 'isClear',
-                    key: 'isClear'
+              title: '备注',
+                    dataIndex: 'remark',
+                    key: 'remark'
                   }]
               }
               rowKey={record => record.id}
-              dataSource={deliverys.deliverys}
-              pagination={deliverys.pagination}
-              loading={deliverys.loading}
-              />
+            dataSource={deliverys.orderGoods}
+            pagination={false}
+            loading={deliverys.loading}
+            />
             <FormItem wrapperCol={{ span: 20, offset: 4 }} style={{ marginTop: 24 }}>
               <Button type="primary" htmlType="submit" loading={deliverys.submiting} onClick={(e) => onSubmit(e, form)}>确定</Button>
               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             <Button type="ghost" onClick={() => dispatch(routerRedux.goBack())}>返回</Button>
             </FormItem>
           </Form>
+
           {uploadAttachmentAble ?
             <Row >
               <Col span="24">
