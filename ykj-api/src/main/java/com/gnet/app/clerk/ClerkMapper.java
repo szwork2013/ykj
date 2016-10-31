@@ -34,6 +34,6 @@ public interface ClerkMapper extends Mapper<Clerk>{
 	 * @param condition
 	 * @return
 	 */
-	public List<Clerk> selectClearksAllByCondition(ClerkCondition condition);
+	public List<Clerk> selectClearksByCondition(ClerkCondition condition);
 	
 }

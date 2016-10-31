@@ -16,7 +16,6 @@
 		<result column="private_remark" property="privateRemark" jdbcType="VARCHAR"/>
 		<result column="name" property="name" jdbcType="VARCHAR"/>
 		<result column="remark" property="remark" jdbcType="VARCHAR"/>
-		<result column="attachment_id" property="attachmentId" jdbcType="CHAR"/>
 		<result column="is_del" property="isDel" jdbcType="BIT"/>
 		<result column="is_finish" property="isFinish" jdbcType="BIT"/>
 		<result column="create_date" property="createDate" />
@@ -25,7 +24,6 @@
 		<result column="order_id" property="orderId" jdbcType="CHAR"/>
 		<result column="need_time" property="needTime" />
 		<result column="service_code" property="serviceCode" jdbcType="CHAR"/>
-		<result column="attachmentName" property="attachmentName" jdbcType="CHAR"/>
     </resultMap>
     	
     <select id="findAll" resultMap="BaseOrderServiceMap">
@@ -51,11 +49,10 @@
     
     <select id="findById" resultMap="BaseOrderServiceMap">
      SELECT
-		  yos.*, yc.name clerkName, yc.phone clerkPhone,yd.attachment_filename attachmentName
+		  yos.*, yc.name clerkName, yc.phone clerkPhone 
 		FROM
 		  ykj_order_service yos
 		    LEFT JOIN ykj_clerk yc ON  yos.clerk_id = yc.id
-		    LEFT JOIN ykj_order_service_attachment yd ON yd.id = yos.attachment_id
     where yos.id = #{id} and yos.is_del = 0
     </select>	
     	
@@ -93,11 +90,10 @@
     
     <select id="selectOrderServiceWithDetailByCondition" resultMap="BaseOrderServiceMap" parameterType="com.gnet.app.orderService.OrderServiceCondition">
         SELECT
-		  t.*, s.name clerkName, s.phone clerkPhone,w.attachment_filename attachmentName
+		  t.*, s.name clerkName, s.phone clerkPhone
 		FROM
 		  ykj_order_service t
 		    LEFT JOIN ykj_clerk s ON t.clerk_id = s.id
-		    LEFT JOIN ykj_order_service_attachment w ON w.id = t.attachment_id
 		<where>
 			<if test="type != null">
 				and t.type = #{type}
