@@ -119,12 +119,6 @@ public class InstallationValidator {
 			return map;
 		}
 		
-		if (StringUtils.isNotBlank(instation.getAttachmentId()) && instation.getAttachmentId().length() > 36 ) {
-			map.put("code", OrderServiceErrorBuilder.ERROR_ATTACHMENTID_TOOLONG);
-			map.put("msg", "长度不能超过36");
-			return map;
-		}
-		
 		if (StringUtils.isNotBlank(instation.getId()) && instation.getId().length() > 36 ) {
 			map.put("code", OrderServiceErrorBuilder.ERROR_ID_TOOLONG);
 			map.put("msg", "长度不能超过36");
@@ -279,12 +273,6 @@ public class InstallationValidator {
 		if (StringUtils.isNotBlank(installation.getName()) && installation.getName().length() > 50 ) {
 			map.put("code", OrderServiceErrorBuilder.ERROR_NAME_TOOLONG);
 			map.put("msg", "长度不能超过50");
-			return map;
-		}
-		
-		if (StringUtils.isNotBlank(installation.getAttachmentId()) && installation.getAttachmentId().length() > 36 ) {
-			map.put("code", OrderServiceErrorBuilder.ERROR_ATTACHMENTID_TOOLONG);
-			map.put("msg", "长度不能超过36");
 			return map;
 		}
 		

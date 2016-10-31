@@ -97,12 +97,6 @@ public class DesignValidator {
 			return map;
 		}
 		
-		if (StringUtils.isNotBlank(design.getAttachmentId()) && design.getAttachmentId().length() > 36 ) {
-			map.put("code", OrderServiceErrorBuilder.ERROR_ATTACHMENTID_TOOLONG);
-			map.put("msg", "长度不能超过36");
-			return map;
-		}
-		
 		if (StringUtils.isNotBlank(design.getId()) && design.getId().length() > 36 ) {
 			map.put("code", OrderServiceErrorBuilder.ERROR_ID_TOOLONG);
 			map.put("msg", "长度不能超过36");
@@ -162,12 +156,6 @@ public class DesignValidator {
 		if (StringUtils.isNotBlank(design.getName()) && design.getName().length() > 50 ) {
 			map.put("code", OrderServiceErrorBuilder.ERROR_NAME_TOOLONG);
 			map.put("msg", "长度不能超过50");
-			return map;
-		}
-		
-		if (StringUtils.isNotBlank(design.getAttachmentId()) && design.getAttachmentId().length() > 36 ) {
-			map.put("code", OrderServiceErrorBuilder.ERROR_ATTACHMENTID_TOOLONG);
-			map.put("msg", "长度不能超过36");
 			return map;
 		}
 		

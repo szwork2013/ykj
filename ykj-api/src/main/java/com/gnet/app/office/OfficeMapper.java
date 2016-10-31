@@ -24,6 +24,7 @@ public interface OfficeMapper extends Mapper<Office>{
 	 * @param condition
 	 * @return
 	 */
-	public List<Office> selectOfficesAllByCondition(OfficeCondition condition);
+	public List<Office> selectOfficesByCondition(OfficeCondition condition);
+	
 	
 }

@@ -88,17 +88,15 @@ public class MeasureController implements ResourceProcessor<RepositoryLinksResou
 		return ResponseEntity.ok(orderServiceResource);
 	}
 
-	@RequestMapping(value = "{orderId}/search", method = RequestMethod.GET)
+	//@RequestMapping(value = "{orderId}/search", method = RequestMethod.GET)
+	@RequestMapping(value = "/search", method = RequestMethod.GET)
 	public ResponseEntity<?> searchMeasures(@PageableDefault Pageable pageable,
 			@RequestParam(name = "isall", required = false) Boolean isAll,
-			@PathVariable("orderId") String orderId,
-			OrderServiceCondition orderServiceCondition,
-			Authentication authentication) {
+			OrderServiceCondition orderServiceCondition, Authentication authentication) {
 		CustomUser customUser = (CustomUser) authentication.getPrincipal();
 
 		orderServiceCondition.setIsDel(Constant.isNotDeleted);
 		orderServiceCondition.setType(OrderSer.TYPE_MEASURE);
-		orderServiceCondition.setOrderId(orderId);
 		// 判断是否分页
 		Resources<OrderServiceResource> resources = null;
 		if (isAll != null && isAll) {
@@ -122,17 +120,10 @@ public class MeasureController implements ResourceProcessor<RepositoryLinksResou
 	 * @return
 	 */
 	@RequestMapping(method = RequestMethod.POST)
-	public ResponseEntity<?> createMeasure(@RequestBody OrderSer measure,
-			Authentication authentication) {
+	public ResponseEntity<?> createMeasure(@RequestBody OrderSer measure, Authentication authentication) {
 		CustomUser customUser = (CustomUser) authentication.getPrincipal();
 		Clerk clerk = customUser.getClerk();
-		Date date = new Date();
-		measure.setCreateDate(date);
-		measure.setModifyDate(date);
 		measure.setType(OrderSer.TYPE_MEASURE);
-		measure.setIsDel(Boolean.FALSE);
-		measure.setIsClear(Boolean.FALSE);
-		measure.setIsFinish(Boolean.FALSE);
 
 		Map<String, Object> error = MeasureValidator.validateBeforeCreateMeasure(measure, clerk.getBusinessId());
 		if (error != null) {
@@ -140,12 +131,10 @@ public class MeasureController implements ResourceProcessor<RepositoryLinksResou
 					.body(new OrderServiceErrorBuilder(Integer.valueOf(error.get("code").toString()),
 							error.get("msg").toString()).build());
 		}
-		Boolean result = measureService.createOrderService(clerk, measure, null);
+		String id = measureService.createOrderService(clerk, measure);
 
-		if (result) {
-			return ResponseEntity.created(ControllerLinkBuilder
-					.linkTo(ControllerLinkBuilder.methodOn(MeasureController.class).getMeasure(measure.getId()))
-					.toUri()).build();
+		if (StringUtils.isNotBlank(id)) {
+			return ResponseEntity.status(HttpStatus.OK).body(id);
 		}
 
 		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -161,11 +150,9 @@ public class MeasureController implements ResourceProcessor<RepositoryLinksResou
 	 */
 	@RequestMapping(value = "/{id}", method = RequestMethod.PUT)
 	public ResponseEntity<?> updateMeasure(@PathVariable("id") String id, @RequestBody OrderSer measure,
-			 Authentication authentication) {
+			Authentication authentication) {
 		CustomUser customUser = (CustomUser) authentication.getPrincipal();
 		Clerk clerk = customUser.getClerk();
-		Date date = new Date();
-		measure.setModifyDate(date);
 		measure.setId(id);
 
 		Map<String, Object> error = MeasureValidator.validateBeforeUpdateMeasure(measure, clerk.getBusinessId());
@@ -175,7 +162,7 @@ public class MeasureController implements ResourceProcessor<RepositoryLinksResou
 							error.get("msg").toString()).build());
 		}
 
-		Boolean result = measureService.updateOrderService(clerk, measure, null);
+		Boolean result = measureService.updateOrderService(clerk, measure);
 
 		if (result) {
 			return ResponseEntity.noContent()
@@ -196,7 +183,7 @@ public class MeasureController implements ResourceProcessor<RepositoryLinksResou
 	 * @return
 	 */
 	@RequestMapping(value = "/{id}/statement", method = RequestMethod.PATCH)
-	public ResponseEntity<?> stateMeasure(@PathVariable("id") String id) {
+	public ResponseEntity<?> statementMeasure(@PathVariable("id") String id, Authentication authentication) {
 		if (StringUtils.isBlank(id)) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND)
 					.body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_ID_NULL, "测量服务编号为空").build());
@@ -214,10 +201,7 @@ public class MeasureController implements ResourceProcessor<RepositoryLinksResou
 							error.get("msg").toString()).build());
 		}
 
-		Date date = new Date();
-		measure.setModifyDate(date);
-		measure.setIsClear(Boolean.TRUE);
-		Boolean result = measureService.update(measure);
+		Boolean result = measureService.statement(measure);
 
 		if (result) {
 			return ResponseEntity.noContent()
@@ -238,7 +222,7 @@ public class MeasureController implements ResourceProcessor<RepositoryLinksResou
 	 * @return
 	 */
 	@RequestMapping(value = "/{id}/cancelStatement", method = RequestMethod.PATCH)
-	public ResponseEntity<?> cancelStateMeasure(@PathVariable("id") String id) {
+	public ResponseEntity<?> cancelStatementMeasure(@PathVariable("id") String id) {
 		if (StringUtils.isBlank(id)) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND)
 					.body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_ID_NULL, "测量服务编号为空").build());
@@ -256,10 +240,7 @@ public class MeasureController implements ResourceProcessor<RepositoryLinksResou
 							error.get("msg").toString()).build());
 		}
 
-		Date date = new Date();
-		measure.setModifyDate(date);
-		measure.setIsClear(Boolean.FALSE);
-		Boolean result = measureService.update(measure);
+		Boolean result = measureService.cancelStatement(measure);
 
 		if (result) {
 			return ResponseEntity.noContent()
@@ -317,9 +298,8 @@ public class MeasureController implements ResourceProcessor<RepositoryLinksResou
 
 		Boolean result = orderServiceAttachmentService.create(attachment);
 		if (result) {
-			return ResponseEntity.created(
-					ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(OrderServiceAttachmentController.class)
-							.getOrderServiceAttachment(attachment.getId())).toUri())
+			return ResponseEntity.created(ControllerLinkBuilder.linkTo(ControllerLinkBuilder
+					.methodOn(OrderServiceAttachmentController.class).getAttachment(attachment.getId())).toUri())
 					.build();
 		}
 
