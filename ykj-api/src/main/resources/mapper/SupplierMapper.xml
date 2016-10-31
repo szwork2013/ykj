@@ -45,12 +45,12 @@
     </select>
     
     <select id="isCreateExist" resultType="Integer">
-       select count(1) from ykj_supplier where business_id = #{businessId} and supplier_name = #{supplierName} and is_del = 0 
+       select count(1) from ykj_supplier where business_id = #{businessId} and supplier_name = #{supplierName}
     </select>
     
     <select id="isModifyExist" resultType="Integer">
      select count(1) from ykj_supplier where business_id = #{businessId} and supplier_name != #{oldSupplierName} and supplier_name = #{supplierName}
-     and is_del = 0
+
     </select>
     
 </mapper>
