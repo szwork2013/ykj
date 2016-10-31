@@ -66,6 +66,12 @@ app.model(require('./models/users'))
 
 app.model(require('./models/componentDataSource'));
 
+/**************系统管理*****************/
+app.model(require('./models/storageGoods'));
+app.model(require('./models/storageIns'));
+app.model(require('./models/storageOuts'));
+
+
 // 4. Router
 app.router(require('./router'));
 
