@@ -9,26 +9,27 @@ const Edit = (props) => {
       {...props}
 
       type="edit"
+      uploadAttachmentAble = {true}
       moreProps={ (getFieldProps) => {
         return {        }
       } }
-      mapPropsToFields={ (design) => ({}) }
-      onSubmit={ (e, form) => {
+      mapPropsToFields={ (measure) => ({}) }
+      onSubmit={ (e, form , fileList) => {
         e.preventDefault();
         
         form.validateFieldsAndScroll((errors, values) => {
-		  if (!!errors) {
-		  	return;
-		  }
-		  
-		  const formData = form.getFieldsValue();
-         formData.orderId = designs.currentOrder.id;
+          if (!!errors) {
+            return;
+          }
+          let formData = form.getFieldsValue();
+          formData.fileList = fileList;
+          formData.orderId = designs.currentOrder.id;
           dispatch({
             type: 'designs/edit',
             payload: formData,
           })
 		  
-		});
+		    });
 
       } }
     />

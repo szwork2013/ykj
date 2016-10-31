@@ -720,7 +720,7 @@ export default Form.create({
         value: order.phoneSec
       },
       orderSource: {
-        value: order.orderSource
+        value: `${order.orderSource}`
       },
       address: {
         value: order.address
