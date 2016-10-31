@@ -40,7 +40,7 @@ app.model(require('./models/roles'));
 app.model(require('./models/orders'));
 app.model(require('./models/orderService'));
 app.model(require('./models/measures'));
-
+app.model(require('./models/orderServiceAttachment'));
 app.model(require('./models/designs'));
 app.model(require('./models/deliverys'));
 app.model(require('./models/deliveryGoods'));
