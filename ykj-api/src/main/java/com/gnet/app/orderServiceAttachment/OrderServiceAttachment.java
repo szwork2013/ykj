@@ -4,6 +4,7 @@ import java.util.Date;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import com.gnet.mybatis.BaseEntity;
 
@@ -22,29 +23,42 @@ public class OrderServiceAttachment extends BaseEntity {
 
 	/** 创建日期 **/
 	private Date createDate;
-	
+
 	/** 修改日期 **/
 	private Date modifyDate;
-	
+
 	/** 附件路径 **/
 	private String attachmentRoot;
-	
+
 	/** 附件大小 **/
 	private String attachmentSize;
-	
+
 	/** 附件名称 **/
 	private String attachmentFilename;
-	
+
 	/** 附件尾缀 **/
 	private String attachmentSuffix;
-	
+
+	/**
+	 * 附件来源
+	 */
+	private Integer attachmentSource;
+
 	/** 上传日期 **/
 	private Date uploadDate;
-	
+
 	/** 上传者 **/
 	private String uploadPersonId;
+
+	/** 上传者姓名 **/
+	private @Transient String uploadPersonName;
 	
+	/**
+	 * 订单服务编号
+	 */
+	private String serviceId;
+
 	/** 备注 **/
 	private String remark;
-	
+
 }
