@@ -1,6 +1,15 @@
 package com.gnet.utils.model;
 
-public class TreeNode implements java.io.Serializable{
+import java.util.List;
+
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
+@Setter
+@Getter
+@ToString
+public class TreeNode<T> implements java.io.Serializable{
 
 	/**
 	 * 名称
@@ -8,52 +17,20 @@ public class TreeNode implements java.io.Serializable{
 	private String name;
 	
 	/**
-	 * ID
+	 * 键值标识
 	 */
-	private String id;
+	private String key;
 	
 	/**
-	 * 父ID
+	 * 数据元素
 	 */
-	private String pId;
+	private T data;
 	
 	/**
 	 * 是否为叶子节点
 	 */
-	private boolean isLeaf ;
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getId() {
-		return id;
-	}
-
-	public void setId(String id) {
-		this.id = id;
-	}
-
-	public String getpId() {
-		return pId;
-	}
-
-	public void setpId(String pId) {
-		this.pId = pId;
-	}
-
-	public boolean isLeaf() {
-		return isLeaf;
-	}
-
-	public void setLeaf(boolean isLeaf) {
-		this.isLeaf = isLeaf;
-	}
+	private boolean leaf ;
 	
-	
+	private List<TreeNode<T>> children;
 	
 }
