@@ -2,6 +2,13 @@ package com.gnet.app.clerk;
 
 import com.gnet.app.CommonCondition;
 
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
+@Setter
+@Getter
+@ToString
 public class ClerkCondition extends CommonCondition {
 
 	/**
@@ -32,48 +39,6 @@ public class ClerkCondition extends CommonCondition {
 	/**
 	 * 是否删除
 	 */
-	private String isDel;
+	private Boolean isDel;
 
-	public String getOfficeId() {
-		return officeId;
-	}
-
-	public void setOfficeId(String officeId) {
-		this.officeId = officeId;
-	}
-
-	public String getStoreId() {
-		return storeId;
-	}
-
-	public void setStoreId(String storeId) {
-		this.storeId = storeId;
-	}
-
-	public Integer getRoleType() {
-		return roleType;
-	}
-
-	public void setRoleType(Integer roleType) {
-		this.roleType = roleType;
-	}
-
-	public String getFuzzyName() {
-		return fuzzyName;
-	}
-
-	public void setFuzzyName(String fuzzyName) {
-		this.fuzzyName = fuzzyName;
-	}
-
-	public String getIsDel() {
-		return isDel;
-	}
-
-	public void setIsDel(String isDel) {
-		this.isDel = isDel;
-	}
-	
-	
-	
 }
