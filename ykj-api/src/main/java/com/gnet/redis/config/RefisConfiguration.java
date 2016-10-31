@@ -19,16 +19,19 @@ public class RefisConfiguration {
 
 	/**
 	 * 连接Redis
-	 * 
+	 *
 	 * @return
 	 */
 	@Bean
 	public JedisConnectionFactory redisConnectionFactory() {
 		JedisConnectionFactory jedisConnectionFactory = new JedisConnectionFactory();
 		// host地址
-		jedisConnectionFactory.setHostName("192.168.1.139");
+//		jedisConnectionFactory.setHostName("192.168.1.139");
+//		jedisConnectionFactory.setHostName("192.168.1.23");
+		jedisConnectionFactory.setHostName("114.55.150.199");
 		// 端口号
-		jedisConnectionFactory.setPort(6379);
+		jedisConnectionFactory.setPort(20161);
+		jedisConnectionFactory.setPassword("ykj123456!@#");
 		jedisConnectionFactory.afterPropertiesSet();
 		return jedisConnectionFactory;
 	}

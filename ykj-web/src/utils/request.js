@@ -1,7 +1,7 @@
 import fetch from 'dva/fetch';
 import { routerRedux } from 'dva/router';
 
-const ROOT_PATH = 'https://localhost:8443';
+const ROOT_PATH = 'http://localhost:8443';
 const ROOT_API_PATH = `${ROOT_PATH}/api`;
 const TOKEN_API_PATH = `${ROOT_PATH}/oauth/token`;
 const CLIENT_ID = 'public';

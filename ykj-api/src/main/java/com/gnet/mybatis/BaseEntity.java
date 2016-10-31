@@ -39,5 +39,12 @@ public class BaseEntity implements Serializable {
 	public static final Boolean DEL_TRUE = Boolean.TRUE;
 	
 	@Id @GeneratedValue(strategy = GenerationType.IDENTITY) private String id;
-	
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
 }
