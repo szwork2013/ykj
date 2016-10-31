@@ -1,4 +1,3 @@
-
 import './index.html';
 import './index.less';
 import dva, { connect } from 'dva';
@@ -47,7 +46,7 @@ app.model(require('./models/deliverys'));
 app.model(require('./models/deliveryGoods'));
 app.model(require('./models/installations'));
 app.model(require('./models/installGoods'));
- 
+
 
 /**************客户管理*****************/
 app.model(require('./models/customers'));
@@ -55,6 +54,7 @@ app.model(require('./models/houses'));
 app.model(require('./models/tracks'));
 app.model(require('./models/tags'));
 app.model(require('./models/group'));
+app.model(require('./models/cgroup'));
 
 
 /**************采购管理*****************/
@@ -71,4 +71,3 @@ app.router(require('./router'));
 
 // 5. Start
 app.start(document.getElementById('root'));
-
