@@ -83,12 +83,6 @@ public class OrderSer extends BaseEntity {
 	/** 服务人员电话 **/
 	private @Transient String clerkPhone;
 	
-	/** 附件编号 **/
-	private String attachmentId;
-	
-	/** 附件名称 **/
-	private @Transient String attachmentName;
-	
 	/** 要求时间 **/
 	private @JsonFormat(pattern="yyyy-MM-dd") Date needTime;
 	

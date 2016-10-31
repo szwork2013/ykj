@@ -113,123 +113,62 @@ public class OrderSerService {
 
 	// 因为预警期表还未完成，到时候还得增加消息提醒表记录
 	@Transactional(readOnly = false)
-	public Boolean createOrderService(Clerk clerk, OrderSer orderService, MultipartFile file) {
+	public String createOrderService(Clerk clerk, OrderSer orderService) {
 
+		orderService.setCreateDate(new Date());
+		orderService.setModifyDate(new Date());
+		orderService.setIsDel(Boolean.FALSE);
+		orderService.setIsClear(Boolean.FALSE);
+		orderService.setIsFinish(Boolean.FALSE);
 		orderService.setServiceCode(generateServiceCode());
-		boolean result = orderServiceMapper.insertSelective(orderService) == 1;
-		if (null != file && !file.isEmpty()) {
-			// 存在附件，则进行保存
-
-			String path = this.fileUploadService.getRootPath() + "order_service_file";
-			File dir = new File(path);
-			if (!dir.exists()) {
-				dir.mkdirs();
-			}
-
-			File localFile = new File(path + "/" + file.getOriginalFilename());
-			try {
-				if (!localFile.exists()) {
-					localFile.createNewFile();
-				}
-				file.transferTo(localFile);
-
-				OrderServiceAttachment attachment = new OrderServiceAttachment();
-				attachment.setAttachmentFilename(file.getOriginalFilename());
-				attachment.setAttachmentSize(String.valueOf(file.getSize()));
-				attachment.setCreateDate(new Date());
-				attachment.setModifyDate(new Date());
-				attachment.setUploadDate(new Date());
-				attachment.setUploadPersonId(clerk.getId());
-				attachment.setAttachmentRoot(path);
-				attachment.setAttachmentSuffix(file.getOriginalFilename()
-						.substring(file.getOriginalFilename().lastIndexOf('.'), file.getOriginalFilename().length()));
-
-				result = orderServiceAttachmentMapper.insertSelective(attachment) == 1;
-
-				orderService.setAttachmentId(attachment.getId());
-				result = this.orderServiceMapper.updateByPrimaryKeySelective(orderService) == 1;
-			} catch (IllegalStateException | IOException e) {
-				// TODO Auto-generated catch block
-				throw new RuntimeException(e);
-			}
+		int n = orderServiceMapper.insertSelective(orderService) ;
+		if(1 == n){
+			return orderService.getId();
+		}else{
+			return null;
 		}
-
-		return result;
 
 	}
 
 	// 因为预警期表还未完成，到时候还得增加消息提醒表记录
 	@Transactional(readOnly = false)
-	public Boolean updateOrderService(Clerk clerk, OrderSer orderService, MultipartFile file) {
-
-		OrderSer oldOrderSer = orderServiceMapper.selectByPrimaryKey(orderService.getId());
-		boolean result = orderServiceMapper.updateByPrimaryKeySelective(orderService) == 1;
-
-		if (null != file && !file.isEmpty()) {
-			// 存在附件，则进行保存
-
-			String path = this.fileUploadService.getRootPath() + "order_service_file";
-			File dir = new File(path);
-			if (!dir.exists()) {
-				dir.mkdirs();
-			}
-
-			File localFile = new File(path + "/" + file.getOriginalFilename());
-			try {
-				if (!localFile.exists()) {
-					localFile.createNewFile();
-				}
-				file.transferTo(localFile);
-
-				// 先删除原附件
-				orderServiceAttachmentMapper.deleteByPrimaryKey(oldOrderSer.getAttachmentId());
-				// 新增附件记录信息
-				OrderServiceAttachment attachment = new OrderServiceAttachment();
-				attachment.setAttachmentFilename(file.getOriginalFilename());
-				attachment.setAttachmentSize(String.valueOf(file.getSize()));
-				attachment.setCreateDate(new Date());
-				attachment.setModifyDate(new Date());
-				attachment.setUploadDate(new Date());
-				attachment.setUploadPersonId(clerk.getId());
-				attachment.setAttachmentRoot("");
-				attachment.setAttachmentSuffix(file.getOriginalFilename()
-						.substring(file.getOriginalFilename().lastIndexOf('.'), file.getOriginalFilename().length()));
-
-				result = orderServiceAttachmentMapper.insertSelective(attachment) == 1;
-
-				// 跟新服务表信息
-				orderService.setAttachmentId(attachment.getId());
-				result = this.orderServiceMapper.updateByPrimaryKeySelective(orderService) == 1;
-			} catch (IllegalStateException | IOException e) {
-				// TODO Auto-generated catch block
-				throw new RuntimeException(e);
-			}
-		}
-
-		return result;
+	public Boolean updateOrderService(Clerk clerk, OrderSer orderService) {
+		orderService.setModifyDate(new Date());
+		return orderServiceMapper.updateByPrimaryKeySelective(orderService) == 1;
 
 	}
 
 	@Transactional(readOnly = false)
 	public Boolean deleteOrderService(Clerk clerk, String orderServiceId) {
 
-		OrderSer orderSer = orderServiceMapper.selectByPrimaryKey(orderServiceId);
+		OrderSer orderSer = new OrderSer();
+		orderSer.setId(orderServiceId);
 		orderSer.setIsDel(Boolean.TRUE);
-		boolean result = orderServiceMapper.updateByPrimaryKeySelective(orderSer) == 1;
-		orderServiceAttachmentMapper.deleteByPrimaryKey(orderSer.getAttachmentId());
 
-		return result;
+		return orderServiceMapper.updateByPrimaryKeySelective(orderSer) == 1;
 
 	}
 
 	protected String generateServiceCode() {
 		String maxServiceCode = this.orderServiceMapper.selectMaxServiceCodeToday();
 		int num = 0;
-		if(StringUtils.isNotBlank(maxServiceCode)){
+		if (StringUtils.isNotBlank(maxServiceCode)) {
 			num = Integer.parseInt(maxServiceCode.substring(10)) + 1;
 		}
 		DateUtil dateUtil = new DateUtil();
-		return "FW" + dateUtil.dateToString(new Date(), "yyyyMMdd") + StringUtils.leftPad(String.valueOf(num), 3,'0');
+		return "FW" + dateUtil.dateToString(new Date(), "yyyyMMdd") + StringUtils.leftPad(String.valueOf(num), 3, '0');
+	}
+
+	@Transactional(readOnly=false)
+	public boolean cancelStatement(OrderSer orderService) {
+		orderService.setIsClear(Boolean.FALSE);
+		return this.orderServiceMapper.updateByPrimaryKeySelective(orderService) == 1;
+	}
+	
+	@Transactional(readOnly=false)
+	public boolean statement(OrderSer orderService) {
+		orderService.setIsClear(Boolean.TRUE);
+		return this.orderServiceMapper.updateByPrimaryKeySelective(orderService) == 1;
 	}
 
 	private void setExtInfoDetail(OrderSer orderService) {
