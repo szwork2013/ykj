@@ -12,6 +12,7 @@ const Add = (props) => {
       moreProps={ (getFieldProps) => {
         return {        }
       } }
+      uploadAttachmentAble = {false}
       mapPropsToFields={ (delivery) => ({}) }
       onSubmit={ (e, form) => {
         e.preventDefault();

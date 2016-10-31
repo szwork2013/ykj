@@ -4,6 +4,7 @@ import { routerRedux } from 'dva/router';
 
 import Container from '../Container';
 import Box from '../Box';
+import BoxTable from '../BoxTable';
 import OrderCustomerInfo from '../OrderService/OrderCustomerInfo'
 import { ClerkSelectModalInput } from '../Common/ClerkComponent'
 import { OrderServiceAttachmentTable } from '../Common/OrderServiceAttachmentComponent'
@@ -14,7 +15,7 @@ const Option = Select.Option;
 
 const Detail = (props) => {
 
-  const { deliverys, installGoods, componentDataSource, customers, form, type, onSubmit, moreProps, dispatch,uploadAttachmentAble = true,orderServiceAttachment, ...rest } = props;
+  const { deliverys, installGoods, componentDataSource, customers, form, type, onSubmit, moreProps, dispatch, uploadAttachmentAble = true, orderServiceAttachment, ...rest } = props;
 
   const { loading } = deliverys;
   const { getFieldProps, getFieldError, isFieldValidating, setFieldsValue } = form;
@@ -242,6 +243,79 @@ const Detail = (props) => {
                 </Col>
               </Row>
             </Box>
+            <FormItem wrapperCol={{ span: 20, offset: 4 }} style={{ marginTop: 24 }}>
+              <Button type="primary" htmlType="submit" loading={deliverys.submiting} onClick={(e) => onSubmit(e, form)}>确定</Button>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <Button type="ghost" onClick={() => dispatch(routerRedux.goBack())}>返回</Button>
+            </FormItem>
+          </Form>
+          <Form horizontal >
+            <h3>本次送货的商品列表</h3>
+            <br />
+            <BoxTable
+              noPadding
+
+              columns={
+                [
+                  {
+                    title: '序号',
+                    dataIndex: 'index',
+                    key: 'index',
+                    render: (text, record, index) => index + 1
+                  },
+                  {
+                    title: '商品名称',
+                    dataIndex: 'name',
+                    key: 'name',
+                  },
+                  {
+                    title: '商品型号',
+                    dataIndex: 'model',
+                    key: 'model',
+                  },
+                  {
+                    title: '单位',
+                    dataIndex: 'unit',
+                    key: 'unit'
+                  },
+                  {
+                    title: '订货数量',
+                    dataIndex: 'clerkName',
+                    key: 'clerkName',
+                  },
+                  {
+                    title: '未送货数量',
+                    dataIndex: 'clerkPhone',
+                    key: 'clerkPhone',
+                  },
+                  {
+                    title: '本次送货数量',
+                    dataIndex: 'starLevel',
+                    key: 'starLevel',
+                    render: (text, record, index) => {
+                      return (
+                        <InputNumber>
+
+                        </InputNumber>
+                      )
+                    }
+                  },
+                  {
+                    title: '当前库存',
+                    dataIndex: 'cost',
+                    key: 'cost',
+                  },
+                  {
+                    title: '备注',
+                    dataIndex: 'isClear',
+                    key: 'isClear'
+                  }]
+              }
+              rowKey={record => record.id}
+              dataSource={deliverys.deliverys}
+              pagination={deliverys.pagination}
+              loading={deliverys.loading}
+              />
             <FormItem wrapperCol={{ span: 20, offset: 4 }} style={{ marginTop: 24 }}>
               <Button type="primary" htmlType="submit" loading={deliverys.submiting} onClick={(e) => onSubmit(e, form)}>确定</Button>
               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
