@@ -30,6 +30,9 @@ import CustomersPage, { CustomerAdd, CustomerEdit, CustomerHouses, CustomerTrack
 import GroupPage, { GroupAdd, GroupEdit } from './routes/GroupPage';
 import CgroupPage, {CgroupEdit } from './routes/CgroupPage';
 
+/*--------------------------------商品管理-------------------------------------- */
+import GoodsPage, { GoodsAdd, GoodsEdit } from './routes/GoodsPage';
+
 
 /*--------------------------------采购管理-------------------------------------- */
 import SuppliersPage, { SupplierAdd, SupplierEdit } from './routes/SuppliersPage';
@@ -81,6 +84,15 @@ export default ({ history }) => {
             </Route>
 
           </Route>
+
+        <Route breadcrumbName="库存管理" path="stock">
+          <IndexRedirect to="stock" />
+            <Route breadcrumbName="商品列表" path="goods" >
+              <IndexRoute component={ GoodsPage }  />
+              <Route breadcrumbName="添加商品信息" path="add" component={ GoodsAdd } />
+              <Route breadcrumbName="编辑商品信息" path="edit/:id" component={ GoodsEdit } />
+            </Route>
+        </Route>
 
         <Route breadcrumbName="客户管理" path="customers">
           <IndexRedirect to="customers" />

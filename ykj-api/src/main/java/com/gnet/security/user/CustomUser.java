@@ -34,10 +34,29 @@ public class CustomUser extends User {
 		this.user = user;
 		return this;
 	}
-	
+
+	public Clerk getClerk() {
+		return clerk;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public SysUser getUser() {
+		return user;
+	}
+
 	public CustomUser setClerk(Clerk clerk) {
 		this.clerk = clerk;
+
 		return this;
 	}
+
+
 	
 }

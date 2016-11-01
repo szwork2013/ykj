@@ -61,6 +61,9 @@ app.model(require('./models/cgroup'));
 /**************采购管理*****************/
 app.model(require('./models/suppliers'));
 
+/**************xx管理*****************/
+app.model(require('./models/goods'));
+
 /**************系统管理*****************/
 app.model(require('./models/codewords'));
 app.model(require('./models/users'))

@@ -111,6 +111,7 @@ public class GoodController implements ResourceProcessor<RepositoryLinksResource
 		CustomUser customUser = (CustomUser) authentication.getPrincipal();
 		String businessId = customUser.getClerk().getBusinessId();
 		good.setBusinessId(businessId);
+		good.setOnsaleStatus(Good.ONSALE_STATUS);
 
 		Boolean result = goodService.create(good);
 		if (result) {
@@ -133,12 +134,12 @@ public class GoodController implements ResourceProcessor<RepositoryLinksResource
 		good.setId(id);
 		good.setBusinessId(businessId);
 
-		Map<String, Object> error = GoodValidator.validateBeforeUpdateGood(good);
-		if (error != null) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-					new GoodErrorBuilder(Integer.valueOf(error.get("code").toString()), error.get("msg").toString())
-							.build());
-		}
+//		Map<String, Object> error = GoodValidator.validateBeforeUpdateGood(good);
+//		if (error != null) {
+//			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+//					new GoodErrorBuilder(Integer.valueOf(error.get("code").toString()), error.get("msg").toString())
+//							.build());
+//		}
 
 		Boolean result = goodService.update(good);
 

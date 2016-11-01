@@ -1,5 +1,6 @@
 package com.gnet.app.good;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -19,7 +20,10 @@ public class GoodService {
 	private GoodMapper goodMapper;
 	
 	public Good findById(String id) {
-		return goodMapper.selectByPrimaryKey(id);
+		List<String> ids = new ArrayList<>();
+		ids.add(id);
+		List<Good> goodList = goodMapper.findByIds(ids);
+		return goodList.size()>0?goodList.get(0):null;
 	}
 	
 	public Good find(Good good) {
@@ -76,7 +80,7 @@ public class GoodService {
 	/**
 	 * 商品在订单中的使用情况
 	 * @param storageGoodsId
-	 * @param businessId
+	 * @param
 	 * @return
 	 */
 	public Boolean useInOrder(String storageGoodsId) {
