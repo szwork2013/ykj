@@ -9,8 +9,8 @@ export async function root(access_token, query) {
   });
 }
 
-export async function search(access_token, payload) {
-  return request(`/api/orders/${payload}/deliverys`, {
+export async function search(access_token, query) {
+  return request(`/api/deliverys/search?${querystring.stringify(query)}`, {
     headers: {
       'Authorization': `Bearer ${access_token}`,
     }
@@ -84,3 +84,4 @@ export async function cancelStatement(access_token, id) {
     }
   })
 }
+

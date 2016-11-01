@@ -55,18 +55,18 @@ public class DeliveryValidator {
 		}
 
 		// 测量单号不能为空过滤
-		if (StringUtils.isBlank(delivery.getServiceCode())) {
-			map.put("code", OrderServiceErrorBuilder.ERROR_SERVICECODE_NULL);
-			map.put("msg", "送货单号不能为空");
-			return map;
-		}
+//		if (StringUtils.isBlank(delivery.getServiceCode())) {
+//			map.put("code", OrderServiceErrorBuilder.ERROR_SERVICECODE_NULL);
+//			map.put("msg", "送货单号不能为空");
+//			return map;
+//		}
 
 		// 测量名称不能为空过滤
-		if (StringUtils.isBlank(delivery.getName())) {
-			map.put("code", OrderServiceErrorBuilder.ERROR_NAME_NULL);
-			map.put("msg", "名称不能为空");
-			return map;
-		}
+//		if (StringUtils.isBlank(delivery.getName())) {
+//			map.put("code", OrderServiceErrorBuilder.ERROR_NAME_NULL);
+//			map.put("msg", "名称不能为空");
+//			return map;
+//		}
 
 		// 要求时间不能为空过滤
 		if (delivery.getNeedTime() == null) {
@@ -117,12 +117,6 @@ public class DeliveryValidator {
 		if (StringUtils.isNotBlank(delivery.getName()) && delivery.getName().length() > 50 ) {
 			map.put("code", OrderServiceErrorBuilder.ERROR_NAME_TOOLONG);
 			map.put("msg", "长度不能超过50");
-			return map;
-		}
-		
-		if (StringUtils.isNotBlank(delivery.getAttachmentId()) && delivery.getAttachmentId().length() > 36 ) {
-			map.put("code", OrderServiceErrorBuilder.ERROR_ATTACHMENTID_TOOLONG);
-			map.put("msg", "长度不能超过36");
 			return map;
 		}
 		
@@ -285,12 +279,6 @@ public class DeliveryValidator {
 		if (StringUtils.isNotBlank(delivery.getName()) && delivery.getName().length() > 50 ) {
 			map.put("code", OrderServiceErrorBuilder.ERROR_NAME_TOOLONG);
 			map.put("msg", "长度不能超过50");
-			return map;
-		}
-		
-		if (StringUtils.isNotBlank(delivery.getAttachmentId()) && delivery.getAttachmentId().length() > 36 ) {
-			map.put("code", OrderServiceErrorBuilder.ERROR_ATTACHMENTID_TOOLONG);
-			map.put("msg", "长度不能超过36");
 			return map;
 		}
 		

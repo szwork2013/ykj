@@ -9,8 +9,8 @@ export async function root(access_token, query) {
   });
 }
 
-export async function search(access_token, payload) {
-    return request(`/api/measures/${payload.orderId}/search`, {
+export async function search(access_token, query) {
+    return request(`/api/measures/search?${querystring.stringify(query)}`, {
       headers: {
         'Authorization': `Bearer ${access_token}`,
       }

@@ -10,7 +10,7 @@ class CustomerSelect extends Component {
 
     constructor(props) {
         super(props);
-        this.componentDataSourceName = "CUSTOMERS";
+        this.componentDataSourceName = "customers";
     }
 
 
@@ -25,22 +25,20 @@ class CustomerSelect extends Component {
             type: 'componentDataSource/loadCustomersData',
             payload: "ALL",
         });
-        console.log("数据加载完成")
 
     }
 
     componentWillUpdate() {
-        console.log("componentWillUpdate")
     }
 
 
     handleSelect(onSelect, value, option) {
-        if (this.props.onSelect) {
+        if (onSelect) {
             const dataSource = this.props.componentDataSource[this.componentDataSourceName] || [];
 
             dataSource.map(item => {
                 if (item.id === value) {
-                    return this.props.onSelect(item);
+                    return onSelect(item);
                 }
             })
         } else {
@@ -48,9 +46,11 @@ class CustomerSelect extends Component {
         }
 
     }
+    test(){
+        console.log(this)
+    }
 
     render() {
-
         const dataSource = this.props.componentDataSource[this.componentDataSourceName] || [];
         return (
             <Select showSearch

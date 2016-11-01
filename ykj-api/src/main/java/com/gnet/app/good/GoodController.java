@@ -218,5 +218,35 @@ public class GoodController implements ResourceProcessor<RepositoryLinksResource
 
 		return ResponseEntity.ok(resources);
 	}
+	
+	/**
+   * 根据商品类型搜索所有对应的商品
+   * @param model
+   * @param authentication
+   * @return
+   */
+	@RequestMapping(value = "/searchStorageGoodStatusDetails", method = RequestMethod.GET)
+  public ResponseEntity<?> searchStorageGoodStatusDetails(@PageableDefault Pageable pageable,
+      @RequestParam(name = "isall", required = false) Boolean isAll,GoodCondition condition,
+      Authentication authentication) {
+    CustomUser customUser = (CustomUser) authentication.getPrincipal();
+    List<String> orderList = null;
+
+    // 排序处理
+    try {
+      orderList = ParamSceneUtils.toOrder(pageable, GoodOrderType.class);
+    } catch (NotFoundOrderPropertyException e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(new GoodErrorBuilder(GoodErrorBuilder.ERROR_SORT_PROPERTY_NOTFOUND, "排序字段不符合要求").build());
+    } catch (NotFoundOrderDirectionException e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(new GoodErrorBuilder(GoodErrorBuilder.ERROR_SORT_DIRECTION_NOTFOUND, "排序方向不符合要求").build());
+    }
+
+    // 判断是否分页
+    Page<StorageGoodStatusDetail> storageGoodStatusDetails = goodService.paginationStorageGoodStatusDetailList(pageable, orderList,customUser.getClerk(),condition);
+
+    return ResponseEntity.ok(storageGoodStatusDetails);
+  }
 
 }

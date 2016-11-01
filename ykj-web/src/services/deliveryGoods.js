@@ -38,3 +38,15 @@ export async function update(access_token, delivery) {
     body: JSON.stringify(deliveryGoods)
   })
 }
+
+
+/**
+ * 根据订单号获取订单商品
+ */
+export async function getOrderGoodsListWithDetailByOrderId(access_token, query) {
+  return request(`/api/orderDeliverGoods/getOrderGoodsListWithDetailByOrderId?${querystring.stringify(query)}`, {
+    headers: {
+      'Authorization': `Bearer ${access_token}`,
+    }
+  });
+}

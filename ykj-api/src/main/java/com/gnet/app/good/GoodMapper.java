@@ -20,4 +20,7 @@ public interface GoodMapper extends Mapper<Good> {
 	public List<Good> findByIds(@Param("ids") List<String> ids);
 	
 	public List<Good> selectGoodsAllByCondition(GoodCondition condition);
+	
+	
+	public List<StorageGoodStatusDetail> selectStorageGoodStatusDetailList(GoodCondition condition);
 }

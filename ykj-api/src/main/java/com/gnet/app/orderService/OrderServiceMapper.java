@@ -36,4 +36,11 @@ public interface OrderServiceMapper extends Mapper<OrderSer> {
 	 * @return
 	 */
 	public String selectMaxServiceCodeToday();
+	
+	/**
+   * 根据订单编号获取
+   * @param condition
+   * @return
+   */
+	public OrderSer getOrderServiceDetailForPrint(String orderServiceId);
 }

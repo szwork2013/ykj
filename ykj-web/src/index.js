@@ -1,4 +1,3 @@
-
 import './index.html';
 import './index.less';
 import dva, { connect } from 'dva';
@@ -41,7 +40,7 @@ app.model(require('./models/roles'));
 app.model(require('./models/orders'));
 app.model(require('./models/orderService'));
 app.model(require('./models/measures'));
-
+app.model(require('./models/orderServiceAttachment'));
 app.model(require('./models/designs'));
 app.model(require('./models/deliverys'));
 app.model(require('./models/deliveryGoods'));
@@ -70,9 +69,14 @@ app.model(require('./models/users'))
 
 app.model(require('./models/componentDataSource'));
 
+/**************系统管理*****************/
+app.model(require('./models/storageGoods'));
+app.model(require('./models/storageIns'));
+app.model(require('./models/storageOuts'));
+
+
 // 4. Router
 app.router(require('./router'));
 
 // 5. Start
 app.start(document.getElementById('root'));
-

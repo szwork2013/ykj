@@ -8,7 +8,7 @@ public class OrderServiceAttachmentResourceAssembler implements ResourceAssemble
 	@Override
 	public OrderServiceAttachmentResource toResource(OrderServiceAttachment entity) {
 		OrderServiceAttachmentResource resource = new OrderServiceAttachmentResource(entity);
-		resource.add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(OrderServiceAttachmentController.class).getOrderServiceAttachment(entity.getId())).withSelfRel());
+		resource.add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(OrderServiceAttachmentController.class).getAttachment(entity.getId())).withSelfRel());
 		return resource;
 	}
 	

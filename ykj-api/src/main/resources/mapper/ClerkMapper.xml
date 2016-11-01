@@ -103,7 +103,7 @@
     select count(1) from ykj_clerk where store_id = #{id} and is_del = 0;
     </select>
     
-    <select id="selectClearksAllByCondition" resultMap="BaseClerkMap" parameterType="com.gnet.app.clerk.ClerkCondition">
+    <select id="selectClearksByCondition" resultMap="BaseClerkMap" parameterType="com.gnet.app.clerk.ClerkCondition">
 		select * from ykj_clerk 
 		<where>
 			<if test=" fuzzyName != null and fuzzyName != ''">

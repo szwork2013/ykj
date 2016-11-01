@@ -125,10 +125,7 @@ export default {
                         type: 'searchCustomersByName',
                         payload: 'ALL'
                     });
-                    dispatch({
-                        type: 'codewords/setCodewordsByType',
-                        payload: 'ORDER_SOURCE'
-                    });
+                    console.log("初始化完成")
                 }
             });
     },
@@ -179,7 +176,6 @@ export default {
         }
       } );
       const { data, error } = yield search(access_token, mergeQuery(oldQuery, query));
-      console.log(data)
       if (!error) {
         yield put({
           type: 'setOrders',
@@ -265,7 +261,6 @@ export default {
     	const err = yield parseError(error);
         yield message.error(`创建订单管理信息失败:${err.status} ${err.message}`, 3);
       }
-      console.log(payload)
      
 
       yield put({
@@ -607,7 +602,6 @@ export default {
         type: 'toggleSubmiting',
         payload: true,
       });
-      console.log(payload)
 
       const access_token = yield select( state => state.oauth.access_token );
       const { data, error } = yield revenueOrder(access_token, payload.orderId,payload);
@@ -749,7 +743,6 @@ export default {
      * 订单审核
      */
     *audit({ payload }, {select, put}) {
-      console.log(payload)
       const access_token = yield select( state => state.oauth.access_token );
       const { data, error } = yield auditOrder(access_token, payload.id);
 

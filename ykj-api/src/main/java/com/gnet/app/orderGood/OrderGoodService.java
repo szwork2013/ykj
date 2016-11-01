@@ -239,4 +239,16 @@ public class OrderGoodService {
 		return orderGoodMapper.selectAllUnderOrderWithGoodInfo(orderId);
 	}
 	
+	/**
+	 * 根据订单号获取订单商品详情
+	 * @param orderId
+	 * @return
+	 */
+	public List<OrderGood> selectOrderGoodsListWithDetailByOrderId(String orderId){
+		OrderGoodCondition condition = new OrderGoodCondition();
+		condition.setOrderId(orderId);;
+		return this.orderGoodMapper.selectOrderGoodsAllWithDetailByCondition(condition);
+	}
+	
+	
 }

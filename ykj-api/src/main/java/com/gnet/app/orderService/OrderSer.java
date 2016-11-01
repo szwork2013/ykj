@@ -10,6 +10,9 @@ import javax.persistence.Transient;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.gnet.app.business.Business;
+import com.gnet.app.clerk.Clerk;
+import com.gnet.app.customer.Customer;
 import com.gnet.app.orderDeliverGoods.OrderDeliverGoods;
 import com.gnet.app.orderInstallGoods.OrderInstallGoods;
 import com.gnet.mybatis.BaseEntity;
@@ -83,12 +86,6 @@ public class OrderSer extends BaseEntity {
 	/** 服务人员电话 **/
 	private @Transient String clerkPhone;
 	
-	/** 附件编号 **/
-	private String attachmentId;
-	
-	/** 附件名称 **/
-	private @Transient String attachmentName;
-	
 	/** 要求时间 **/
 	private @JsonFormat(pattern="yyyy-MM-dd") Date needTime;
 	
@@ -124,6 +121,15 @@ public class OrderSer extends BaseEntity {
 	
 	/** 服务状态 **/
 	private @Transient String status;
+	
+	/** 员工信息 **/
+	private @Transient Clerk clerk;
+	
+	/** 客户信息 **/
+	private @Transient Customer customer;
+	
+	/** 商家信息 **/
+	private @Transient Business business;
 	
 	/** 送货商品列表 **/
 	private @Transient List<OrderDeliverGoods> serviceGoods;

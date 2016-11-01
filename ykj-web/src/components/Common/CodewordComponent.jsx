@@ -10,7 +10,7 @@ class CodewordSelect extends Component {
 
     constructor(props) {
         super(props);
-        this.componentDataSourceName = "CODEWORDS";
+        this.componentDataSourceName = "codewords";
         this.state = {
             type : this.props.type
         }
@@ -24,22 +24,22 @@ class CodewordSelect extends Component {
     }
 
     componentWillMount() {
+        console.log("componentWillMount")
+        console.log(this.state.type)
         this.props.dispatch({
-            type: 'componentDataSource/loadCodewordData',
+            type: 'componentDataSource/loadCodewordsData',
             payload: this.state.type,
         });
-        console.log("数据加载完成")
     }
 
     componentWillUpdate() {
-        console.log("componentWillUpdate")
     }
 
 
     handleSelect(onSelect, value, option) {
         if (this.props.onSelect) {
             const dataSource = this.props.componentDataSource[this.componentDataSourceName][this.state.type] || [];
-
+            console.dir(dataSource)
             dataSource.map(item => {
                 if (item.id === value) {
                     return this.props.onSelect(item);
@@ -52,7 +52,6 @@ class CodewordSelect extends Component {
     }
     
     render() {
-
         const dataSource =  this.props.componentDataSource[this.componentDataSourceName][this.state.type] || [];
         return (
             <Select showSearch
@@ -68,7 +67,7 @@ class CodewordSelect extends Component {
                 >
                 {
                     dataSource.map(item => {
-                        return <Select.Option key={item.id} value={item.id}>{item.name}</Select.Option>
+                        return <Select.Option key={item.code} value={item.code}>{item.value}</Select.Option>
                     })
                 }
             </Select >

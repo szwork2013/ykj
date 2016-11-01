@@ -9,6 +9,7 @@ const Edit = (props) => {
       {...props}
 
       type="edit"
+      uploadAttachmentAble = {true}
       moreProps={ (getFieldProps) => {
         return {        }
       } }

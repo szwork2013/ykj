@@ -12,6 +12,7 @@ const Add = (props) => {
       moreProps={ (getFieldProps) => {
         return {        }
       } }
+      uploadAttachmentAble = {false}
       mapPropsToFields={ (measure) => ({}) }
       onSubmit={ (e, form,fileList) => {
         e.preventDefault();
@@ -22,7 +23,6 @@ const Add = (props) => {
           }
           
           const formData = form.getFieldsValue();
-          formData.fileList = fileList;
           formData.orderId = measures.currentOrder.id;
           dispatch({
             type: 'measures/add',

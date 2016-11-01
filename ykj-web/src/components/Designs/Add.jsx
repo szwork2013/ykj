@@ -12,22 +12,22 @@ const Add = (props) => {
       moreProps={ (getFieldProps) => {
         return {        }
       } }
-      mapPropsToFields={ (design) => ({}) }
-      onSubmit={ (e, form) => {
+      uploadAttachmentAble = {false}
+      mapPropsToFields={ (measure) => ({}) }
+      onSubmit={ (e, form,fileList) => {
         e.preventDefault();
         
         form.validateFieldsAndScroll((errors, values) => {
           if (!!errors) {
             return;
           }
-		  
+          
           const formData = form.getFieldsValue();
           formData.orderId = designs.currentOrder.id;
-          console.log(formData)
-            dispatch({
-              type: 'designs/add',
-              payload: formData,
-            })
+          dispatch({
+            type: 'designs/add',
+            payload: formData,
+          })
 		  
         });
 		

@@ -5,5 +5,6 @@ export default state => {
     customers: state.customers,
     orders: state.orders,
     installGoods: state.installGoods,
+    componentDataSource : state.componentDataSource
   }
 }

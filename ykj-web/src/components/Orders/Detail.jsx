@@ -9,8 +9,9 @@ import Container from '../Container';
 import Box from '../Box';
 import TreeBox from '../TreeBox';
 import TableVariable from './TableVariable';
-import CustomerSelect from '../Common/CustomerSelect';
-import CodewordSelect from '../Common/CodewordSelect';
+import CustomerSelect from '../Common/CustomerComponent';
+import CodewordSelect from '../Common/CodewordComponent';
+import { ClerkSelectModalInput } from '../Common/ClerkComponent'
 
 const FormItem = Form.Item;
 const CheckboxGroup = Checkbox.Group;
@@ -68,6 +69,14 @@ class Detail extends Component {
       ],
     });
 
+    const orderResponsibleNameProps = getFieldProps('orderResponsibleName', {
+      rules: [
+        { pattern: new RegExp(/^[0-9]+$/), message: '请填写正确的QQ' },
+      ],
+    });
+
+    
+
     const orderSourceProps = getFieldProps('orderSource', {
       rules: [
         { required: false, message: '请选择订单来源' }
@@ -110,14 +119,6 @@ class Detail extends Component {
       wrapperCol: { span: 10 },
     };
 
-    const treeData = [
-      { name: '杭州', id: '1' },
-      { name: '台州', id: '2' },
-      { name: '湖州', id: '3' },
-      { name: '张伟刚', id: '4', pId: '1' },
-      { name: '许照亮', id: '5', pId: '2' },
-      { name: '其味无穷', id: '6', pId: '5' },
-    ]
 
     const customers = [{
       id: '1',
@@ -169,7 +170,7 @@ class Detail extends Component {
                     >
 
                     <CustomerSelect
-                      style={{ width: '80%'}}
+                      style={{ width: '80%' }}
                       elementProps={customerIdProps}
                       dispatch={dispatch}
                       componentDataSource={componentDataSource}
@@ -222,19 +223,16 @@ class Detail extends Component {
                     hasFeedback
                     help={isFieldValidating('orderResponsibleId') ? '校验中...' : (getFieldError('orderResponsibleId') || []).join(', ')}
                     >
-                    <TreeBox
-                      treeData={treeData}
-                      multiple={false}
-                      checkable={false}
-                      changeable={true}
-                      treeProps={orderResponsibleIdProps}
+                    <ClerkSelectModalInput
+                      idProps={orderResponsibleIdProps}
+                      nameProps={orderResponsibleNameProps}
+                      style={{ width: '80%' }}
+                      dispatch={dispatch}
+                      componentDataSource={componentDataSource}
                       onOk={(value) => {
-                        const { setFieldsValue } = form
-                        setFieldsValue({
-                          orderResponsibleId: value
-                        })
                       } }
-                      />
+                      >
+                    </ClerkSelectModalInput>
                   </FormItem>
                 </Col>
                 <Col sm={12}>
@@ -244,13 +242,13 @@ class Detail extends Component {
                     hasFeedback
                     help={isFieldValidating('orderType') ? '校验中...' : (getFieldError('orderType') || []).join(', ')}
                     >
-                    <CodewordSelect 
-                      style={{ width: '80%'}}
+                    <CodewordSelect
+                      style={{ width: '80%' }}
                       elementProps={orderSourceProps}
                       type={"ORDER_SOURCE"}
                       dispatch={dispatch}
                       componentDataSource={componentDataSource}
-                    >
+                      >
                     </CodewordSelect>
                   </FormItem>
                 </Col>
