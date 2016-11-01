@@ -19,4 +19,9 @@ public class StorageInDetailCondition {
    * 入库编号
    */
   private String storageInId;
+  
+  /**
+   * 入库商品编号
+   */
+  private String storageGoodsId;
 }

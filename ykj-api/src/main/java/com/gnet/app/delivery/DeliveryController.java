@@ -67,453 +67,475 @@ import com.gnet.utils.spring.SpringContextHolder;
 @RequestMapping("/api/deliverys")
 public class DeliveryController implements ResourceProcessor<RepositoryLinksResource> {
 
-	@Autowired
-	private DeliveryService deliveryService;
-	@Autowired
-	private OrderService orderService;
-	@Autowired
-	private OrderServiceAttachmentService orderServiceAttachmentService;
-	@Autowired
-	private OrderDeliverGoodsService orderDeliverGoodsService;
-	@Autowired
-	private PagedResourcesAssembler<OrderDeliverGoods> pagedResourcesAssembler;
-	@Autowired
-	private ListResourcesAssembler<OrderDeliverGoods> listResourcesAssembler;
-	@Autowired
-	private PagedResourcesAssembler<OrderSer> pagedOrderServiceResourcesAssembler;
-	@Autowired
-	private ListResourcesAssembler<OrderSer> listOrderServiceResourcesAssembler;
+  @Autowired
+  private DeliveryService deliveryService;
 
-	/**
-	 * 送货详细信息
-	 * 
-	 * @param id
-	 * @return
-	 */
-	@RequestMapping(value = "/{id}", method = RequestMethod.GET)
-	public ResponseEntity<?> getDelivery(@PathVariable("id") String id) {
-		if (StringUtils.isBlank(id)) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND)
-					.body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_ID_NULL, "送货服务编号为空").build());
-		}
-		OrderSer delivery = deliveryService.findById(id);
-		if (delivery == null) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND)
-					.body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_SERVICE_NULL, "找不到送货服务").build());
-		}
+  @Autowired
+  private OrderService orderService;
 
-		DeliveryResourceAssembler orderServiceResourceAssembler = new DeliveryResourceAssembler();
-		OrderServiceResource orderServiceResource = orderServiceResourceAssembler.toResource(delivery);
+  @Autowired
+  private OrderServiceAttachmentService orderServiceAttachmentService;
 
-		return ResponseEntity.ok(orderServiceResource);
-	}
+  @Autowired
+  private OrderDeliverGoodsService orderDeliverGoodsService;
 
-	/**
-	 * 返回订单的送货服务列表
-	 * 
-	 * @param pageable
-	 * @param orderId
-	 * @param isAll
-	 * @return
-	 */
-	@RequestMapping(value = "/search", method = RequestMethod.GET)
-	public ResponseEntity<?> searchDelivery(@PageableDefault Pageable pageable,
-			@RequestParam(name = "isall", required = false) Boolean isAll, OrderServiceCondition orderServiceCondition,
-			Authentication authentication) {
-		if (StringUtils.isBlank(orderServiceCondition.getOrderId())) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND)
-					.body(new OrderErrorBuilder(OrderErrorBuilder.ERROR_ID_NULL, "订单编号为空").build());
-		}
+  @Autowired
+  private PagedResourcesAssembler<OrderDeliverGoods> pagedResourcesAssembler;
 
-		Order order = orderService.findById(orderServiceCondition.getOrderId());
-		Map<String, Object> error = OrderValidator.validateBeforeDelivery(order);
-		if (error != null) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-					new OrderErrorBuilder(Integer.valueOf(error.get("code").toString()), error.get("msg").toString())
-							.build());
-		}
+  @Autowired
+  private ListResourcesAssembler<OrderDeliverGoods> listResourcesAssembler;
 
-		List<String> orderList = null;
+  @Autowired
+  private PagedResourcesAssembler<OrderSer> pagedOrderServiceResourcesAssembler;
 
-		// 排序处理
-		try {
-			orderList = ParamSceneUtils.toOrder(pageable, OrderServiceOrderType.class);
-		} catch (NotFoundOrderPropertyException e) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-					new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_SORT_PROPERTY_NOTFOUND, "排序字段不符合要求")
-							.build());
-		} catch (NotFoundOrderDirectionException e) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-					new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_SORT_DIRECTION_NOTFOUND, "排序方向不符合要求")
-							.build());
-		}
+  @Autowired
+  private ListResourcesAssembler<OrderSer> listOrderServiceResourcesAssembler;
 
-		// 判断是否分页
-		Resources<OrderServiceResource> resources = null;
-		if (isAll != null && isAll) {
-			List<OrderSer> deliverys = deliveryService.findAll(orderList, orderServiceCondition.getOrderId(),
-					OrderSer.TYPE_DELIVERY);
+  /**
+   * 送货详细信息
+   * 
+   * @param id
+   * @return
+   */
+  @RequestMapping(value = "/{id}", method = RequestMethod.GET)
+  public ResponseEntity<?> getDelivery(@PathVariable("id") String id) {
+    if (StringUtils.isBlank(id)) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_ID_NULL, "送货服务编号为空").build());
+    }
+    OrderSer delivery = deliveryService.findById(id);
+    if (delivery == null) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_SERVICE_NULL, "找不到送货服务").build());
+    }
 
-			DeliveryResourceAssembler orderServiceResourceAssembler = new DeliveryResourceAssembler();
-			resources = listOrderServiceResourcesAssembler.toResource(deliverys, orderServiceResourceAssembler);
-		} else {
-			Page<OrderSer> deliverys = deliveryService.pagination(pageable, orderList,
-					orderServiceCondition.getOrderId(), OrderSer.TYPE_DELIVERY);
+    DeliveryResourceAssembler orderServiceResourceAssembler = new DeliveryResourceAssembler();
+    OrderServiceResource orderServiceResource = orderServiceResourceAssembler.toResource(delivery);
 
-			DeliveryResourceAssembler orderServiceResourceAssembler = new DeliveryResourceAssembler();
-			resources = pagedOrderServiceResourcesAssembler.toResource(deliverys, orderServiceResourceAssembler);
-		}
+    return ResponseEntity.ok(orderServiceResource);
+  }
 
-		return ResponseEntity.ok(resources);
-	}
+  /**
+   * 返回订单的送货服务列表
+   * 
+   * @param pageable
+   * @param orderId
+   * @param isAll
+   * @return
+   */
+  @RequestMapping(value = "/search", method = RequestMethod.GET)
+  public ResponseEntity<?> searchDelivery(@PageableDefault Pageable pageable,
+      @RequestParam(name = "isall", required = false) Boolean isAll, OrderServiceCondition orderServiceCondition,
+      Authentication authentication) {
+    if (StringUtils.isBlank(orderServiceCondition.getOrderId())) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(new OrderErrorBuilder(OrderErrorBuilder.ERROR_ID_NULL, "订单编号为空").build());
+    }
 
-	/**
-	 * 送货商品列表
-	 * 
-	 * @param id
-	 * @return
-	 */
-	@RequestMapping(value = "/{id}/delivery_goods", method = RequestMethod.GET)
-	public ResponseEntity<?> getDeliveryGoods(@PathVariable("id") String serviceId, @PageableDefault Pageable pageable,
-			@RequestParam(name = "isall", required = false) Boolean isAll) {
-		if (StringUtils.isBlank(serviceId)) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND)
-					.body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_ID_NULL, "送货服务编号为空").build());
-		}
-		List<String> orderList = null;
+    Order order = orderService.findById(orderServiceCondition.getOrderId());
+    Map<String, Object> error = OrderValidator.validateBeforeDelivery(order);
+    if (error != null) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+          new OrderErrorBuilder(Integer.valueOf(error.get("code").toString()), error.get("msg").toString()).build());
+    }
 
-		// 排序处理
-		try {
-			orderList = ParamSceneUtils.toOrder(pageable, OrderDeliverGoodsOrderType.class);
-		} catch (NotFoundOrderPropertyException e) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND)
-					.body(new OrderDeliverGoodsErrorBuilder(OrderDeliverGoodsErrorBuilder.ERROR_SORT_PROPERTY_NOTFOUND,
-							"排序字段不符合要求").build());
-		} catch (NotFoundOrderDirectionException e) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND)
-					.body(new OrderDeliverGoodsErrorBuilder(OrderDeliverGoodsErrorBuilder.ERROR_SORT_DIRECTION_NOTFOUND,
-							"排序方向不符合要求").build());
-		}
+    List<String> orderList = null;
 
-		// 判断是否分页
-		Resources<OrderDeliverGoodsResource> resources = null;
-		if (isAll != null && isAll) {
-			List<OrderDeliverGoods> orderDeliverGoods = orderDeliverGoodsService.findAll(orderList, serviceId);
+    // 排序处理
+    try {
+      orderList = ParamSceneUtils.toOrder(pageable, OrderServiceOrderType.class);
+    } catch (NotFoundOrderPropertyException e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+          new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_SORT_PROPERTY_NOTFOUND, "排序字段不符合要求").build());
+    } catch (NotFoundOrderDirectionException e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+          new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_SORT_DIRECTION_NOTFOUND, "排序方向不符合要求").build());
+    }
 
-			OrderDeliverGoodsResourceAssembler orderDeliverGoodsResourceAssembler = new OrderDeliverGoodsResourceAssembler();
-			resources = listResourcesAssembler.toResource(orderDeliverGoods, orderDeliverGoodsResourceAssembler);
-		} else {
-			Page<OrderDeliverGoods> orderDeliverGoods = orderDeliverGoodsService.pagination(pageable, orderList,
-					serviceId);
+    // 判断是否分页
+    Resources<OrderServiceResource> resources = null;
+    if (isAll != null && isAll) {
+      List<OrderSer> deliverys = deliveryService.findAll(orderList, orderServiceCondition.getOrderId(),
+          OrderSer.TYPE_DELIVERY);
 
-			OrderDeliverGoodsResourceAssembler orderDeliverGoodsResourceAssembler = new OrderDeliverGoodsResourceAssembler();
-			resources = pagedResourcesAssembler.toResource(orderDeliverGoods, orderDeliverGoodsResourceAssembler);
-		}
+      DeliveryResourceAssembler orderServiceResourceAssembler = new DeliveryResourceAssembler();
+      resources = listOrderServiceResourcesAssembler.toResource(deliverys, orderServiceResourceAssembler);
+    } else {
+      Page<OrderSer> deliverys = deliveryService.pagination(pageable, orderList, orderServiceCondition.getOrderId(),
+          OrderSer.TYPE_DELIVERY);
 
-		return ResponseEntity.ok(resources);
-	}
+      DeliveryResourceAssembler orderServiceResourceAssembler = new DeliveryResourceAssembler();
+      resources = pagedOrderServiceResourcesAssembler.toResource(deliverys, orderServiceResourceAssembler);
+    }
 
-	/**
-	 * 增加送货服务（还需要增加商品）
-	 * 
-	 * @param delivery
-	 * @param authentication
-	 * @return
-	 */
-	@RequestMapping(method = RequestMethod.POST)
-	public ResponseEntity<?> createDelivery(@RequestBody OrderSer delivery, Authentication authentication) {
-		CustomUser customUser = (CustomUser) authentication.getPrincipal();
-		Clerk clerk = customUser.getClerk();
-		Date date = new Date();
-		delivery.setCreateDate(date);
-		delivery.setModifyDate(date);
-		delivery.setType(OrderSer.TYPE_DELIVERY);
-		delivery.setIsDel(Boolean.FALSE);
-		delivery.setIsClear(Boolean.FALSE);
+    return ResponseEntity.ok(resources);
+  }
 
-		Map<String, Object> error = DeliveryValidator.validateBeforeCreateDelivery(delivery, clerk.getBusinessId());
-		if (error != null) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-					.body(new OrderServiceErrorBuilder(Integer.valueOf(error.get("code").toString()),
-							error.get("msg").toString()).build());
-		}
-		Boolean result = deliveryService.create(delivery);
+  /**
+   * 送货商品列表
+   * 
+   * @param id
+   * @return
+   */
+  @RequestMapping(value = "/{id}/delivery_goods", method = RequestMethod.GET)
+  public ResponseEntity<?> getDeliveryGoods(@PathVariable("id") String serviceId, @PageableDefault Pageable pageable,
+      @RequestParam(name = "isall", required = false) Boolean isAll) {
+    if (StringUtils.isBlank(serviceId)) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_ID_NULL, "送货服务编号为空").build());
+    }
+    List<String> orderList = null;
 
-		if (result) {
-			return ResponseEntity.created(ControllerLinkBuilder
-					.linkTo(ControllerLinkBuilder.methodOn(DeliveryController.class).getDelivery(delivery.getId()))
-					.toUri()).build();
-		}
+    // 排序处理
+    try {
+      orderList = ParamSceneUtils.toOrder(pageable, OrderDeliverGoodsOrderType.class);
+    } catch (NotFoundOrderPropertyException e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+          new OrderDeliverGoodsErrorBuilder(OrderDeliverGoodsErrorBuilder.ERROR_SORT_PROPERTY_NOTFOUND, "排序字段不符合要求")
+              .build());
+    } catch (NotFoundOrderDirectionException e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+          new OrderDeliverGoodsErrorBuilder(OrderDeliverGoodsErrorBuilder.ERROR_SORT_DIRECTION_NOTFOUND, "排序方向不符合要求")
+              .build());
+    }
 
-		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-				.body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_CREATED, "创建错误").build());
-	}
+    // 判断是否分页
+    Resources<OrderDeliverGoodsResource> resources = null;
+    if (isAll != null && isAll) {
+      List<OrderDeliverGoods> orderDeliverGoods = orderDeliverGoodsService.findAll(orderList, serviceId);
 
-	/**
-	 * 更新送货商品
-	 * 
-	 * @param id
-	 * @param delivery
-	 * @return
-	 */
-	@RequestMapping(value = "/{id}/delivery_goods", method = RequestMethod.PUT)
-	public ResponseEntity<?> updateDeliveryGoods(@PathVariable("id") String id, @RequestBody OrderSer delivery,
-			Authentication authentication) {
-		if (StringUtils.isBlank(id)) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND)
-					.body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_ID_NULL, "送货服务编号为空").build());
-		}
+      OrderDeliverGoodsResourceAssembler orderDeliverGoodsResourceAssembler = new OrderDeliverGoodsResourceAssembler();
+      resources = listResourcesAssembler.toResource(orderDeliverGoods, orderDeliverGoodsResourceAssembler);
+    } else {
+      Page<OrderDeliverGoods> orderDeliverGoods = orderDeliverGoodsService.pagination(pageable, orderList, serviceId);
 
-		Map<String, Object> error = DeliveryValidator.validateBeforeUpdateDeliveryGoods(delivery);
-		if (error != null) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-					.body(new OrderServiceErrorBuilder(Integer.valueOf(error.get("code").toString()),
-							error.get("msg").toString()).build());
-		}
+      OrderDeliverGoodsResourceAssembler orderDeliverGoodsResourceAssembler = new OrderDeliverGoodsResourceAssembler();
+      resources = pagedResourcesAssembler.toResource(orderDeliverGoods, orderDeliverGoodsResourceAssembler);
+    }
 
-		Boolean result = deliveryService.updateGoods(delivery);
+    return ResponseEntity.ok(resources);
+  }
 
-		if (result) {
-			BooleanResourceAssembler booleanResourceAssembler = new BooleanResourceAssembler();
-			return ResponseEntity.ok(booleanResourceAssembler.toResource(Boolean.TRUE));
-		}
+  /**
+   * 增加送货服务（还需要增加商品）
+   * 
+   * @param delivery
+   * @param authentication
+   * @return
+   */
+  @RequestMapping(method = RequestMethod.POST)
+  public ResponseEntity<?> createDelivery(@RequestBody OrderSer delivery, Authentication authentication) {
+    CustomUser customUser = (CustomUser) authentication.getPrincipal();
+    Clerk clerk = customUser.getClerk();
+    Date date = new Date();
+    delivery.setCreateDate(date);
+    delivery.setModifyDate(date);
+    delivery.setType(OrderSer.TYPE_DELIVERY);
+    delivery.setIsDel(Boolean.FALSE);
+    delivery.setIsClear(Boolean.FALSE);
 
-		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-				.body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_EDITED, "更新错误").build());
-	}
+    Map<String, Object> error = DeliveryValidator.validateBeforeCreateDelivery(delivery, clerk.getBusinessId());
+    if (error != null) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+          .body(new OrderServiceErrorBuilder(Integer.valueOf(error.get("code").toString()), error.get("msg").toString())
+              .build());
+    }
+    Boolean result = deliveryService.create(delivery);
 
-	/**
-	 * 更新送货服务
-	 * 
-	 * @param id
-	 * @param delivery
-	 * @return
-	 */
-	@RequestMapping(value = "/{id}", method = RequestMethod.PUT)
-	public ResponseEntity<?> updateDelivery(@PathVariable("id") String id, @RequestBody OrderSer delivery,
-			Authentication authentication) {
-		CustomUser customUser = (CustomUser) authentication.getPrincipal();
-		Clerk clerk = customUser.getClerk();
-		Date date = new Date();
-		delivery.setModifyDate(date);
-		delivery.setId(id);
+    if (result) {
+      return ResponseEntity
+          .created(ControllerLinkBuilder
+              .linkTo(ControllerLinkBuilder.methodOn(DeliveryController.class).getDelivery(delivery.getId())).toUri())
+          .build();
+    }
 
-		Map<String, Object> error = DeliveryValidator.validateBeforeUpdateDelivery(delivery, clerk.getBusinessId());
-		if (error != null) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-					.body(new OrderServiceErrorBuilder(Integer.valueOf(error.get("code").toString()),
-							error.get("msg").toString()).build());
-		}
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_CREATED, "创建错误").build());
+  }
 
-		Boolean result = deliveryService.update(delivery);
+  /**
+   * 更新送货商品
+   * 
+   * @param id
+   * @param delivery
+   * @return
+   */
+  @RequestMapping(value = "/{id}/delivery_goods", method = RequestMethod.PUT)
+  public ResponseEntity<?> updateDeliveryGoods(@PathVariable("id") String id, @RequestBody OrderSer delivery,
+      Authentication authentication) {
+    if (StringUtils.isBlank(id)) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_ID_NULL, "送货服务编号为空").build());
+    }
 
-		if (result) {
-			return ResponseEntity.noContent()
-					.location(ControllerLinkBuilder
-							.linkTo(ControllerLinkBuilder.methodOn(DeliveryController.class).getDelivery(id)).toUri())
-					.build();
-		}
+    Map<String, Object> error = DeliveryValidator.validateBeforeUpdateDeliveryGoods(delivery);
+    if (error != null) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+          .body(new OrderServiceErrorBuilder(Integer.valueOf(error.get("code").toString()), error.get("msg").toString())
+              .build());
+    }
 
-		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-				.body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_EDITED, "更新错误").build());
-	}
+    Boolean result = deliveryService.updateGoods(delivery);
 
-	/**
-	 * 结算送货服务
-	 * 
-	 * @param id
-	 * @param measure
-	 * @return
-	 */
-	@RequestMapping(value = "/{id}/statement", method = RequestMethod.PATCH)
-	public ResponseEntity<?> stateDelivery(@PathVariable("id") String id) {
-		if (StringUtils.isBlank(id)) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND)
-					.body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_ID_NULL, "送货服务编号为空").build());
-		}
-		OrderSer delivery = deliveryService.findById(id);
-		if (delivery == null) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND)
-					.body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_SERVICE_NULL, "找不到送货服务").build());
-		}
+    if (result) {
+      BooleanResourceAssembler booleanResourceAssembler = new BooleanResourceAssembler();
+      return ResponseEntity.ok(booleanResourceAssembler.toResource(Boolean.TRUE));
+    }
 
-		Map<String, Object> error = DeliveryValidator.validateBeforeUpdateState(delivery);
-		if (error != null) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-					.body(new OrderServiceErrorBuilder(Integer.valueOf(error.get("code").toString()),
-							error.get("msg").toString()).build());
-		}
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_EDITED, "更新错误").build());
+  }
 
-		Date date = new Date();
-		delivery.setModifyDate(date);
-		delivery.setIsClear(Boolean.TRUE);
-		Boolean result = deliveryService.update(delivery);
+  /**
+   * 更新送货服务
+   * 
+   * @param id
+   * @param delivery
+   * @return
+   */
+  @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
+  public ResponseEntity<?> updateDelivery(@PathVariable("id") String id, @RequestBody OrderSer delivery,
+      Authentication authentication) {
+    CustomUser customUser = (CustomUser) authentication.getPrincipal();
+    Clerk clerk = customUser.getClerk();
+    Date date = new Date();
+    delivery.setModifyDate(date);
+    delivery.setId(id);
 
-		if (result) {
-			return ResponseEntity.noContent()
-					.location(ControllerLinkBuilder
-							.linkTo(ControllerLinkBuilder.methodOn(DeliveryController.class).getDelivery(id)).toUri())
-					.build();
-		}
+    Map<String, Object> error = DeliveryValidator.validateBeforeUpdateDelivery(delivery, clerk.getBusinessId());
+    if (error != null) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+          .body(new OrderServiceErrorBuilder(Integer.valueOf(error.get("code").toString()), error.get("msg").toString())
+              .build());
+    }
 
-		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-				.body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_EDITED, "更新错误").build());
-	}
+    Boolean result = deliveryService.update(delivery);
 
-	/**
-	 * 取消结算送货服务
-	 * 
-	 * @param id
-	 * @param measure
-	 * @return
-	 */
-	@RequestMapping(value = "/{id}/cancelStatement", method = RequestMethod.PATCH)
-	public ResponseEntity<?> cacelStateDelivery(@PathVariable("id") String id) {
-		if (StringUtils.isBlank(id)) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND)
-					.body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_ID_NULL, "送货服务编号为空").build());
-		}
-		OrderSer delivery = deliveryService.findById(id);
-		if (delivery == null) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND)
-					.body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_SERVICE_NULL, "找不到送货服务").build());
-		}
+    if (result) {
+      return ResponseEntity.noContent().location(ControllerLinkBuilder
+          .linkTo(ControllerLinkBuilder.methodOn(DeliveryController.class).getDelivery(id)).toUri()).build();
+    }
 
-		Map<String, Object> error = DeliveryValidator.validateBeforeUpdateCancelState(delivery);
-		if (error != null) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-					.body(new OrderServiceErrorBuilder(Integer.valueOf(error.get("code").toString()),
-							error.get("msg").toString()).build());
-		}
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_EDITED, "更新错误").build());
+  }
 
-		Date date = new Date();
-		delivery.setModifyDate(date);
-		delivery.setIsClear(Boolean.FALSE);
-		Boolean result = deliveryService.update(delivery);
+  /**
+   * 结算送货服务
+   * 
+   * @param id
+   * @param measure
+   * @return
+   */
+  @RequestMapping(value = "/{id}/statement", method = RequestMethod.PATCH)
+  public ResponseEntity<?> stateDelivery(@PathVariable("id") String id) {
+    if (StringUtils.isBlank(id)) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_ID_NULL, "送货服务编号为空").build());
+    }
+    OrderSer delivery = deliveryService.findById(id);
+    if (delivery == null) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_SERVICE_NULL, "找不到送货服务").build());
+    }
 
-		if (result) {
-			return ResponseEntity.noContent()
-					.location(ControllerLinkBuilder
-							.linkTo(ControllerLinkBuilder.methodOn(DeliveryController.class).getDelivery(id)).toUri())
-					.build();
-		}
+    Map<String, Object> error = DeliveryValidator.validateBeforeUpdateState(delivery);
+    if (error != null) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+          .body(new OrderServiceErrorBuilder(Integer.valueOf(error.get("code").toString()), error.get("msg").toString())
+              .build());
+    }
 
-		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-				.body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_EDITED, "更新错误").build());
-	}
+    Date date = new Date();
+    delivery.setModifyDate(date);
+    delivery.setIsClear(Boolean.TRUE);
+    Boolean result = deliveryService.update(delivery);
 
-	/**
-	 * 上传附件
-	 * 
-	 * @param fileType
-	 * @param file
-	 * @param authentication
-	 * @return
-	 */
-	@RequestMapping(path = "/attachment_upload", method = RequestMethod.POST)
-	public ResponseEntity<?> upload(@Param("fileType") String fileType, @RequestParam("file") MultipartFile file,
-			Authentication authentication) {
-		CustomUser customUser = (CustomUser) authentication.getPrincipal();
-		if (file == null) {
-			return ResponseEntity.status(HttpStatus.FORBIDDEN)
-					.body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_UPLOAD, "未获得上传文件").build());
-		}
+    if (result) {
+      return ResponseEntity.noContent().location(ControllerLinkBuilder
+          .linkTo(ControllerLinkBuilder.methodOn(DeliveryController.class).getDelivery(id)).toUri()).build();
+    }
 
-		FileUploadService fileUploadService = SpringContextHolder.getBean(FileUploadService.class);
-		Resource uploadResource = fileUploadService.getResource(file, fileType);
-		if (uploadResource == null) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_UPLOAD, "上传失败").build());
-		}
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_EDITED, "更新错误").build());
+  }
 
-		String path = null;
-		try {
-			path = uploadResource.getFile().getPath();
-		} catch (IOException e) {
-			e.printStackTrace();
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_UPLOAD, "上传失败").build());
-		}
+  /**
+   * 取消结算送货服务
+   * 
+   * @param id
+   * @param measure
+   * @return
+   */
+  @RequestMapping(value = "/{id}/cancelStatement", method = RequestMethod.PATCH)
+  public ResponseEntity<?> cacelStateDelivery(@PathVariable("id") String id) {
+    if (StringUtils.isBlank(id)) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_ID_NULL, "送货服务编号为空").build());
+    }
+    OrderSer delivery = deliveryService.findById(id);
+    if (delivery == null) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_SERVICE_NULL, "找不到送货服务").build());
+    }
 
-		Date date = new Date();
-		OrderServiceAttachment attachment = new OrderServiceAttachment();
-		attachment.setCreateDate(date);
-		attachment.setModifyDate(date);
-		attachment.setAttachmentRoot(fileUploadService.getRelativePath(path));
-		attachment.setAttachmentSize(String.valueOf(file.getSize()));
-		attachment.setAttachmentFilename(file.getOriginalFilename());
-		attachment.setUploadDate(date);
-		attachment.setUploadPersonId(customUser.getId());
+    Map<String, Object> error = DeliveryValidator.validateBeforeUpdateCancelState(delivery);
+    if (error != null) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+          .body(new OrderServiceErrorBuilder(Integer.valueOf(error.get("code").toString()), error.get("msg").toString())
+              .build());
+    }
 
-		Boolean result = orderServiceAttachmentService.create(attachment);
-		if (result) {
-			return ResponseEntity.created(ControllerLinkBuilder.linkTo(ControllerLinkBuilder
-					.methodOn(OrderServiceAttachmentController.class).getAttachment(attachment.getId())).toUri())
-					.build();
-		}
+    Date date = new Date();
+    delivery.setModifyDate(date);
+    delivery.setIsClear(Boolean.FALSE);
+    Boolean result = deliveryService.update(delivery);
 
-		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-				.body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_UPLOAD, "上传失败").build());
-	}
+    if (result) {
+      return ResponseEntity.noContent().location(ControllerLinkBuilder
+          .linkTo(ControllerLinkBuilder.methodOn(DeliveryController.class).getDelivery(id)).toUri()).build();
+    }
 
-	/**
-	 * 下载附件
-	 * 
-	 * @param id
-	 * @return
-	 */
-	@RequestMapping(path = "/{id}/attachment_download", method = RequestMethod.GET)
-	public ResponseEntity<?> download(@PathVariable("id") String id, HttpServletResponse response) {
-		FileUploadService fileUploadService = SpringContextHolder.getBean(FileUploadService.class);
-		if (StringUtils.isBlank(id)) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-					new OrderServiceAttachmentErrorBuilder(OrderServiceAttachmentErrorBuilder.ERROR_ID_NULL, "附件编号为空")
-							.build());
-		}
-		OrderServiceAttachment attachment = orderServiceAttachmentService.findById(id);
-		FileSystemResource resource = new FileSystemResource(
-				fileUploadService.getUploadRootPath() + attachment.getAttachmentRoot());
-		try {
-			DownResponseBuilder.buildFile(response, resource, attachment.getAttachmentFilename());
-		} catch (IOException e) {
-			e.printStackTrace();
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_DOWNLOAD, "下载附件失败").build());
-		}
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_EDITED, "更新错误").build());
+  }
 
-		return ResponseEntity.ok(null);
+  /**
+   * 送货服务打印信息
+   * @param id
+   * @return
+   */
+  @RequestMapping(value = "/{id}/print", method = RequestMethod.GET)
+  public ResponseEntity<?> printDelivery(@PathVariable("id") String id) {
+    if (StringUtils.isBlank(id)) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_ID_NULL, "送货服务编号为空").build());
+    }
+    OrderSer delivery = deliveryService.getOrderServiceForPrint(id);
+    if (delivery == null) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_SERVICE_NULL, "找不到送货服务").build());
+    }
 
-	}
+    DeliveryResourceAssembler orderServiceResourceAssembler = new DeliveryResourceAssembler();
+    OrderServiceResource orderServiceResource = orderServiceResourceAssembler.toResource(delivery);
 
-	/**
-	 * 删除送货服务
-	 * 
-	 * @param id
-	 * @param authentication
-	 * @return
-	 */
-	@RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
-	public ResponseEntity<?> deleteDelivery(@PathVariable("id") String id) {
-		Map<String, Object> error = DeliveryValidator.validateBeforeDeleteOrderService(id);
-		if (error != null) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-					.body(new OrderServiceErrorBuilder(Integer.valueOf(error.get("code").toString()),
-							error.get("msg").toString()).build());
-		}
+    return ResponseEntity.ok(orderServiceResource);
 
-		if (deliveryService.delete(id, new Date())) {
-			BooleanResourceAssembler booleanResourceAssembler = new BooleanResourceAssembler();
-			return ResponseEntity.ok(booleanResourceAssembler.toResource(Boolean.TRUE));
-		}
+  }
 
-		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-				.body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_DELETED, "删除错误").build());
-	}
+  /**
+   * 上传附件
+   * 
+   * @param fileType
+   * @param file
+   * @param authentication
+   * @return
+   */
+  @RequestMapping(path = "/attachment_upload", method = RequestMethod.POST)
+  public ResponseEntity<?> upload(@Param("fileType") String fileType, @RequestParam("file") MultipartFile file,
+      Authentication authentication) {
+    CustomUser customUser = (CustomUser) authentication.getPrincipal();
+    if (file == null) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN)
+          .body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_UPLOAD, "未获得上传文件").build());
+    }
 
-	@Override
-	public RepositoryLinksResource process(RepositoryLinksResource resource) {
-		resource.add(ControllerLinkBuilder.linkTo(DeliveryController.class).withRel("deliverys"));
-		return resource;
-	}
+    FileUploadService fileUploadService = SpringContextHolder.getBean(FileUploadService.class);
+    Resource uploadResource = fileUploadService.getResource(file, fileType);
+    if (uploadResource == null) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_UPLOAD, "上传失败").build());
+    }
+
+    String path = null;
+    try {
+      path = uploadResource.getFile().getPath();
+    } catch (IOException e) {
+      e.printStackTrace();
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_UPLOAD, "上传失败").build());
+    }
+
+    Date date = new Date();
+    OrderServiceAttachment attachment = new OrderServiceAttachment();
+    attachment.setCreateDate(date);
+    attachment.setModifyDate(date);
+    attachment.setAttachmentRoot(fileUploadService.getRelativePath(path));
+    attachment.setAttachmentSize(String.valueOf(file.getSize()));
+    attachment.setAttachmentFilename(file.getOriginalFilename());
+    attachment.setUploadDate(date);
+    attachment.setUploadPersonId(customUser.getId());
+
+    Boolean result = orderServiceAttachmentService.create(attachment);
+    if (result) {
+      return ResponseEntity.created(ControllerLinkBuilder
+          .linkTo(
+              ControllerLinkBuilder.methodOn(OrderServiceAttachmentController.class).getAttachment(attachment.getId()))
+          .toUri()).build();
+    }
+
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_UPLOAD, "上传失败").build());
+  }
+
+  /**
+   * 下载附件
+   * 
+   * @param id
+   * @return
+   */
+  @RequestMapping(path = "/{id}/attachment_download", method = RequestMethod.GET)
+  public ResponseEntity<?> download(@PathVariable("id") String id, HttpServletResponse response) {
+    FileUploadService fileUploadService = SpringContextHolder.getBean(FileUploadService.class);
+    if (StringUtils.isBlank(id)) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+          new OrderServiceAttachmentErrorBuilder(OrderServiceAttachmentErrorBuilder.ERROR_ID_NULL, "附件编号为空").build());
+    }
+    OrderServiceAttachment attachment = orderServiceAttachmentService.findById(id);
+    FileSystemResource resource = new FileSystemResource(
+        fileUploadService.getUploadRootPath() + attachment.getAttachmentRoot());
+    try {
+      DownResponseBuilder.buildFile(response, resource, attachment.getAttachmentFilename());
+    } catch (IOException e) {
+      e.printStackTrace();
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_DOWNLOAD, "下载附件失败").build());
+    }
+
+    return ResponseEntity.ok(null);
+
+  }
+
+  /**
+   * 删除送货服务
+   * 
+   * @param id
+   * @param authentication
+   * @return
+   */
+  @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
+  public ResponseEntity<?> deleteDelivery(@PathVariable("id") String id) {
+    Map<String, Object> error = DeliveryValidator.validateBeforeDeleteOrderService(id);
+    if (error != null) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+          .body(new OrderServiceErrorBuilder(Integer.valueOf(error.get("code").toString()), error.get("msg").toString())
+              .build());
+    }
+
+    if (deliveryService.delete(id, new Date())) {
+      BooleanResourceAssembler booleanResourceAssembler = new BooleanResourceAssembler();
+      return ResponseEntity.ok(booleanResourceAssembler.toResource(Boolean.TRUE));
+    }
+
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_DELETED, "删除错误").build());
+  }
+
+  @Override
+  public RepositoryLinksResource process(RepositoryLinksResource resource) {
+    resource.add(ControllerLinkBuilder.linkTo(DeliveryController.class).withRel("deliverys"));
+    return resource;
+  }
 
 }

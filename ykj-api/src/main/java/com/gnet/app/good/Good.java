@@ -97,4 +97,7 @@ public class Good extends BaseEntity {
 	/** 外置参数：原值 **/
 	private @Transient String originValue;
 	
+	/** 销售状态文本*/
+	private @Transient String onsaleStatusText;
+	
 }

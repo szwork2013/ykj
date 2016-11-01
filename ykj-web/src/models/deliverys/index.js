@@ -61,7 +61,13 @@ const initialState = {
     /**
      * 订单商品信息
      */
-    orderGoods : [],
+    orderGoods : [{
+        id:'1',
+        goodName : '商品A'
+    },{
+        id:'2',
+        goodName : '商品B'
+    }],
     /**
      * 送货单商品信息
      */

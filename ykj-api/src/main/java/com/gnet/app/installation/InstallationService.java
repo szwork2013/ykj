@@ -335,4 +335,15 @@ public class InstallationService {
 		return orderServiceMapper.isModifyExist(serviceCode, oldServiceCode, businessId) > 0;
 	}
 
+	 /**
+   * 根据订单服务编码获取打印信息
+   * @author JunLin.Yang
+   * @param orderServiceId 订单服务号ID
+   * @return 用于打印的订单服务信息
+   */
+  public OrderSer getOrderServiceForPrint(String orderServiceId){
+    OrderSer orderSer = this.orderServiceMapper.getOrderServiceDetailForPrint(orderServiceId);
+    orderSer.setInstallGoods(this.orderInstallGoodsMapper.selectAllList(orderServiceId));
+    return orderSer;
+  }
 }

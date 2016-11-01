@@ -7,6 +7,7 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import com.gnet.app.good.Good;
 import com.gnet.mybatis.BaseEntity;
 
 import lombok.Getter;
@@ -57,24 +58,11 @@ public class StorageInDetail extends BaseEntity {
   private BigDecimal cost;
   
   //-----------------------额外信息---------------------------------
-  /**
-   * 商品名称
-   */
-  private @Transient String goodName;
   
   /**
-   * 商品型号
+   * 商品信息
    */
-  private @Transient String goodModel;
+  private @Transient Good good;
   
-  /**
-   * 商品类别
-   */
-  private @Transient String goodType;
-  
-  /**
-   * 商品在售状态
-   */
-  private @Transient String goodOnsaleStatusName;
   
 }

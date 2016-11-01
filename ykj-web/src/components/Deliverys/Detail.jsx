@@ -24,13 +24,13 @@ const Detail = (props) => {
 
   const clerkIdProps = getFieldProps('clerkId', {
     rules: [
-      { required: true, message: '服务人员必须选择' }
+      { required: true, message: '送货人员必须选择' }
     ]
   });
 
   const clerkNameProps = getFieldProps('clerkName', {
     rules: [
-      { required: true, message: '服务人员必须选择' }
+      { required: true, message: '送货人员必须选择' }
     ]
   });
 
@@ -264,9 +264,14 @@ const Detail = (props) => {
                     key: 'deliverNum',
                     render: (text, record, index) => {
                       return (
+                        <div>
+                        <Input type='hidden' {...getFieldProps('serviceGoods['+index+'].orderGoodsId')} value='${record.storageGoodsId}'>
+
+                        </Input>
                         <InputNumber {...getFieldProps('serviceGoods['+index+'].deliverNum')}>
 
                         </InputNumber>
+                        </div>
                       )
                     }
                   },

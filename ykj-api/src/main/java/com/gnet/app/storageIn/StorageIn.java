@@ -2,11 +2,15 @@ package com.gnet.app.storageIn;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import com.gnet.app.business.Business;
+import com.gnet.app.clerk.Clerk;
+import com.gnet.app.storageInDetail.StorageInDetail;
 import com.gnet.mybatis.BaseEntity;
 
 import lombok.Getter;
@@ -65,21 +69,35 @@ public class StorageIn extends BaseEntity {
    * 备注
    */
   private String remark;
-  
-  
+
   //-----------------------额外信息---------------------------------
+  /**
+   * 商家信息
+   */
+  private @Transient Business business;
+
+  /**
+   * 顾客信息
+   */
+  private @Transient Clerk clerk;
+
   /**
    * 入库方式名称
    */
   private @Transient String typeName;
-  
+
   /**
    * 入库数量
    */
   private @Transient BigDecimal inTotalNum;
-  
+
   /**
    * 入库数量
    */
   private @Transient BigDecimal inTotalCost;
+
+  /**
+   * 入库明细信息
+   */
+  private @Transient List<StorageInDetail> storageInDetailList;
 }

@@ -68,459 +68,485 @@ import com.gnet.utils.spring.SpringContextHolder;
 @RequestMapping("/api/installations")
 public class InstallationController implements ResourceProcessor<RepositoryLinksResource> {
 
-	@Autowired
-	private InstallationService installationService;
-	@Autowired
-	private OrderServiceAttachmentService orderServiceAttachmentService;
-	@Autowired
-	private OrderInstallGoodsService orderInstallGoodsService;
-	@Autowired
-	private PagedResourcesAssembler<OrderInstallGoods> pagedResourcesAssembler;
-	@Autowired
-	private ListResourcesAssembler<OrderInstallGoods> listResourcesAssembler;
-	@Autowired
-	private OrderService orderService;
+  @Autowired
+  private InstallationService installationService;
 
-	@Autowired
-	private PagedResourcesAssembler<OrderSer> orderSerPagedResourcesAssembler;
-	@Autowired
-	private ListResourcesAssembler<OrderSer> orderSerListResourcesAssembler;
+  @Autowired
+  private OrderServiceAttachmentService orderServiceAttachmentService;
 
-	/**
-	 * 安装的详细信息
-	 * 
-	 * @param id
-	 * @return
-	 */
-	@RequestMapping(value = "/{id}", method = RequestMethod.GET)
-	public ResponseEntity<?> getInstallation(@PathVariable("id") String id) {
-		if (StringUtils.isBlank(id)) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND)
-					.body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_ID_NULL, "安装服务编号为空").build());
-		}
-		OrderSer installation = installationService.findById(id);
-		if (installation == null) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND)
-					.body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_SERVICE_NULL, "找不到安装服务").build());
-		}
+  @Autowired
+  private OrderInstallGoodsService orderInstallGoodsService;
 
-		InstallationResourceAssembler orderServiceResourceAssembler = new InstallationResourceAssembler();
-		OrderServiceResource orderServiceResource = orderServiceResourceAssembler.toResource(installation);
+  @Autowired
+  private PagedResourcesAssembler<OrderInstallGoods> pagedResourcesAssembler;
 
-		return ResponseEntity.ok(orderServiceResource);
-	}
+  @Autowired
+  private ListResourcesAssembler<OrderInstallGoods> listResourcesAssembler;
 
-	/**
-	 * 安装商品列表
-	 * 
-	 * @param id
-	 * @return
-	 */
-	@RequestMapping(value = "/{id}/installation_goods", method = RequestMethod.GET)
-	public ResponseEntity<?> getInstallationGoods(@PathVariable("id") String serviceId,
-			@PageableDefault Pageable pageable, @RequestParam(name = "isall", required = false) Boolean isAll) {
-		if (StringUtils.isBlank(serviceId)) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND)
-					.body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_ID_NULL, "安装服务编号为空").build());
-		}
-		List<String> orderList = null;
+  @Autowired
+  private OrderService orderService;
 
-		// 排序处理
-		try {
-			orderList = ParamSceneUtils.toOrder(pageable, OrderInstallGoodsOrderType.class);
-		} catch (NotFoundOrderPropertyException e) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND)
-					.body(new OrderDeliverGoodsErrorBuilder(OrderDeliverGoodsErrorBuilder.ERROR_SORT_PROPERTY_NOTFOUND,
-							"排序字段不符合要求").build());
-		} catch (NotFoundOrderDirectionException e) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND)
-					.body(new OrderDeliverGoodsErrorBuilder(OrderDeliverGoodsErrorBuilder.ERROR_SORT_DIRECTION_NOTFOUND,
-							"排序方向不符合要求").build());
-		}
+  @Autowired
+  private PagedResourcesAssembler<OrderSer> orderSerPagedResourcesAssembler;
 
-		// 判断是否分页
-		Resources<OrderInstallGoodsResource> resources = null;
-		if (isAll != null && isAll) {
-			List<OrderInstallGoods> orderInstallGoods = orderInstallGoodsService.findAll(orderList, serviceId);
+  @Autowired
+  private ListResourcesAssembler<OrderSer> orderSerListResourcesAssembler;
 
-			OrderInstallGoodsResourceAssembler orderInstallationGoodsResourceAssembler = new OrderInstallGoodsResourceAssembler();
-			resources = listResourcesAssembler.toResource(orderInstallGoods, orderInstallationGoodsResourceAssembler);
-		} else {
-			Page<OrderInstallGoods> orderInstallGoods = orderInstallGoodsService.pagination(pageable, orderList,
-					serviceId);
+  /**
+   * 安装的详细信息
+   * 
+   * @param id
+   * @return
+   */
+  @RequestMapping(value = "/{id}", method = RequestMethod.GET)
+  public ResponseEntity<?> getInstallation(@PathVariable("id") String id) {
+    if (StringUtils.isBlank(id)) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_ID_NULL, "安装服务编号为空").build());
+    }
+    OrderSer installation = installationService.findById(id);
+    if (installation == null) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_SERVICE_NULL, "找不到安装服务").build());
+    }
 
-			OrderInstallGoodsResourceAssembler orderInstallationGoodsResourceAssembler = new OrderInstallGoodsResourceAssembler();
-			resources = pagedResourcesAssembler.toResource(orderInstallGoods, orderInstallationGoodsResourceAssembler);
-		}
+    InstallationResourceAssembler orderServiceResourceAssembler = new InstallationResourceAssembler();
+    OrderServiceResource orderServiceResource = orderServiceResourceAssembler.toResource(installation);
 
-		return ResponseEntity.ok(resources);
-	}
+    return ResponseEntity.ok(orderServiceResource);
+  }
 
-	/**
-	 * 返回订单的安装服务列表
-	 * 
-	 * @param pageable
-	 * @param orderId
-	 * @param isAll
-	 * @return
-	 */
-	@RequestMapping(value = "/search", method = RequestMethod.GET)
-	public ResponseEntity<?> searchInstallations(@PageableDefault Pageable pageable,
-			@RequestParam(name = "isall", required = false) Boolean isAll, OrderServiceCondition orderServiceCondition,
-			Authentication authentication) {
-		if (StringUtils.isBlank(orderServiceCondition.getOrderId())) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND)
-					.body(new OrderErrorBuilder(OrderErrorBuilder.ERROR_ID_NULL, "订单编号为空").build());
-		}
+  /**
+   * 安装商品列表
+   * 
+   * @param id
+   * @return
+   */
+  @RequestMapping(value = "/{id}/installation_goods", method = RequestMethod.GET)
+  public ResponseEntity<?> getInstallationGoods(@PathVariable("id") String serviceId,
+      @PageableDefault Pageable pageable, @RequestParam(name = "isall", required = false) Boolean isAll) {
+    if (StringUtils.isBlank(serviceId)) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_ID_NULL, "安装服务编号为空").build());
+    }
+    List<String> orderList = null;
 
-		Order order = orderService.findById(orderServiceCondition.getOrderId());
-		Map<String, Object> error = OrderValidator.validateBeforeInstallation(order);
-		if (error != null) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-					new OrderErrorBuilder(Integer.valueOf(error.get("code").toString()), error.get("msg").toString())
-							.build());
-		}
+    // 排序处理
+    try {
+      orderList = ParamSceneUtils.toOrder(pageable, OrderInstallGoodsOrderType.class);
+    } catch (NotFoundOrderPropertyException e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+          new OrderDeliverGoodsErrorBuilder(OrderDeliverGoodsErrorBuilder.ERROR_SORT_PROPERTY_NOTFOUND, "排序字段不符合要求")
+              .build());
+    } catch (NotFoundOrderDirectionException e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+          new OrderDeliverGoodsErrorBuilder(OrderDeliverGoodsErrorBuilder.ERROR_SORT_DIRECTION_NOTFOUND, "排序方向不符合要求")
+              .build());
+    }
 
-		List<String> orderList = null;
+    // 判断是否分页
+    Resources<OrderInstallGoodsResource> resources = null;
+    if (isAll != null && isAll) {
+      List<OrderInstallGoods> orderInstallGoods = orderInstallGoodsService.findAll(orderList, serviceId);
 
-		// 排序处理
-		try {
-			orderList = ParamSceneUtils.toOrder(pageable, OrderServiceOrderType.class);
-		} catch (NotFoundOrderPropertyException e) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-					new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_SORT_PROPERTY_NOTFOUND, "排序字段不符合要求")
-							.build());
-		} catch (NotFoundOrderDirectionException e) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-					new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_SORT_DIRECTION_NOTFOUND, "排序方向不符合要求")
-							.build());
-		}
+      OrderInstallGoodsResourceAssembler orderInstallationGoodsResourceAssembler = new OrderInstallGoodsResourceAssembler();
+      resources = listResourcesAssembler.toResource(orderInstallGoods, orderInstallationGoodsResourceAssembler);
+    } else {
+      Page<OrderInstallGoods> orderInstallGoods = orderInstallGoodsService.pagination(pageable, orderList, serviceId);
 
-		// 判断是否分页
-		Resources<OrderServiceResource> resources = null;
-		if (isAll != null && isAll) {
-			List<OrderSer> installations = installationService.findAll(orderList, orderServiceCondition.getOrderId(),
-					OrderSer.TYPE_INSTALLATION);
+      OrderInstallGoodsResourceAssembler orderInstallationGoodsResourceAssembler = new OrderInstallGoodsResourceAssembler();
+      resources = pagedResourcesAssembler.toResource(orderInstallGoods, orderInstallationGoodsResourceAssembler);
+    }
 
-			DeliveryResourceAssembler orderServiceResourceAssembler = new DeliveryResourceAssembler();
-			resources = orderSerListResourcesAssembler.toResource(installations, orderServiceResourceAssembler);
-		} else {
-			Page<OrderSer> installations = installationService.pagination(pageable, orderList,
-					orderServiceCondition.getOrderId(), OrderSer.TYPE_INSTALLATION);
+    return ResponseEntity.ok(resources);
+  }
 
-			DeliveryResourceAssembler orderServiceResourceAssembler = new DeliveryResourceAssembler();
-			resources = orderSerPagedResourcesAssembler.toResource(installations, orderServiceResourceAssembler);
-		}
+  /**
+   * 返回订单的安装服务列表
+   * 
+   * @param pageable
+   * @param orderId
+   * @param isAll
+   * @return
+   */
+  @RequestMapping(value = "/search", method = RequestMethod.GET)
+  public ResponseEntity<?> searchInstallations(@PageableDefault Pageable pageable,
+      @RequestParam(name = "isall", required = false) Boolean isAll, OrderServiceCondition orderServiceCondition,
+      Authentication authentication) {
+    if (StringUtils.isBlank(orderServiceCondition.getOrderId())) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(new OrderErrorBuilder(OrderErrorBuilder.ERROR_ID_NULL, "订单编号为空").build());
+    }
 
-		return ResponseEntity.ok(resources);
-	}
+    Order order = orderService.findById(orderServiceCondition.getOrderId());
+    Map<String, Object> error = OrderValidator.validateBeforeInstallation(order);
+    if (error != null) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+          new OrderErrorBuilder(Integer.valueOf(error.get("code").toString()), error.get("msg").toString()).build());
+    }
 
-	/**
-	 * 增加安装服务（还需要增加商品）
-	 * 
-	 * @param installation
-	 * @param authentication
-	 * @return
-	 */
-	@RequestMapping(method = RequestMethod.POST)
-	public ResponseEntity<?> createInstallation(@RequestBody OrderSer installation, Authentication authentication) {
-		CustomUser customUser = (CustomUser) authentication.getPrincipal();
-		Clerk clerk = customUser.getClerk();
-		Date date = new Date();
-		installation.setCreateDate(date);
-		installation.setModifyDate(date);
-		installation.setType(OrderSer.TYPE_INSTALLATION);
-		installation.setIsDel(Boolean.FALSE);
-		installation.setIsClear(Boolean.FALSE);
+    List<String> orderList = null;
 
-		Map<String, Object> error = InstallationValidator.validateBeforeCreateInstation(installation,
-				clerk.getBusinessId());
-		if (error != null) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-					.body(new OrderServiceErrorBuilder(Integer.valueOf(error.get("code").toString()),
-							error.get("msg").toString()).build());
-		}
-		Boolean result = installationService.create(installation);
+    // 排序处理
+    try {
+      orderList = ParamSceneUtils.toOrder(pageable, OrderServiceOrderType.class);
+    } catch (NotFoundOrderPropertyException e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+          new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_SORT_PROPERTY_NOTFOUND, "排序字段不符合要求").build());
+    } catch (NotFoundOrderDirectionException e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+          new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_SORT_DIRECTION_NOTFOUND, "排序方向不符合要求").build());
+    }
 
-		if (result) {
-			return ResponseEntity.created(ControllerLinkBuilder.linkTo(
-					ControllerLinkBuilder.methodOn(InstallationController.class).getInstallation(installation.getId()))
-					.toUri()).build();
-		}
+    // 判断是否分页
+    Resources<OrderServiceResource> resources = null;
+    if (isAll != null && isAll) {
+      List<OrderSer> installations = installationService.findAll(orderList, orderServiceCondition.getOrderId(),
+          OrderSer.TYPE_INSTALLATION);
 
-		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-				.body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_CREATED, "创建错误").build());
-	}
+      DeliveryResourceAssembler orderServiceResourceAssembler = new DeliveryResourceAssembler();
+      resources = orderSerListResourcesAssembler.toResource(installations, orderServiceResourceAssembler);
+    } else {
+      Page<OrderSer> installations = installationService.pagination(pageable, orderList,
+          orderServiceCondition.getOrderId(), OrderSer.TYPE_INSTALLATION);
 
-	/**
-	 * 更新安装商品
-	 * 
-	 * @param id
-	 * @param installation
-	 * @return
-	 */
-	@RequestMapping(value = "/{id}/installation_goods", method = RequestMethod.PUT)
-	public ResponseEntity<?> updateInstallationGoods(@PathVariable("id") String id, @RequestBody OrderSer installation,
-			Authentication authentication) {
-		if (StringUtils.isBlank(id)) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND)
-					.body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_ID_NULL, "安装服务编号为空").build());
-		}
+      DeliveryResourceAssembler orderServiceResourceAssembler = new DeliveryResourceAssembler();
+      resources = orderSerPagedResourcesAssembler.toResource(installations, orderServiceResourceAssembler);
+    }
 
-		Map<String, Object> error = InstallationValidator.validateBeforeUpdateInstallationGoods(installation);
-		if (error != null) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-					.body(new OrderServiceErrorBuilder(Integer.valueOf(error.get("code").toString()),
-							error.get("msg").toString()).build());
-		}
+    return ResponseEntity.ok(resources);
+  }
 
-		Boolean result = installationService.updateGoods(installation);
+  /**
+   * 增加安装服务（还需要增加商品）
+   * 
+   * @param installation
+   * @param authentication
+   * @return
+   */
+  @RequestMapping(method = RequestMethod.POST)
+  public ResponseEntity<?> createInstallation(@RequestBody OrderSer installation, Authentication authentication) {
+    CustomUser customUser = (CustomUser) authentication.getPrincipal();
+    Clerk clerk = customUser.getClerk();
+    Date date = new Date();
+    installation.setCreateDate(date);
+    installation.setModifyDate(date);
+    installation.setType(OrderSer.TYPE_INSTALLATION);
+    installation.setIsDel(Boolean.FALSE);
+    installation.setIsClear(Boolean.FALSE);
 
-		if (result) {
-			BooleanResourceAssembler booleanResourceAssembler = new BooleanResourceAssembler();
-			return ResponseEntity.ok(booleanResourceAssembler.toResource(Boolean.TRUE));
-		}
+    Map<String, Object> error = InstallationValidator.validateBeforeCreateInstation(installation,
+        clerk.getBusinessId());
+    if (error != null) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+          .body(new OrderServiceErrorBuilder(Integer.valueOf(error.get("code").toString()), error.get("msg").toString())
+              .build());
+    }
+    Boolean result = installationService.create(installation);
 
-		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-				.body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_EDITED, "更新错误").build());
-	}
+    if (result) {
+      return ResponseEntity
+          .created(ControllerLinkBuilder
+              .linkTo(
+                  ControllerLinkBuilder.methodOn(InstallationController.class).getInstallation(installation.getId()))
+              .toUri())
+          .build();
+    }
 
-	/**
-	 * 更新安装服务
-	 * 
-	 * @param id
-	 * @param installation
-	 * @return
-	 */
-	@RequestMapping(value = "/{id}", method = RequestMethod.PUT)
-	public ResponseEntity<?> updateInstallation(@PathVariable("id") String id, @RequestBody OrderSer installation,
-			Authentication authentication) {
-		CustomUser customUser = (CustomUser) authentication.getPrincipal();
-		Clerk clerk = customUser.getClerk();
-		Date date = new Date();
-		installation.setModifyDate(date);
-		installation.setId(id);
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_CREATED, "创建错误").build());
+  }
 
-		Map<String, Object> error = InstallationValidator.validateBeforeUpdateInstallation(installation,
-				clerk.getBusinessId());
-		if (error != null) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-					.body(new OrderServiceErrorBuilder(Integer.valueOf(error.get("code").toString()),
-							error.get("msg").toString()).build());
-		}
+  /**
+   * 更新安装商品
+   * 
+   * @param id
+   * @param installation
+   * @return
+   */
+  @RequestMapping(value = "/{id}/installation_goods", method = RequestMethod.PUT)
+  public ResponseEntity<?> updateInstallationGoods(@PathVariable("id") String id, @RequestBody OrderSer installation,
+      Authentication authentication) {
+    if (StringUtils.isBlank(id)) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_ID_NULL, "安装服务编号为空").build());
+    }
 
-		Boolean result = installationService.update(installation);
+    Map<String, Object> error = InstallationValidator.validateBeforeUpdateInstallationGoods(installation);
+    if (error != null) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+          .body(new OrderServiceErrorBuilder(Integer.valueOf(error.get("code").toString()), error.get("msg").toString())
+              .build());
+    }
 
-		if (result) {
-			return ResponseEntity.noContent()
-					.location(ControllerLinkBuilder
-							.linkTo(ControllerLinkBuilder.methodOn(InstallationController.class).getInstallation(id))
-							.toUri())
-					.build();
-		}
+    Boolean result = installationService.updateGoods(installation);
 
-		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-				.body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_EDITED, "更新错误").build());
-	}
+    if (result) {
+      BooleanResourceAssembler booleanResourceAssembler = new BooleanResourceAssembler();
+      return ResponseEntity.ok(booleanResourceAssembler.toResource(Boolean.TRUE));
+    }
 
-	/**
-	 * 结算安装服务
-	 * 
-	 * @param id
-	 * @param measure
-	 * @return
-	 */
-	@RequestMapping(value = "/{id}/statement", method = RequestMethod.PATCH)
-	public ResponseEntity<?> stateInstallation(@PathVariable("id") String id) {
-		if (StringUtils.isBlank(id)) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND)
-					.body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_ID_NULL, "安装服务编号为空").build());
-		}
-		OrderSer installation = installationService.findById(id);
-		if (installation == null) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND)
-					.body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_SERVICE_NULL, "找不到安装服务").build());
-		}
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_EDITED, "更新错误").build());
+  }
 
-		Map<String, Object> error = InstallationValidator.validateBeforeUpdateState(installation);
-		if (error != null) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-					.body(new OrderServiceErrorBuilder(Integer.valueOf(error.get("code").toString()),
-							error.get("msg").toString()).build());
-		}
+  /**
+   * 更新安装服务
+   * 
+   * @param id
+   * @param installation
+   * @return
+   */
+  @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
+  public ResponseEntity<?> updateInstallation(@PathVariable("id") String id, @RequestBody OrderSer installation,
+      Authentication authentication) {
+    CustomUser customUser = (CustomUser) authentication.getPrincipal();
+    Clerk clerk = customUser.getClerk();
+    Date date = new Date();
+    installation.setModifyDate(date);
+    installation.setId(id);
 
-		Date date = new Date();
-		installation.setModifyDate(date);
-		installation.setIsClear(Boolean.TRUE);
-		Boolean result = installationService.update(installation);
+    Map<String, Object> error = InstallationValidator.validateBeforeUpdateInstallation(installation,
+        clerk.getBusinessId());
+    if (error != null) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+          .body(new OrderServiceErrorBuilder(Integer.valueOf(error.get("code").toString()), error.get("msg").toString())
+              .build());
+    }
 
-		if (result) {
-			return ResponseEntity.noContent()
-					.location(ControllerLinkBuilder
-							.linkTo(ControllerLinkBuilder.methodOn(InstallationController.class).getInstallation(id))
-							.toUri())
-					.build();
-		}
+    Boolean result = installationService.update(installation);
 
-		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-				.body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_EDITED, "更新错误").build());
-	}
+    if (result) {
+      return ResponseEntity.noContent()
+          .location(ControllerLinkBuilder
+              .linkTo(ControllerLinkBuilder.methodOn(InstallationController.class).getInstallation(id)).toUri())
+          .build();
+    }
 
-	/**
-	 * 取消结算安装服务
-	 * 
-	 * @param id
-	 * @param measure
-	 * @return
-	 */
-	@RequestMapping(value = "/{id}/cancelStatement", method = RequestMethod.PATCH)
-	public ResponseEntity<?> cacelStateInstallation(@PathVariable("id") String id) {
-		if (StringUtils.isBlank(id)) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND)
-					.body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_ID_NULL, "安装服务编号为空").build());
-		}
-		OrderSer installation = installationService.findById(id);
-		if (installation == null) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND)
-					.body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_SERVICE_NULL, "找不到安装服务").build());
-		}
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_EDITED, "更新错误").build());
+  }
 
-		Map<String, Object> error = InstallationValidator.validateBeforeUpdateCancelState(installation);
-		if (error != null) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-					.body(new OrderServiceErrorBuilder(Integer.valueOf(error.get("code").toString()),
-							error.get("msg").toString()).build());
-		}
+  /**
+   * 结算安装服务
+   * 
+   * @param id
+   * @param measure
+   * @return
+   */
+  @RequestMapping(value = "/{id}/statement", method = RequestMethod.PATCH)
+  public ResponseEntity<?> stateInstallation(@PathVariable("id") String id) {
+    if (StringUtils.isBlank(id)) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_ID_NULL, "安装服务编号为空").build());
+    }
+    OrderSer installation = installationService.findById(id);
+    if (installation == null) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_SERVICE_NULL, "找不到安装服务").build());
+    }
 
-		Date date = new Date();
-		installation.setModifyDate(date);
-		installation.setIsClear(Boolean.FALSE);
-		Boolean result = installationService.update(installation);
+    Map<String, Object> error = InstallationValidator.validateBeforeUpdateState(installation);
+    if (error != null) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+          .body(new OrderServiceErrorBuilder(Integer.valueOf(error.get("code").toString()), error.get("msg").toString())
+              .build());
+    }
 
-		if (result) {
-			return ResponseEntity.noContent()
-					.location(ControllerLinkBuilder
-							.linkTo(ControllerLinkBuilder.methodOn(InstallationController.class).getInstallation(id))
-							.toUri())
-					.build();
-		}
+    Date date = new Date();
+    installation.setModifyDate(date);
+    installation.setIsClear(Boolean.TRUE);
+    Boolean result = installationService.update(installation);
 
-		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-				.body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_EDITED, "更新错误").build());
-	}
+    if (result) {
+      return ResponseEntity.noContent()
+          .location(ControllerLinkBuilder
+              .linkTo(ControllerLinkBuilder.methodOn(InstallationController.class).getInstallation(id)).toUri())
+          .build();
+    }
 
-	/**
-	 * 上传附件
-	 * 
-	 * @param fileType
-	 * @param file
-	 * @param authentication
-	 * @return
-	 */
-	@RequestMapping(path = "/attachment_upload", method = RequestMethod.POST)
-	public ResponseEntity<?> upload(@Param("fileType") String fileType, @RequestParam("file") MultipartFile file,
-			Authentication authentication) {
-		CustomUser customUser = (CustomUser) authentication.getPrincipal();
-		if (file == null) {
-			return ResponseEntity.status(HttpStatus.FORBIDDEN)
-					.body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_UPLOAD, "未获得上传文件").build());
-		}
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_EDITED, "更新错误").build());
+  }
 
-		FileUploadService fileUploadService = SpringContextHolder.getBean(FileUploadService.class);
-		Resource uploadResource = fileUploadService.getResource(file, fileType);
-		if (uploadResource == null) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_UPLOAD, "上传失败").build());
-		}
+  /**
+   * 取消结算安装服务
+   * 
+   * @param id
+   * @param measure
+   * @return
+   */
+  @RequestMapping(value = "/{id}/cancelStatement", method = RequestMethod.PATCH)
+  public ResponseEntity<?> cacelStateInstallation(@PathVariable("id") String id) {
+    if (StringUtils.isBlank(id)) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_ID_NULL, "安装服务编号为空").build());
+    }
+    OrderSer installation = installationService.findById(id);
+    if (installation == null) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_SERVICE_NULL, "找不到安装服务").build());
+    }
 
-		String path = null;
-		try {
-			path = uploadResource.getFile().getPath();
-		} catch (IOException e) {
-			e.printStackTrace();
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_UPLOAD, "上传失败").build());
-		}
+    Map<String, Object> error = InstallationValidator.validateBeforeUpdateCancelState(installation);
+    if (error != null) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+          .body(new OrderServiceErrorBuilder(Integer.valueOf(error.get("code").toString()), error.get("msg").toString())
+              .build());
+    }
 
-		Date date = new Date();
-		OrderServiceAttachment attachment = new OrderServiceAttachment();
-		attachment.setCreateDate(date);
-		attachment.setModifyDate(date);
-		attachment.setAttachmentRoot(fileUploadService.getRelativePath(path));
-		attachment.setAttachmentSize(String.valueOf(file.getSize()));
-		attachment.setAttachmentFilename(file.getOriginalFilename());
-		attachment.setUploadDate(date);
-		attachment.setUploadPersonId(customUser.getId());
+    Date date = new Date();
+    installation.setModifyDate(date);
+    installation.setIsClear(Boolean.FALSE);
+    Boolean result = installationService.update(installation);
 
-		Boolean result = orderServiceAttachmentService.create(attachment);
-		if (result) {
-			return ResponseEntity.created(ControllerLinkBuilder.linkTo(ControllerLinkBuilder
-					.methodOn(OrderServiceAttachmentController.class).getAttachment(attachment.getId())).toUri())
-					.build();
-		}
+    if (result) {
+      return ResponseEntity.noContent()
+          .location(ControllerLinkBuilder
+              .linkTo(ControllerLinkBuilder.methodOn(InstallationController.class).getInstallation(id)).toUri())
+          .build();
+    }
 
-		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-				.body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_UPLOAD, "上传失败").build());
-	}
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_EDITED, "更新错误").build());
+  }
 
-	/**
-	 * 下载附件
-	 * 
-	 * @param id
-	 * @return
-	 */
-	@RequestMapping(path = "/{id}/attachment_download", method = RequestMethod.GET)
-	public ResponseEntity<?> download(@PathVariable("id") String id, HttpServletResponse response) {
-		FileUploadService fileUploadService = SpringContextHolder.getBean(FileUploadService.class);
-		if (StringUtils.isBlank(id)) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-					new OrderServiceAttachmentErrorBuilder(OrderServiceAttachmentErrorBuilder.ERROR_ID_NULL, "附件编号为空")
-							.build());
-		}
-		OrderServiceAttachment attachment = orderServiceAttachmentService.findById(id);
-		FileSystemResource resource = new FileSystemResource(
-				fileUploadService.getUploadRootPath() + attachment.getAttachmentRoot());
-		try {
-			DownResponseBuilder.buildFile(response, resource, attachment.getAttachmentFilename());
-		} catch (IOException e) {
-			e.printStackTrace();
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_DOWNLOAD, "下载附件失败").build());
-		}
+  /**
+   * 送货服务打印信息
+   * @param id
+   * @return
+   */
+  @RequestMapping(value = "/{id}/print", method = RequestMethod.GET)
+  public ResponseEntity<?> printInstallation(@PathVariable("id") String id) {
+    if (StringUtils.isBlank(id)) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_ID_NULL, "送货服务编号为空").build());
+    }
+    OrderSer installation = installationService.getOrderServiceForPrint(id);
+    if (installation == null) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_SERVICE_NULL, "找不到送货服务").build());
+    }
 
-		return ResponseEntity.ok(null);
+    InstallationResourceAssembler orderServiceResourceAssembler = new InstallationResourceAssembler();
+    OrderServiceResource orderServiceResource = orderServiceResourceAssembler.toResource(installation);
 
-	}
+    return ResponseEntity.ok(orderServiceResource);
 
-	/**
-	 * 删除安装服务
-	 * 
-	 * @param id
-	 * @param authentication
-	 * @return
-	 */
-	@RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
-	public ResponseEntity<?> deleteInstallation(@PathVariable("id") String id) {
-		Map<String, Object> error = InstallationValidator.validateBeforeDeleteOrderService(id);
-		if (error != null) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-					.body(new OrderServiceErrorBuilder(Integer.valueOf(error.get("code").toString()),
-							error.get("msg").toString()).build());
-		}
+  }
 
-		if (installationService.delete(id, new Date())) {
-			BooleanResourceAssembler booleanResourceAssembler = new BooleanResourceAssembler();
-			return ResponseEntity.ok(booleanResourceAssembler.toResource(Boolean.TRUE));
-		}
+  /**
+   * 上传附件
+   * 
+   * @param fileType
+   * @param file
+   * @param authentication
+   * @return
+   */
+  @RequestMapping(path = "/attachment_upload", method = RequestMethod.POST)
+  public ResponseEntity<?> upload(@Param("fileType") String fileType, @RequestParam("file") MultipartFile file,
+      Authentication authentication) {
+    CustomUser customUser = (CustomUser) authentication.getPrincipal();
+    if (file == null) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN)
+          .body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_UPLOAD, "未获得上传文件").build());
+    }
 
-		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-				.body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_DELETED, "删除错误").build());
-	}
+    FileUploadService fileUploadService = SpringContextHolder.getBean(FileUploadService.class);
+    Resource uploadResource = fileUploadService.getResource(file, fileType);
+    if (uploadResource == null) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_UPLOAD, "上传失败").build());
+    }
 
-	@Override
-	public RepositoryLinksResource process(RepositoryLinksResource resource) {
-		resource.add(ControllerLinkBuilder.linkTo(InstallationController.class).withRel("deliverys"));
-		return resource;
-	}
+    String path = null;
+    try {
+      path = uploadResource.getFile().getPath();
+    } catch (IOException e) {
+      e.printStackTrace();
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_UPLOAD, "上传失败").build());
+    }
+
+    Date date = new Date();
+    OrderServiceAttachment attachment = new OrderServiceAttachment();
+    attachment.setCreateDate(date);
+    attachment.setModifyDate(date);
+    attachment.setAttachmentRoot(fileUploadService.getRelativePath(path));
+    attachment.setAttachmentSize(String.valueOf(file.getSize()));
+    attachment.setAttachmentFilename(file.getOriginalFilename());
+    attachment.setUploadDate(date);
+    attachment.setUploadPersonId(customUser.getId());
+
+    Boolean result = orderServiceAttachmentService.create(attachment);
+    if (result) {
+      return ResponseEntity.created(ControllerLinkBuilder
+          .linkTo(
+              ControllerLinkBuilder.methodOn(OrderServiceAttachmentController.class).getAttachment(attachment.getId()))
+          .toUri()).build();
+    }
+
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_UPLOAD, "上传失败").build());
+  }
+
+  /**
+   * 下载附件
+   * 
+   * @param id
+   * @return
+   */
+  @RequestMapping(path = "/{id}/attachment_download", method = RequestMethod.GET)
+  public ResponseEntity<?> download(@PathVariable("id") String id, HttpServletResponse response) {
+    FileUploadService fileUploadService = SpringContextHolder.getBean(FileUploadService.class);
+    if (StringUtils.isBlank(id)) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+          new OrderServiceAttachmentErrorBuilder(OrderServiceAttachmentErrorBuilder.ERROR_ID_NULL, "附件编号为空").build());
+    }
+    OrderServiceAttachment attachment = orderServiceAttachmentService.findById(id);
+    FileSystemResource resource = new FileSystemResource(
+        fileUploadService.getUploadRootPath() + attachment.getAttachmentRoot());
+    try {
+      DownResponseBuilder.buildFile(response, resource, attachment.getAttachmentFilename());
+    } catch (IOException e) {
+      e.printStackTrace();
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_DOWNLOAD, "下载附件失败").build());
+    }
+
+    return ResponseEntity.ok(null);
+
+  }
+
+  /**
+   * 删除安装服务
+   * 
+   * @param id
+   * @param authentication
+   * @return
+   */
+  @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
+  public ResponseEntity<?> deleteInstallation(@PathVariable("id") String id) {
+    Map<String, Object> error = InstallationValidator.validateBeforeDeleteOrderService(id);
+    if (error != null) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+          .body(new OrderServiceErrorBuilder(Integer.valueOf(error.get("code").toString()), error.get("msg").toString())
+              .build());
+    }
+
+    if (installationService.delete(id, new Date())) {
+      BooleanResourceAssembler booleanResourceAssembler = new BooleanResourceAssembler();
+      return ResponseEntity.ok(booleanResourceAssembler.toResource(Boolean.TRUE));
+    }
+
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .body(new OrderServiceErrorBuilder(OrderServiceErrorBuilder.ERROR_DELETED, "删除错误").build());
+  }
+
+  @Override
+  public RepositoryLinksResource process(RepositoryLinksResource resource) {
+    resource.add(ControllerLinkBuilder.linkTo(InstallationController.class).withRel("deliverys"));
+    return resource;
+  }
 
 }

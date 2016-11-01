@@ -1,99 +1,155 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.gnet.app.orderService.OrderServiceMapper" >
-    <resultMap id="BaseOrderServiceMap" type="com.gnet.app.orderService.OrderSer" >
-        <id column="id" property="id" jdbcType="CHAR" />
-		<result column="customer_remark" property="customerRemark" jdbcType="VARCHAR"/>
+<mapper namespace="com.gnet.app.orderService.OrderServiceMapper">
+	<resultMap id="BaseOrderServiceMap" type="com.gnet.app.orderService.OrderSer">
+		<id column="id" property="id" jdbcType="CHAR" />
+		<result column="customer_remark" property="customerRemark"
+			jdbcType="VARCHAR" />
 		<result column="service_time" property="serviceTime" />
-		<result column="star_level" property="starLevel" jdbcType="INTEGER"/>
-		<result column="clerk_id" property="clerkId" jdbcType="CHAR"/>
-		<result column="clerkName" property="clerkName" jdbcType="VARCHAR"/>
-		<result column="clerkPhone" property="clerkPhone" jdbcType="VARCHAR"/>
-		<result column="cost" property="cost" jdbcType="DECIMAL"/>
-		<result column="type" property="type" jdbcType="INTEGER"/>
-		<result column="service_position" property="servicePosition" jdbcType="VARCHAR"/>
-		<result column="is_clear" property="isClear" jdbcType="BIT"/>
-		<result column="private_remark" property="privateRemark" jdbcType="VARCHAR"/>
-		<result column="name" property="name" jdbcType="VARCHAR"/>
-		<result column="remark" property="remark" jdbcType="VARCHAR"/>
-		<result column="is_del" property="isDel" jdbcType="BIT"/>
-		<result column="is_finish" property="isFinish" jdbcType="BIT"/>
+		<result column="star_level" property="starLevel" jdbcType="INTEGER" />
+		<result column="clerk_id" property="clerkId" jdbcType="CHAR" />
+		<result column="clerkName" property="clerkName" jdbcType="VARCHAR" />
+		<result column="clerkPhone" property="clerkPhone" jdbcType="VARCHAR" />
+		<result column="cost" property="cost" jdbcType="DECIMAL" />
+		<result column="type" property="type" jdbcType="INTEGER" />
+		<result column="service_position" property="servicePosition"
+			jdbcType="VARCHAR" />
+		<result column="is_clear" property="isClear" jdbcType="BIT" />
+		<result column="private_remark" property="privateRemark"
+			jdbcType="VARCHAR" />
+		<result column="name" property="name" jdbcType="VARCHAR" />
+		<result column="remark" property="remark" jdbcType="VARCHAR" />
+		<result column="is_del" property="isDel" jdbcType="BIT" />
+		<result column="is_finish" property="isFinish" jdbcType="BIT" />
 		<result column="create_date" property="createDate" />
-		<result column="finance_expend_id" property="financeExpendId" jdbcType="CHAR"/>
+		<result column="finance_expend_id" property="financeExpendId"
+			jdbcType="CHAR" />
 		<result column="modify_date" property="modifyDate" />
-		<result column="order_id" property="orderId" jdbcType="CHAR"/>
+		<result column="order_id" property="orderId" jdbcType="CHAR" />
 		<result column="need_time" property="needTime" />
-		<result column="service_code" property="serviceCode" jdbcType="CHAR"/>
+		<result column="service_code" property="serviceCode" jdbcType="CHAR" />
+	</resultMap>
+	
+	<resultMap id="OrderServiceMap" type="com.gnet.app.orderService.OrderSer">
+        <id column="id" property="id" jdbcType="CHAR" />
+        <result column="create_date" property="createDate" />
+        <result column="modify_date" property="modifyDate" />
+        <result column="type" property="type" jdbcType="INTEGER" />
+        <result column="order_id" property="orderId" jdbcType="CHAR" />
+        <result column="service_code" property="serviceCode" jdbcType="CHAR" />
+        <result column="name" property="name" jdbcType="VARCHAR" />
+        <result column="clerk_id" property="clerkId" jdbcType="CHAR" />
+        <result column="need_time" property="needTime" />
+        <result column="service_time" property="serviceTime" />
+        <result column="customer_remark" property="customerRemark" jdbcType="VARCHAR" />
+        <result column="private_remark" property="privateRemark" jdbcType="VARCHAR" />
+        <result column="cost" property="cost" jdbcType="DECIMAL" />
+        <result column="finance_expend_id" property="financeExpendId"  jdbcType="CHAR" />
+        <result column="star_level" property="starLevel" jdbcType="INTEGER" />
+        <result column="service_position" property="servicePosition" jdbcType="VARCHAR" />
+        <result column="is_del" property="isDel" jdbcType="BIT" />
+        <result column="is_finish" property="isFinish" jdbcType="BIT" />
+        <result column="is_clear" property="isClear" jdbcType="BIT" />
+        <result column="remark" property="remark" jdbcType="VARCHAR" />
     </resultMap>
-    	
-    <select id="findAll" resultMap="BaseOrderServiceMap">
-    select yos.*, yc.name clerkName, yc.phone clerkPhone from ykj_order_service yos
-    left join ykj_clerk yc on yc.id = yos.clerk_id
-    where yos.order_id = #{orderId} and yos.type = #{type} and yos.is_del = 0 and yc.is_del = 0
-    <if test="orderList != null">
-        <foreach item="orderItem" collection="orderList" open="order by " separator="," close="" >
-            #{orderItem}
-        </foreach>
-    </if>
-    </select>
     
-    <select id="finishServiceNum" resultMap="BaseOrderServiceMap">
-    select * from ykj_order_service where order_id = #{orderId} and type = #{type} and is_finish = 1 and is_del = 0
-    </select>
+    <resultMap id="OrderServiceExtMap" extends="OrderServiceMap" type="com.gnet.app.orderService.OrderSer">
+        <association property="customer"  javaType="com.gnet.app.customer.Customer">  
+            <result property="id" column="customer_id"/>  
+			<result property="name" column="customer_name"/>  
+			<result property="phone" column="customer_phone"/>  
+		</association>  
+		<association property="clerk"  javaType="com.gnet.app.clerk.Clerk">  
+		    <result property="id" column="clerk_id"/>  
+            <result property="name" column="clerk_name"/>  
+            <result property="phone" column="clerk_phone"/>  
+        </association>  
+        <association property="business"  javaType="com.gnet.app.business.Business">  
+            <result property="name" column="business_name"/>  
+            <result property="logo" column="business_logo"/>  
+        </association>  
+        
+    </resultMap>
     
-    <select id="selectAllList" resultMap="BaseOrderServiceMap">
-    select yos.*, yc.name clerkName, yc.phone clerkPhone from ykj_order_service yos
-    left join ykj_clerk yc on yc.id = yos.clerk_id
-    where yos.order_id = #{orderId} and yos.type = #{type} and yos.is_del = 0 and yc.is_del = 0
-    </select>
-    
-    <select id="findById" resultMap="BaseOrderServiceMap">
-     SELECT
-		  yos.*, yc.name clerkName, yc.phone clerkPhone 
+
+	<select id="findAll" resultMap="BaseOrderServiceMap">
+		select yos.*, yc.name clerkName, yc.phone clerkPhone from
+		ykj_order_service yos
+		left join ykj_clerk yc on yc.id = yos.clerk_id
+		where yos.order_id = #{orderId} and yos.type = #{type} and yos.is_del = 0
+		and yc.is_del = 0
+		<if test="orderList != null">
+			<foreach item="orderItem" collection="orderList" open="order by "
+				separator="," close="">
+				#{orderItem}
+			</foreach>
+		</if>
+	</select>
+
+	<select id="finishServiceNum" resultMap="BaseOrderServiceMap">
+		select * from ykj_order_service where order_id = #{orderId} and type =
+		#{type} and is_finish = 1 and is_del = 0
+	</select>
+
+	<select id="selectAllList" resultMap="BaseOrderServiceMap">
+		select yos.*, yc.name clerkName, yc.phone clerkPhone from ykj_order_service
+		yos
+		left join ykj_clerk yc on yc.id = yos.clerk_id
+		where yos.order_id = #{orderId} and yos.type = #{type} and yos.is_del = 0
+		and yc.is_del = 0
+	</select>
+
+	<select id="findById" resultMap="BaseOrderServiceMap">
+		SELECT
+		yos.*, yc.name clerkName, yc.phone clerkPhone
 		FROM
-		  ykj_order_service yos
-		    LEFT JOIN ykj_clerk yc ON  yos.clerk_id = yc.id
-    where yos.id = #{id} and yos.is_del = 0
-    </select>	
-    	
-    <select id="isCreateExist" resultType="Integer">
-    select count(1) from ykj_order_service yos
-    left join ykj_order yo on yo.id = yos.order_id
-    where yos.service_code = #{serviceCode} and yo.business_id = #{businessId}
-    and yos.is_del = 0 and yo.is_del = 0
-    </select>
-    	
-    <select id="isModifyExist" resultType="Integer">
-    select count(1) from ykj_order_service yos
-    left join ykj_order yo on yo.id = yos.order_id
-    where yos.service_code = #{serviceCode} and service_code != #{oldServiceCode} and yo.business_id = #{businessId}
-    and yos.is_del = 0 and yo.is_del = 0
-    </select>
-    
-    <update id="deleteById">
-    update ykj_order_service set modify_date = #{date}, is_del = 1 where id = #{id} 
-    </update> 	
-    
-    <select id="selectServiceUnFinishWithoutMaintenance" resultMap="BaseOrderServiceMap">
-        select * from ykj_order_service where order_id = #{orderId} and 
-        (type = ${@com.gnet.app.orderService.OrderSer@TYPE_MEASURE} 
-        or type = ${@com.gnet.app.orderService.OrderSer@TYPE_DESIGN} 
-        or type = ${@com.gnet.app.orderService.OrderSer@TYPE_DELIVERY} 
-        or type = ${@com.gnet.app.orderService.OrderSer@TYPE_INSTALLATION}) 
-        and is_finish = ${@java.lang.Boolean@FALSE}
-        limit 1
-    </select>
-    
-    <select id="selectMaxServiceCodeToday" resultType="String">
-        select max(service_code) from ykj_order_service where create_date >=  curdate()
-    </select>
-    
-    <select id="selectOrderServiceWithDetailByCondition" resultMap="BaseOrderServiceMap" parameterType="com.gnet.app.orderService.OrderServiceCondition">
-        SELECT
-		  t.*, s.name clerkName, s.phone clerkPhone
+		ykj_order_service yos
+		LEFT JOIN ykj_clerk yc ON yos.clerk_id = yc.id
+		where yos.id = #{id} and yos.is_del = 0
+	</select>
+
+	<select id="isCreateExist" resultType="Integer">
+		select count(1) from ykj_order_service yos
+		left join ykj_order yo on yo.id = yos.order_id
+		where yos.service_code = #{serviceCode} and yo.business_id = #{businessId}
+		and yos.is_del = 0 and yo.is_del = 0
+	</select>
+
+	<select id="isModifyExist" resultType="Integer">
+		select count(1) from ykj_order_service yos
+		left join ykj_order yo on yo.id = yos.order_id
+		where yos.service_code = #{serviceCode} and service_code !=
+		#{oldServiceCode} and yo.business_id = #{businessId}
+		and yos.is_del = 0 and yo.is_del = 0
+	</select>
+
+	<update id="deleteById">
+		update ykj_order_service set modify_date = #{date}, is_del = 1 where id =
+		#{id}
+	</update>
+
+	<select id="selectServiceUnFinishWithoutMaintenance" resultMap="BaseOrderServiceMap">
+		select * from ykj_order_service where order_id = #{orderId} and
+		(type = ${@com.gnet.app.orderService.OrderSer@TYPE_MEASURE}
+		or type = ${@com.gnet.app.orderService.OrderSer@TYPE_DESIGN}
+		or type = ${@com.gnet.app.orderService.OrderSer@TYPE_DELIVERY}
+		or type = ${@com.gnet.app.orderService.OrderSer@TYPE_INSTALLATION})
+		and is_finish = ${@java.lang.Boolean@FALSE}
+		limit 1
+	</select>
+
+	<select id="selectMaxServiceCodeToday" resultType="String">
+		select max(service_code) from ykj_order_service where create_date >=
+		curdate()
+	</select>
+
+	<select id="selectOrderServiceWithDetailByCondition" resultMap="BaseOrderServiceMap"
+		parameterType="com.gnet.app.orderService.OrderServiceCondition">
+		SELECT
+		t.*, s.name clerkName, s.phone clerkPhone
 		FROM
-		  ykj_order_service t
-		    LEFT JOIN ykj_clerk s ON t.clerk_id = s.id
+		ykj_order_service t
+		LEFT JOIN ykj_clerk s ON t.clerk_id = s.id
 		<where>
 			<if test="type != null">
 				and t.type = #{type}
@@ -123,6 +179,28 @@
 				</foreach>
 			</if>
 		</where>
-    </select>
-    	
+	</select>
+
+    <!--  针对打印查询订单服务明细信息（主要包含客户信息和员工信息） -->
+	<select id="getOrderServiceDetailForPrint" resultMap="OrderServiceExtMap">
+		SELECT
+		t.*,
+		s.name AS clerk_name,
+		s.phone AS clerk_phone,
+		w.customer_name , 
+		w.customer_phone,
+		w.business_name,
+		w.business_logo
+		FROM
+		ykj_order_service AS t
+		LEFT JOIN ykj_clerk AS s ON s.id = t.clerk_id
+		LEFT JOIN (SELECT
+		q.id orderId, p.name customer_name,p.phone customer_phone,r.name business_name,r.logo business_logo
+		FROM
+		ykj_order AS q
+		LEFT JOIN ykj_customer AS p ON p.id = q.customer_id
+		LEFT JOIN ykj_business AS r on r.id = q.business_id ) w ON
+		w.orderId = t.order_id
+		where t.id = #{orderServiceId}
+	</select>
 </mapper>

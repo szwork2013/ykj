@@ -15,21 +15,23 @@
 
 	<resultMap id="StorageInExtMap" type="com.gnet.app.storageIn.StorageIn"
 		extends="BaseStorageInMap">
-		<result column="typeName" property="typeName" jdbcType="VARCHAR" />
-		<result column="clerkName" property="clerkName" jdbcType="VARCHAR" />
-		<result column="inTotalNum" property="inTotalNum" jdbcType="DECIMAL" />
-		<result column="inTotalCost" property="inTotalCost" jdbcType="DECIMAL" />
+		<result column="type_name" property="typeName" jdbcType="VARCHAR" />
+		<result column="in_total_num" property="inTotalNum" jdbcType="DECIMAL" />
+		<result column="in_total_cost" property="inTotalCost" jdbcType="DECIMAL" />
+		<association property="clerk"  javaType="com.gnet.app.clerk.Clerk">  
+            <result property="name" column="clerk_name"/>  
+        </association>
 	</resultMap>
 
 
 	<select id="selectStorageInHistoryDataListByCondition"
 		resultMap="StorageInExtMap" parameterType="com.gnet.app.storageIn.StorageInCondition">
 		SELECT
-		t.*, s.name clerkName, 
+		t.*, s.name clerk_name, 
 		(select sa.value from sc_codeword sa,sc_codeword_type sb 
-		where sb.id=sa.codeword_type_id and sa.code=t.type and sb.type_value = 'STORAGE_IN_SOURCE') typeName,
-		(select sum(w.num) from ykj_storage_in_detail w where w.storage_in_id = t.id) inTotalNum,
-		(select sum(w.cost) from ykj_storage_in_detail w where w.storage_in_id = t.id) inTotalCost
+		where sb.id=sa.codeword_type_id and sa.code=t.type and sb.type_value = 'STORAGE_IN_SOURCE') type_name,
+		(select sum(w.num) from ykj_storage_in_detail w where w.storage_in_id = t.id) in_total_num,
+		(select sum(w.cost) from ykj_storage_in_detail w where w.storage_in_id = t.id) in_total_cost
 		FROM
 		ykj_storage_in t
 		LEFT JOIN ykj_clerk s ON t.clerk_id = s.id
@@ -56,7 +58,6 @@
 			<if test="goodId != null ">
 				and exists(select 1 from ykj_storage_in_detail w where w.storage_in_id = t.id and w.storage_goods_id = #{goodId})
 			</if>
-
 		</where>
 	</select>
 

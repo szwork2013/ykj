@@ -55,18 +55,18 @@ public class DeliveryValidator {
 		}
 
 		// 测量单号不能为空过滤
-		if (StringUtils.isBlank(delivery.getServiceCode())) {
-			map.put("code", OrderServiceErrorBuilder.ERROR_SERVICECODE_NULL);
-			map.put("msg", "送货单号不能为空");
-			return map;
-		}
+//		if (StringUtils.isBlank(delivery.getServiceCode())) {
+//			map.put("code", OrderServiceErrorBuilder.ERROR_SERVICECODE_NULL);
+//			map.put("msg", "送货单号不能为空");
+//			return map;
+//		}
 
 		// 测量名称不能为空过滤
-		if (StringUtils.isBlank(delivery.getName())) {
-			map.put("code", OrderServiceErrorBuilder.ERROR_NAME_NULL);
-			map.put("msg", "名称不能为空");
-			return map;
-		}
+//		if (StringUtils.isBlank(delivery.getName())) {
+//			map.put("code", OrderServiceErrorBuilder.ERROR_NAME_NULL);
+//			map.put("msg", "名称不能为空");
+//			return map;
+//		}
 
 		// 要求时间不能为空过滤
 		if (delivery.getNeedTime() == null) {

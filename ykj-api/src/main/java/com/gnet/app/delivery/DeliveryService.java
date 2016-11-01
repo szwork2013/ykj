@@ -16,6 +16,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
+import com.gnet.app.clerk.ClerkMapper;
+import com.gnet.app.customer.CustomerMapper;
 import com.gnet.app.noticeMsg.NoticeMsg;
 import com.gnet.app.noticeMsg.NoticeMsgService;
 import com.gnet.app.orderDeliverGoods.OrderDeliverGoods;
@@ -42,6 +44,10 @@ public class DeliveryService extends OrderSerService{
 	private OrderGoodMapper orderGoodMapper;
 	@Autowired
 	private OrderDeliverGoodsMapper orderDeliverGoodsMapper;
+	@Autowired
+	private CustomerMapper customerMapper;
+	@Autowired
+	private ClerkMapper clerkMapper;
 	@Autowired
 	private OrderProcessMapper orderProcessMapper;
 	@Autowired
@@ -332,5 +338,17 @@ public class DeliveryService extends OrderSerService{
 	public boolean isModifyExist(String serviceCode, String oldServiceCode, String businessId) {
 		return orderServiceMapper.isModifyExist(serviceCode, oldServiceCode, businessId) > 0;
 	}
+	
+	/**
+   * 根据订单服务编码获取打印信息
+   * @author JunLin.Yang
+   * @param orderServiceId 订单服务号ID
+   * @return 用于打印的订单服务信息
+   */
+  public OrderSer getOrderServiceForPrint(String orderServiceId){
+    OrderSer orderSer = this.orderServiceMapper.getOrderServiceDetailForPrint(orderServiceId);
+    orderSer.setServiceGoods(this.orderDeliverGoodsMapper.selectAllList(orderServiceId));
+    return orderSer;
+  }
 
 }
