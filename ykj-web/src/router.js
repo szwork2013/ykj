@@ -22,6 +22,8 @@ import InstallationsPage, { InstallationAdd, InstallationEdit, InstallationCharg
 import StorageGoodsPage, { StorageGoodsBatchDetail } from './routes/StorageGoodsPage';
 import StorageInsPage, { StorageInsDetail } from './routes/StorageInsPage';
 import StorageOutsPage, { StorageOutsDetail } from './routes/StorageOutsPage';
+/*--------------------------------商品管理-------------------------------------- */
+import GoodsPage, { GoodsAdd, GoodsEdit } from './routes/GoodsPage';
 
 
 /*--------------------------------通用设置-------------------------------------- */
@@ -100,6 +102,15 @@ export default ({ history }) => {
               <IndexRoute component={StorageOutsPage} />
               <Route breadcrumbName="明细" path="detail/:id" component={StorageOutsDetail} />
             </Route>
+          </Route>
+
+           <Route breadcrumbName="库存管理" path="stock">
+            <IndexRedirect to="stock" />
+              <Route breadcrumbName="商品列表" path="goods" >
+                <IndexRoute component={ GoodsPage }  />
+                <Route breadcrumbName="添加商品信息" path="add" component={ GoodsAdd } />
+                <Route breadcrumbName="编辑商品信息" path="edit/:id" component={ GoodsEdit } />
+              </Route>
           </Route>
 
           <Route breadcrumbName="客户管理" path="customers">
