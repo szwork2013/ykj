@@ -1,6 +1,5 @@
-package com.gnet.app.storageInDetail;
+package com.gnet.app.storageOutDetail;
 
-import java.math.BigDecimal;
 import java.util.Date;
 
 import javax.persistence.Entity;
@@ -8,7 +7,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import com.gnet.app.good.Good;
-import com.gnet.app.storageIn.StorageIn;
+import com.gnet.app.storageOut.StorageOut;
 import com.gnet.mybatis.BaseEntity;
 
 import lombok.Getter;
@@ -19,8 +18,8 @@ import lombok.ToString;
 @Setter
 @ToString
 @Entity
-@Table(name = "ykj_storage_in_detail")
-public class StorageInDetail extends BaseEntity {
+@Table(name = "ykj_storage_out_detail")
+public class StorageOutDetail extends BaseEntity {
 
   /** 
   * @Fields serialVersionUID :
@@ -44,19 +43,14 @@ public class StorageInDetail extends BaseEntity {
   private String storageGoodsId;
 
   /**
-   * 入库编号
+   * 出库编号
    */
-  private String storageInId;
+  private String storageOutId;
 
   /**
    * 数量
    */
   private Integer num;
-
-  /**
-   * 入库数量
-   */
-  private BigDecimal cost;
   
   //-----------------------额外信息---------------------------------
   
@@ -66,9 +60,8 @@ public class StorageInDetail extends BaseEntity {
   private @Transient Good good;
   
   /**
-   * 入库信息
+   * 出库信息
    */
-  private @Transient StorageIn storageIn;
-  
+  private @Transient StorageOut storageOut;
   
 }

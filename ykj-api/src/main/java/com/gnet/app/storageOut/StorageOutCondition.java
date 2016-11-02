@@ -1,6 +1,4 @@
-package com.gnet.app.storageIn;
-
-import com.gnet.app.CommonCondition;
+package com.gnet.app.storageOut;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -9,17 +7,12 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class StorageInCondition{
+public class StorageOutCondition{
   /** 
   * @Fields serialVersionUID 
   * @creator     :JunLin.Yang
   */ 
   private static final long serialVersionUID = 5915801595398966199L;
-  
-  /**
-   * 主键
-   */
-  private String id;
   
   /**
    * 商家编码
@@ -37,28 +30,23 @@ public class StorageInCondition{
   private String goodId;
   
   /**
-   * 订单编号
-   */
-  private String orderId;
-  
-  /**
    * 批次号模糊值
    */
   private String fuzzyBatchNumber;
   
   /**
-   * 入库类型
+   * 出库类型
    */
   private Integer type;
   
   /**
-   * 入库开始时间
+   * 出库开始时间
    */
-  private String storageInStartDate ;
+  private String storageOutStartDate ;
   
   /**
-   * 入库结束时间
+   * 出库结束时间
    */
-  private String storageInEndDate;
+  private String storageOutEndDate;
   
 }

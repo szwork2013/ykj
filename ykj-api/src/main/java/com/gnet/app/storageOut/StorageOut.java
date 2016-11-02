@@ -1,4 +1,4 @@
-package com.gnet.app.storageIn;
+package com.gnet.app.storageOut;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -10,7 +10,7 @@ import javax.persistence.Transient;
 
 import com.gnet.app.business.Business;
 import com.gnet.app.clerk.Clerk;
-import com.gnet.app.storageInDetail.StorageInDetail;
+import com.gnet.app.storageOutDetail.StorageOutDetail;
 import com.gnet.mybatis.BaseEntity;
 
 import lombok.Getter;
@@ -21,8 +21,8 @@ import lombok.ToString;
 @Setter
 @ToString
 @Entity
-@Table(name = "ykj_storage_in")
-public class StorageIn extends BaseEntity {
+@Table(name = "ykj_storage_out")
+public class StorageOut extends BaseEntity {
 
   /** 
   * @Fields serialVersionUID :
@@ -34,17 +34,22 @@ public class StorageIn extends BaseEntity {
    * 类型：其他
    */
   public final static Integer TYPE_OTHER = 0;
-  
+
   /**
-   * 类型：采购入库
+   * 类型：订单出库
    */
-  public final static Integer TYPE_PROCUREMENT = 1;
-  
+  public final static Integer TYPE_ORDER = 1;
+
   /**
-   * 类型：退货入库
+   * 类型：补货出库
    */
-  public final static Integer TYPE_RETURN = 2;
-  
+  public final static Integer TYPE_REPLENISHMENT = 2;
+
+  /**
+   * 类型：退回工厂
+   */
+  public final static Integer TYPE_RETURN = 3;
+
   /**
    * 创建时间
    */
@@ -56,7 +61,7 @@ public class StorageIn extends BaseEntity {
   private Date modifyDate;
 
   /**
-   * 入库类型
+   * 出库类型
    */
   private Integer type;
 
@@ -69,14 +74,19 @@ public class StorageIn extends BaseEntity {
    * 仓库管理员编号
    */
   private String clerkId;
+  
+  /**
+   * 订单编号
+   */
+  private String orderId;
 
   /**
-   * 入库批次号
+   * 出库批次号
    */
   private String batchNumber;
 
   /**
-   * 入库日期
+   * 出库日期
    */
   private Date changeDate;
 
@@ -97,22 +107,17 @@ public class StorageIn extends BaseEntity {
   private @Transient Clerk clerk;
 
   /**
-   * 入库方式名称
+   * 出库方式名称
    */
   private @Transient String typeName;
 
   /**
-   * 入库数量
+   * 出库数量
    */
-  private @Transient BigDecimal inTotalNum;
+  private @Transient BigDecimal outTotalNum;
 
   /**
-   * 入库数量
+   * 出库明细信息
    */
-  private @Transient BigDecimal inTotalCost;
-
-  /**
-   * 入库明细信息
-   */
-  private @Transient List<StorageInDetail> storageInDetailList;
+  private @Transient List<StorageOutDetail> storageOutDetailList;
 }
