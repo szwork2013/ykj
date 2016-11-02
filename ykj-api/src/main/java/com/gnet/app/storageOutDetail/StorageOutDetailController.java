@@ -69,21 +69,21 @@ public class StorageOutDetailController {
    * @return
    * ResponseEntity<?>
    */
-  @RequestMapping(value = "/searchByStorageOutId", method = RequestMethod.GET)
-  public ResponseEntity<?> searchByStorageOutId(@PageableDefault Pageable pageable,
+  @RequestMapping(value = "/search", method = RequestMethod.GET)
+  public ResponseEntity<?> search(@PageableDefault Pageable pageable,
       @RequestParam(name = "isall", required = false) Boolean isAll,
-      @RequestParam(name = "storageOutId", required = true) String storageOutId, Authentication authentication) {
+      StorageOutDetailCondition condition, Authentication authentication) {
     CustomUser customUser = (CustomUser) authentication.getPrincipal();
     // 判断是否分页
     Resources<StorageOutDetailResource> resources = null;
 
     if (isAll != null && isAll) {
       List<StorageOutDetail> storageOutDetailList = this.storageOutDetailService
-          .selectStorageOutDetailListByStorageOutId(storageOutId);
+          .selectStorageOutDetailListByCondition(condition);
       resources = listResourcesAssembler.toResource(storageOutDetailList, new StorageOutDetailResourceAssembler());
     } else {
       Page<StorageOutDetail> storageOutDetailPageResult = this.storageOutDetailService
-          .paginationStorageOutDetailListByStorageOutId(storageOutId, pageable);
+          .paginationStorageOutDetailListByCondition(condition, pageable);
       resources = pagedResourcesAssembler.toResource(storageOutDetailPageResult,
           new StorageOutDetailResourceAssembler());
     }

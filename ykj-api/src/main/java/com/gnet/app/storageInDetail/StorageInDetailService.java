@@ -36,8 +36,8 @@ public class StorageInDetailService {
    * List<StorageIn> 入库明细集合
    */
   @Transactional(readOnly = true)
-  public List<StorageInDetail> selectStorageInDetailListByStorageInId(String storageInId) {
-    return this.storageInDetailMapper.selectStorageInDetailListByStorageInId(storageInId);
+  public List<StorageInDetail> selectStorageInDetailListByCondition(StorageInDetailCondition condition) {
+    return this.storageInDetailMapper.selectStorageInDetailListByCondition(condition);
   }
 
   /**
@@ -48,14 +48,14 @@ public class StorageInDetailService {
    * Page<StorageIn> 入库明细分页集合
    */
   @Transactional(readOnly = true)
-  public Page<StorageInDetail> paginationStorageInDetailListByStorageInId(String storageInId, Pageable pageable) {
+  public Page<StorageInDetail> paginationStorageInDetailListByCondition(StorageInDetailCondition condition, Pageable pageable) {
 
     Page<StorageInDetail> pageResult = PageUtil.pagination(pageable, null,
         new PageUtil.Callback<StorageInDetail>() {
 
           @Override
           public List<StorageInDetail> getPageContent() {
-            return storageInDetailMapper.selectStorageInDetailListByStorageInId(storageInId);
+            return storageInDetailMapper.selectStorageInDetailListByCondition(condition);
           }
 
         });

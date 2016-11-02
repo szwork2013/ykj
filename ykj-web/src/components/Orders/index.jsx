@@ -110,213 +110,95 @@ const List = (props) => {
             {
               title: '操作',
               key: 'operation',
+              width: 680,
               render: (text, record) => (
-                <table>
-                  <tbody>
-                    <tr>
-                      <td>
+                <span>
+                  <Link to={`/order/orders/${record.id}/deliverys`}><Icon type="shopping-cart" />送货</Link>
+                  <span className="ant-divider"></span>
+                  <Link to={`/order/orders/${record.id}/installations`}><Icon type="download" />安装</Link>
+                  <span className="ant-divider"></span>
+                  <Link to={`/order/orders/print/${record.id}`}><Icon type="file" />打印</Link>
+                  <span className="ant-divider"></span>
+                            <Link to={`/order/orders/edit/${record.id}`}><Icon type="edit" />编辑</Link>
+                            <span className="ant-divider"></span>
                         <Popconfirm title="确定要删除这个订单吗？" onConfirm={() => {
-                          dispatch({
-                            type: 'orders/deleteOne',
-                            payload: record.id,
-                          })
+                    dispatch({
+                      type: 'orders/deleteOne',
+                      payload: record.id,
+                    })
 
-                        } } onCancel={() => { } }>
-                          <a href="#"><Icon type="delete" />删除</a>
-                        </Popconfirm>
-                        <span className="ant-divider"></span>
-                        <a href="javascript:void(0)" onClick={() => {
-                          dispatch({
-                            type: 'orders/toFinishOrder',
-                            payload: {
-                              id: record.id
-                            }
-                          });
-                        } } ><Icon type="upload" />完成</a>
-                        <span className="ant-divider"></span>
-                        <a href="javascript:void(0)" onClick={() => {
-                          dispatch({
-                            type: 'orders/toFollow',
-                            payload: {
-                              currentOrderId: record.id,
-                            }
-                          });
-                        } } ><Icon type="upload" />跟踪</a>
-                        <Link to={`/order/orders/${record.id}/deliverys`}><Icon type="edit" />送货</Link>
-                        <span className="ant-divider"></span>
-                        <Link to={`/order/orders/${record.id}/installations`}><Icon type="edit" />安装</Link>
-                        <span className="ant-divider"></span>
-                        {
-                          record.type == 2 || record.type == 3 ?
-                            (<Link to={`/order/orders/print/${record.id}`}><Icon type="edit" />打印</Link>)
-                            :
-                            (<Link to={`/order/orders/edit/${record.id}`}><Icon type="edit" />编辑</Link>)
+                  } } onCancel={() => { } }>
+                    <a href="#"><Icon type="delete" />删除</a>
+                  </Popconfirm>
+                  <span className="ant-divider"></span>
+                  <a href="javascript:void(0)" onClick={() => {
+                    dispatch({
+                      type: 'orders/toFinishOrder',
+                      payload: {
+                        id: record.id
+                      }
+                    });
+                  } } ><Icon type="check-circle-o" />完成</a>
+                  <span className="ant-divider"></span>
+                  <a href="javascript:void(0)" onClick={() => {
+                    dispatch({
+                      type: 'orders/toFollow',
+                      payload: {
+                        currentOrderId: record.id,
+                      }
+                    });
+                  } } ><Icon type="eye-o" />跟踪</a>
+                  <span className="ant-divider"></span>
+
+                  <a href="javascript:void(0)" onClick={() => {
+                    dispatch({
+                      type: 'orders/toUpload',
+                      payload: {
+                        currentOrder: {
+                          id: record.id
                         }
-
-                        <span className="ant-divider"></span>
-                        <a href="javascript:void(0)" onClick={() => {
-                          dispatch({
-                            type: 'orders/toUpload',
-                            payload: {
-                              currentOrder: {
-                                id: record.id
-                              }
-                            }
-                          });
-                        } } ><Icon type="upload" />订单上传</a>
-                        <span className="ant-divider"></span>
-                        {
-                          record.type == 2 ?
-                            (
-                              <Popconfirm title="确定要删除这个订单吗？" onConfirm={() => {
-                                dispatch({
-                                  type: 'orders/deleteOne',
-                                  payload: record.id,
-                                })
-
-
-                              } } onCancel={() => { } }>
-                                <a href="#"><Icon type="delete" />删除</a>
-                              </Popconfirm>
-                            )
-                            :
-                            undefined
+                      }
+                    });
+                  } } ><Icon type="upload" />订单上传</a>
+                  <span className="ant-divider"></span>
+                  <Link to={`/order/orders/${record.id}/measures`}><Icon type="calculator" />测量</Link>
+                  <span className="ant-divider"></span>
+                  <Link to={`/order/orders/${record.id}/designs`}><Icon type="picture" />设计</Link>
+                  <span className="ant-divider"></span>
+                  <a href="javascript:void(0)" onClick={() => {
+                    dispatch({
+                      type: 'orders/toAudit',
+                      payload: {
+                        currentOrder: {
+                          id: record.id
                         }
-                      </td>
-                    </tr>
-                    {
-                      record.type == 0 ?
-                        (
-                          <tr>
-                            <td>
-                              <span className="ant-divider"></span>
-                              <Link to={`/order/orders/${record.id}/measures`}><Icon type="edit" />测量</Link>
-                              <span className="ant-divider"></span>
-                              <Link to={`/order/orders/${record.id}/designs`}><Icon type="edit" />设计</Link>
-                              <Link to={`/order/orders/print/${record.id}`}><Icon type="edit" />打印</Link>
-                              <span className="ant-divider"></span>
-                              <a href="javascript:void(0)" onClick={() => {
-                                dispatch({
-                                  type: 'orders/toAudit',
-                                  payload: {
-                                    currentOrder: {
-                                      id: record.id
-                                    }
-                                  }
-                                });
-                              } } ><Icon type="edit" />审核</a>
-                              <span className="ant-divider"></span>
-                              <a href="javascript:void(0)" onClick={() => {
-                                dispatch({
-                                  type: 'orders/toRevenueOrder',
-                                  payload: {
-                                    currentOrder: {
-                                      id: record.id
-                                    }
-                                  },
-                                });
-                              } } ><Icon type="edit" />付款</a>
-                            </td>
-                          </tr>
-                        )
-                        :
-                        (
-                          record.type == 2 || record.type == 3 ?
-                            (
-                              undefined
-                            )
-                            :
-                            (
-                              record.payStatus == '未付清' ?
-                                (
-                                  <tr>
-                                    <td>
-                                      <Link to={`/order/orders/print/${record.id}`}><Icon type="edit" />打印</Link>
-                                      <span className="ant-divider"></span>
-                                      <Popconfirm title="确定要针对当前订单退单吗？" onConfirm={() => {
-                                        dispatch({
-                                          type: 'orders/cancelOrder',
-                                          payload: record.id,
-                                        })
+                      }
+                    });
+                  } } ><Icon type="clock-circle-o" />审核</a>
+                  <span className="ant-divider"></span>
+                  <a href="javascript:void(0)" onClick={() => {
+                    dispatch({
+                      type: 'orders/toRevenueOrder',
+                      payload: {
+                        currentOrder: {
+                          id: record.id
+                        }
+                      },
+                    });
+                  } } ><Icon type="pay-circle-o" />付款</a>
+                  <span className="ant-divider"></span>
+                  <Popconfirm title="确定要针对当前订单退单吗？" onConfirm={() => {
+                    dispatch({
+                      type: 'orders/cancelOrder',
+                      payload: record.id,
+                    })
 
-                                      } } onCancel={() => { } }>
-                                        <a href="#"><Icon type="edit" />退单</a>
-                                      </Popconfirm>
-                                      <span className="ant-divider"></span>
-                                      <a href="javascript:void(0)" onClick={() => {
-                                        dispatch({
-                                          type: 'orders/toRevenueOrder',
-                                          payload: {
-                                            currentOrder: {
-                                              id: record.id
-                                            }
-                                          },
-                                        });
-                                      } } ><Icon type="edit" />付款</a>
-                                    </td>
-                                  </tr>
-                                )
-                                :
-                                (
-                                  <tr>
-                                    <td>
-                                      <Link to={`/order/orders/print/${record.id}`}><Icon type="edit" />打印</Link>
-                                      <span className="ant-divider"></span>
-                                      <Popconfirm title="确定要针对当前订单退单吗？" onConfirm={() => {
-                                        dispatch({
-                                          type: 'orders/cancelOrder',
-                                          payload: record.id,
-                                        })
+                  } } onCancel={() => { } }>
+                    <a href="#"><Icon type="logout" />退单</a>
+                  </Popconfirm>
+                  <span className="ant-divider"></span>
 
-                                      } } onCancel={() => { } }>
-                                        <a href="#"><Icon type="edit" />退单</a>
-                                      </Popconfirm>
-                                      <span className="ant-divider"></span>
-                                      <Link to={`/order/orders/${record.id}/measures`}><Icon type="edit" />测量</Link>
-                                      <span className="ant-divider"></span>
-                                      <Link to={`/order/orders/${record.id}/designs`}><Icon type="edit" />设计</Link>
-                                    </td>
-                                  </tr>
-                                )
-                            )
-                        )
-                    }
-                    {
-                      record.type == 1 && record.payStatus == '全部付清' ?
-                        (
-                          <tr>
-                            <td>
-                              <a href="javascript:void(0)" onClick={() => {
-                                dispatch({
-                                  type: 'orders/toRevenueOrder',
-                                  payload: {
-                                    currentOrder: {
-                                      id: record.id
-                                    }
-                                  },
-                                });
-                              } } ><Icon type="edit" />付款</a>
-                              <span className="ant-divider"></span>
-                              <Link to={`/order/orders/${record.id}/deliverys`}><Icon type="edit" />送货</Link>
-                              <span className="ant-divider"></span>
-                              <Link to={`/order/orders/${record.id}/installations`}><Icon type="edit" />安装</Link>
-                              <span className="ant-divider"></span>
-                              <a href="javascript:void(0)" onClick={() => {
-                                dispatch({
-                                  type: 'orders/toFinishOrder',
-                                  payload: {
-                                    id: record.id
-                                  }
-                                });
-                              } } ><Icon type="edit" />完成</a>
-                            </td>
-                          </tr>
-                        )
-                        :
-                        undefined
-                    }
-                  </tbody>
-                </table>
+                </span>
               ),
             }]
         }

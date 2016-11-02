@@ -161,32 +161,9 @@ class EditDetail extends Component {
                           label = "客户姓名"
                           help={isFieldValidating('name') ? '校验中...' : (getFieldError('name') || []).join(', ')}
                       >
-                          <Input {...customerIdProps} type="hidden" size="default" style={ { width: '80%'} } disabled={ orders.submiting } />
+                          <Input {...customerIdProps} type="text" size="default" style={ { width: '80%'} } disabled={ orders.submiting } />
                         
-                          <Select {...nameProps} onBlur={ (value) => {
-                            form.setFieldsValue({
-                              name: value,
-                            })
-                          }} onSelect={ (value, option) => {
-
-                            customerList.map(item => {
-                              if(item.id === value){
-                                 form.setFieldsValue({
-                                  company: item.organization || '',
-                                  phone : item.phone || '',
-                                  customerId : item.id || ''
-                                })
-                              }
-                            })
-                           
-                            return true;
-                          }} style={ { width: '80%'} } size="default" disabled={ orders.submiting }>
-                           {
-                            customerList.map(item => {
-                              return <Option key={item.id} value={item.id}>{item.name}</Option>
-                            })
-                          }
-                          </Select>
+                          
                       </FormItem>
                   </Col>
                   <Col sm={ 12 }>

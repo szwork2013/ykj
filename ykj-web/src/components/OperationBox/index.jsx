@@ -21,7 +21,7 @@ const OperationBox = ({ options = {}, ...others }) => {
   const renderOperation = function() {
       return operation.map((item, index) => {
           return (
-              <Button className={styles['operation-btn']} key={index}>
+              <Button type={item.type} size="large"  key={index}>
                 <Link to={item.url}>{item.label}</Link>
               </Button>
           )

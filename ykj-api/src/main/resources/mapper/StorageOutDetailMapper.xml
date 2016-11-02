@@ -32,7 +32,8 @@
 	</resultMap>
 
 
-	<select id="selectStorageOutDetailListByStorageInId" resultMap="StorageOutDetailExtMap">
+	<select id="selectStorageOutDetailListByCondition" resultMap="StorageOutDetailExtMap"
+	parameterType="com.gnet.app.storageOutDetail.StorageOutDetailCondition">
 		SELECT
 		t.*,
 		s.name AS good_name,
@@ -47,7 +48,14 @@
 		ykj_storage_out_detail AS t
 		LEFT JOIN ykj_storage_goods AS s ON s.id = t.storage_goods_id
 		LEFT JOIN ykj_storage_out AS w ON t.storage_out_id = w.id
-		where t.storage_out_id = #{storageOutId}
+		<where>
+			<if test="storageOutId != null and storageOutId !=''">
+				and t.storage_out_id = #{storageOutId}
+			</if>
+			<if test="storageGoodsId != null and storageGoodsId !=''">
+				and t.storage_goods_id = #{storageGoodsId}
+			</if>
+		</where>
 	</select>
 
 </mapper>

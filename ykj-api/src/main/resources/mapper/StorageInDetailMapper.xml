@@ -33,7 +33,8 @@
 	</resultMap>
 
 
-	<select id="selectStorageInDetailListByStorageInId" resultMap="StorageInDetailExtMap">
+	<select id="selectStorageInDetailListByCondition" resultMap="StorageInDetailExtMap" 
+	parameterType="com.gnet.app.storageInDetail.StorageInDetailCondition">
 		SELECT
 		t.*,
 		s.name AS good_name,
@@ -48,7 +49,14 @@
 		ykj_storage_in_detail AS t
 		LEFT JOIN ykj_storage_goods AS s ON s.id = t.storage_goods_id
 		LEFT JOIN ykj_storage_in AS w ON t.storage_in_id = w.id
-		where t.storage_in_id = #{storageInId}
+		<where>
+			<if test="storageInId != null and storageInId !=''">
+				and t.storage_in_id = #{storageInId}
+			</if>
+			<if test="storageGoodsId != null and storageGoodsId !=''">
+				and t.storage_goods_id = #{storageGoodsId}
+			</if>
+		</where>
 	</select>
 
 </mapper>

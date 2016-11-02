@@ -2,8 +2,6 @@ package com.gnet.app.storageOutDetail;
 
 import java.util.List;
 
-import org.apache.ibatis.annotations.Param;
-
 import tk.mybatis.mapper.common.Mapper;
 
 /**
@@ -17,6 +15,6 @@ public interface StorageOutDetailMapper extends Mapper<StorageOutDetail> {
    * @return
    * List<StorageInDetail>
    */
-  public List<StorageOutDetail> selectStorageOutDetailListByStorageOutId(@Param("storageOutId") String storageOutId);
+  public List<StorageOutDetail> selectStorageOutDetailListByCondition(StorageOutDetailCondition condition);
   
 }

@@ -28,7 +28,21 @@ const InstallGoods = ({ customers, installations, installGoods, form, onSubmit, 
   const formItemLayout = {
     labelCol: { span: 10 },
     wrapperCol: { span: 14 },
-  };
+  }
+
+  const installGoodsTmp = [{
+    name : '木板',
+    model : '兔宝宝系列',
+    deliverNum : 10,
+    storageGoodsNum : 2,
+    remark : '由于客厅不平整，等修复后再施工'
+  },{
+    name : '坐便器',
+    model : 'TOTO',
+    deliverNum : 2,
+    storageGoodsNum : 0,
+    remark : ''
+  }]
   return (
     <div>
       <BoxTable
@@ -49,13 +63,13 @@ const InstallGoods = ({ customers, installations, installGoods, form, onSubmit, 
           },
           {
             title: '商品型号',
-            dataIndex: 'status',
-            key: 'status',
+            dataIndex: 'model',
+            key: 'model',
           },
           {
             title: '送货数量',
-            dataIndex: 'needDeliverNum',
-            key: 'needDeliverNum',
+            dataIndex: 'deliverNum',
+            key: 'deliverNum',
           },
           {
             title: '使用数量',
@@ -82,7 +96,7 @@ const InstallGoods = ({ customers, installations, installGoods, form, onSubmit, 
           }]
         }
         rowKey={ record => record.id }
-        dataSource={ installGoods.installGoods }
+        dataSource={ installGoodsTmp }
         pagination={ installGoods.pagination }
         loading={ installGoods.loading }
         onChange={ onTableChange }
@@ -103,8 +117,29 @@ InstallGoods.propTypes = {
 
 export default Form.create({
   mapPropsToFields: (props) => {
-    const query = props.installations.query;
+    const installGoods = props.installations.currentItem;
     return {
+      needTime : {
+        value : installGoods.needTime
+      },
+      clerkName : {
+        value : installGoods.clerkName
+      },
+      clerkPhone : {
+        value : installGoods.clerkPhone
+      },
+      orderGoodNum : {
+        value : installGoods.orderGoodNum
+      },
+      serviceCost : {
+        value : installGoods.serviceCost
+      },
+      remark : {
+        value : installGoods.remark
+      },
+      status : {
+        value : installGoods.status
+      }
     }
   }
 })(InstallGoods);

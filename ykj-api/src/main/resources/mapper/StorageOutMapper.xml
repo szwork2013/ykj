@@ -17,7 +17,7 @@
 	<resultMap id="StorageOutExtMap" type="com.gnet.app.storageOut.StorageOut"
 		extends="BaseStorageOutMap">
 		<result column="type_name" property="typeName" jdbcType="VARCHAR" />
-		<result column="in_total_num" property="inTotalNum" jdbcType="DECIMAL" />
+		<result column="out_total_num" property="outTotalNum" jdbcType="DECIMAL" />
 		<association property="clerk"  javaType="com.gnet.app.clerk.Clerk">  
             <result property="name" column="clerk_name"/>  
         </association>
@@ -30,7 +30,7 @@
 		t.*, s.name clerk_name, 
 		(select sa.value from sc_codeword sa,sc_codeword_type sb 
 		where sb.id=sa.codeword_type_id and sa.code=t.type and sb.type_value = 'STORAGE_OUT_SOURCE') type_name,
-		(select sum(w.num) from ykj_storage_out_detail w where w.storage_out_id = t.id) in_total_num
+		(select sum(w.num) from ykj_storage_out_detail w where w.storage_out_id = t.id) out_total_num
 		FROM
 		ykj_storage_out t
 		LEFT JOIN ykj_clerk s ON t.clerk_id = s.id
@@ -51,14 +51,51 @@
 				and t.batch_number like
 				CONCAT('%',CONCAT(#{fuzzyBatchNumber},'%'))
 			</if>
-			<if test="storageInStartDate != null ">
-				and t.change_date >= DATE_FORMAT(#{storageInStartDate},'%Y-%m-%d')
+			<if test="storageOutStartDate != null ">
+				and t.change_date >= DATE_FORMAT(#{storageOutStartDate},'%Y-%m-%d')
 			</if>
-			<if test="storageInEndDate != null ">
-                <![CDATA[and t.change_date <= DATE_FORMAT(#{storageInEndDate},'%Y-%m-%d')]]>
+			<if test="storageOutEndDate != null ">
+                <![CDATA[and t.change_date <= DATE_FORMAT(#{storageOutEndDate},'%Y-%m-%d')]]>
 			</if>
-			<if test="goodId != null ">
-				and exists(select 1 from ykj_storage_in_detail w where w.storage_in_id = t.id and w.storage_goods_id = #{goodId})
+		</where>
+	</select>
+	
+	<select id="selectStorageOutGoodHistoryDataListByCondition"
+		resultMap="StorageOutExtMap" parameterType="com.gnet.app.storageOut.StorageOutCondition">
+		SELECT
+		t.*, s.name clerk_name, 
+		(select sa.value from sc_codeword sa,sc_codeword_type sb 
+		where sb.id=sa.codeword_type_id and sa.code=t.type and sb.type_value = 'STORAGE_OUT_SOURCE') type_name,
+		(select sum(w.num) from ykj_storage_out_detail w where w.storage_out_id = t.id and w.storage_goods_id = q.storage_goods_id) out_total_num
+		FROM
+		ykj_storage_out t
+		LEFT JOIN ykj_clerk s ON t.clerk_id = s.id
+		LEFT JOIN ykj_storage_out_detail q on q.storage_in_id = t.id 
+		<where>
+			<if test="type != null">
+				and t.type = #{type}
+			</if>
+			<if test="businessId != null and businessId !='' ">
+				and t.business_id = #{businessId}
+			</if>
+			<if test="clerkId != null and clerkId !='' ">
+				and t.clerk_id = #{clerkId}
+			</if>
+			<if test="orderId != null and orderId !='' ">
+                and t.order_id = #{orderId}
+            </if>
+			<if test="fuzzyBatchNumber != null and fuzzyBatchNumber !='' ">
+				and t.batch_number like
+				CONCAT('%',CONCAT(#{fuzzyBatchNumber},'%'))
+			</if>
+			<if test="storageOutStartDate != null ">
+				and t.change_date >= DATE_FORMAT(#{storageOutStartDate},'%Y-%m-%d')
+			</if>
+			<if test="storageOutEndDate != null ">
+                <![CDATA[and t.change_date <= DATE_FORMAT(#{storageOutEndDate},'%Y-%m-%d')]]>
+			</if>
+			<if test="goodId != null and goodId !='' ">
+				and q.storage_goods_id = #{goodId}
 			</if>
 		</where>
 	</select>

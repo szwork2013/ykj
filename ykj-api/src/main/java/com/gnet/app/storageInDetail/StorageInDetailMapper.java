@@ -17,6 +17,6 @@ public interface StorageInDetailMapper extends Mapper<StorageInDetail> {
    * @return
    * List<StorageInDetail>
    */
-  public List<StorageInDetail> selectStorageInDetailListByStorageInId(@Param("storageInId") String storageInId);
+  public List<StorageInDetail> selectStorageInDetailListByCondition(StorageInDetailCondition condition);
   
 }

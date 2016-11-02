@@ -38,7 +38,7 @@ const OrderCustomerInfo = (props) => {
 					{...rowItemLayout}
 					label="客户电话"
 				>
-				  <p>{currentOrder.customerName}</p>
+				  <p>{currentOrder.customerPhone}</p>
 				</FormItem>
 			</Col>
 	  </Row>

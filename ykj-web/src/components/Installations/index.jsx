@@ -108,6 +108,9 @@ const List = ({ customers, installations, form, children, dispatch, ...rest }) =
               title: '费用',
               dataIndex: 'cost',
               key: 'cost',
+              render:(text,record,index)=>{
+                return <a href="#">点击录入</a>
+              }
             },
             {
               title: '结算标志',

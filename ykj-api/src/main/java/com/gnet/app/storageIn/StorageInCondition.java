@@ -1,6 +1,6 @@
 package com.gnet.app.storageIn;
 
-import com.gnet.app.CommonCondition;
+import java.util.Date;
 
 import lombok.Getter;
 import lombok.Setter;

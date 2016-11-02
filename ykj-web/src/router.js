@@ -19,9 +19,12 @@ import DeliverysPage, { DeliveryAdd, DeliveryEdit, DeliveryNote } from './routes
 import InstallationsPage, { InstallationAdd, InstallationEdit, InstallationCharges, InstallationNote } from './routes/InstallationsPage'
 
 /*--------------------------------库存管理-------------------------------------- */
-import StorageGoodsPage, { StorageGoodsBatchDetail } from './routes/StorageGoodsPage';
+import StorageGoodsStatusPage, { StorageGoodsStatusBatchDetail } from './routes/StorageGoodsStatusPage';
 import StorageInsPage, { StorageInsDetail } from './routes/StorageInsPage';
+import StorageInDetailsPage from './routes/StorageInDetailsPage';
 import StorageOutsPage, { StorageOutsDetail } from './routes/StorageOutsPage';
+import StorageOutDetailsPage from './routes/StorageOutDetailsPage';
+
 /*--------------------------------商品管理-------------------------------------- */
 import GoodsPage, { GoodsAdd, GoodsEdit } from './routes/GoodsPage';
 
@@ -88,19 +91,23 @@ export default ({ history }) => {
           </Route>
 
           <Route breadcrumbName="库存管理" path="storage">
-            <Route breadcrumbName="库存列表" path="storageGoods" >
-              <IndexRoute component={StorageGoodsPage} />
-              <Route breadcrumbName="批次明细" path="batchDetail/:id" component={StorageGoodsBatchDetail} />
+            <Route breadcrumbName="库存列表" path="storageGoodsStatus" >
+              <IndexRoute component={StorageGoodsStatusPage} />
+              <Route breadcrumbName="批次明细" path="batchDetail/:id" component={StorageGoodsStatusBatchDetail} />
               <Route breadcrumbName="入库历史" path="storageIns/:id" component={StorageInsPage} />
               <Route breadcrumbName="出库历史" path="storageOuts/:id" component={StorageOutsPage} />
             </Route>
+            <Route breadcrumbName="入库历史" path="storageIns/good/:id" >
+              <IndexRoute component={StorageInsPage} />
+              <Route breadcrumbName="明细" path="detail/:id" component={StorageInDetailsPage} />
+            </Route>
             <Route breadcrumbName="入库历史" path="storageIns" >
               <IndexRoute component={StorageInsPage} />
-              <Route breadcrumbName="明细" path="detail/:id" component={StorageInsDetail} />
+              <Route breadcrumbName="明细" path="detail/:id" component={StorageInDetailsPage} />
             </Route>
             <Route breadcrumbName="出库历史" path="storageOuts" >
               <IndexRoute component={StorageOutsPage} />
-              <Route breadcrumbName="明细" path="detail/:id" component={StorageOutsDetail} />
+              <Route breadcrumbName="明细" path="detail/:id" component={StorageOutDetailsPage} />
             </Route>
           </Route>
 

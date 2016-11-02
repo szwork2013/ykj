@@ -69,21 +69,21 @@ public class StorageInDetailController {
    * @return
    * ResponseEntity<?>
    */
-  @RequestMapping(value = "/searchByStorageInId", method = RequestMethod.GET)
+  @RequestMapping(value = "/search", method = RequestMethod.GET)
   public ResponseEntity<?> search(@PageableDefault Pageable pageable,
       @RequestParam(name = "isall", required = false) Boolean isAll,
-      @RequestParam(name = "isall", required = true) String storageInId, Authentication authentication) {
+      StorageInDetailCondition condition, Authentication authentication) {
     CustomUser customUser = (CustomUser) authentication.getPrincipal();
     // 判断是否分页
     Resources<StorageInDetailResource> resources = null;
 
     if (isAll != null && isAll) {
       List<StorageInDetail> storageInDetailList = this.storageInDetailService
-          .selectStorageInDetailListByStorageInId(storageInId);
+          .selectStorageInDetailListByCondition(condition);
       resources = listResourcesAssembler.toResource(storageInDetailList, new StorageInDetailResourceAssembler());
     } else {
       Page<StorageInDetail> storageInPageResult = this.storageInDetailService
-          .paginationStorageInDetailListByStorageInId(storageInId, pageable);
+          .paginationStorageInDetailListByCondition(condition, pageable);
       resources = pagedResourcesAssembler.toResource(storageInPageResult, new StorageInDetailResourceAssembler());
     }
 

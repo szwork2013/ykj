@@ -3,6 +3,7 @@ package com.gnet.app.storageOut;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -52,8 +53,12 @@ public class StorageOutService {
 
     //由于表中只包含商家编码和操作人编码，故这边不做任何处理
     condition.setBusinessId(clerk.getBusinessId());
-    List<StorageOut> list = this.storageOutMapper.selectStorageOutHistoryDataListByCondition(condition);
-
+    List<StorageOut> list = null;
+    if (StringUtils.isBlank(condition.getGoodId())) {
+		list = this.storageOutMapper.selectStorageOutHistoryDataListByCondition(condition);
+	}else{
+		list = this.storageOutMapper.selectStorageOutGoodHistoryDataListByCondition(condition);
+	}
     return list;
   }
 
@@ -89,7 +94,12 @@ public class StorageOutService {
 
       @Override
       public List<StorageOut> getPageContent() {
-        return storageOutMapper.selectStorageOutHistoryDataListByCondition(condition);
+    	  if (StringUtils.isBlank(condition.getGoodId())) {
+    		  return storageOutMapper.selectStorageOutHistoryDataListByCondition(condition);
+			}else{
+				return storageOutMapper.selectStorageOutGoodHistoryDataListByCondition(condition);
+			}
+        
       }
 
     });

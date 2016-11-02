@@ -13,6 +13,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import com.gnet.Application;
 import com.gnet.app.clerk.Clerk;
 import com.gnet.app.storageInDetail.StorageInDetail;
+import com.gnet.app.storageOut.StorageOutService;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = Application.class) // springboot 启动类
@@ -53,5 +54,6 @@ public class StorageInServiceTest {
     this.storageInService.create(clerk, storageIn);
     
   }
+ 
 
 }

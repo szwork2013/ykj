@@ -24,8 +24,6 @@ class CodewordSelect extends Component {
     }
 
     componentWillMount() {
-        console.log("componentWillMount")
-        console.log(this.state.type)
         this.props.dispatch({
             type: 'componentDataSource/loadCodewordsData',
             payload: this.state.type,

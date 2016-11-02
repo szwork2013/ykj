@@ -13,12 +13,12 @@ const ButtonGroup = Button.Group;
 const TabPane = Tabs.TabPane;
 const FormItem = Form.Item;
 const { confirm } = Modal;
-const List = ({ form, storageGoods, componentDataSource, dispatch, ...rest }) => {
+const List = ({ form, storageGoodsStatus, componentDataSource, dispatch, ...rest }) => {
   const { getFieldProps } = form;
 
   const onTableChange = (pagination, filters, sorter) => {
     dispatch({
-      type: 'storageGoods/setQuery',
+      type: 'storageGoodsStatus/setQuery',
       payload: {
         page: pagination.current,
         sort: sorter.field ? `${sorter.field},${sorter.order}` : undefined,
@@ -90,10 +90,14 @@ const List = ({ form, storageGoods, componentDataSource, dispatch, ...rest }) =>
               <Button type="primary" onClick={() => {
 
                 const formData = form.getFieldsValue();
-                console.log(formData);
+                 dispatch({
+                        type: 'storageGoodsStatus/setQuery',
+                        payload: formData
+                    });
+                
               } } >查询</Button>
               <Button type="ghost" onClick={() => {
-                form.resetFieldsValue();
+                form.resetFields();
               } } >重置</Button>
             </ButtonGroup>
 
@@ -108,17 +112,7 @@ const List = ({ form, storageGoods, componentDataSource, dispatch, ...rest }) =>
                     <Input
                       placeholder="请输入商品名称"
                       style={{ width: 250 }}
-                      >
-                    </Input>
-                  </FormItem>
-                </Col>
-                <Col sm={4}>
-                  <FormItem
-                    { ...formItemLayout }
-                    >
-                    <Input
-                      placeholder="请输入关键字"
-                      style={{ width: 250 }}
+                      {...getFieldProps('fuzzyName')}
                       >
                     </Input>
                   </FormItem>
@@ -142,87 +136,135 @@ const List = ({ form, storageGoods, componentDataSource, dispatch, ...rest }) =>
             },
             {
               title: '商品名称',
-              dataIndex: 'name',
-              key: 'name',
+              dataIndex: 'goodName',
+              key: 'goodName',
+              render: (text, record) => {
+                if(record.good){
+                 return record.good.name || ''
+                }else {
+                  return ''
+                }
+              }
             },
             {
               title: '商品型号',
-              dataIndex: 'status',
-              key: 'status'
+              dataIndex: 'goodModel',
+              key: 'goodModel',
+              render: (text, record) => {
+                if(record.good){
+                 return record.good.model || ''
+                }else {
+                  return ''
+                }
+              }
             },
             {
               title: '原价',
-              dataIndex: 'servicePosition',
-              key: 'servicePosition'
+              dataIndex: 'goodPrice',
+              key: 'goodPrice',
+              render: (text, record) => {
+                if(record.good){
+                 return record.good.price || ''
+                }else {
+                  return ''
+                }
+              }
             },
             {
               title: '库存数量',
-              dataIndex: 'serviceTime',
-              key: 'serviceTime',
+              dataIndex: 'goodStoreNow',
+              key: 'goodStoreNow',
+              render: (text, record) => {
+                if(record.good){
+                 return record.good.storeNow || ''
+                }else {
+                  return ''
+                }
+              }
             },
             {
               title: '预留库存数',
-              dataIndex: 'clerkName',
-              key: 'clerkName',
+              dataIndex: 'reservedTotalNum',
+              key: 'reservedTotalNum',
             },
             {
               title: '未发货商品数',
-              dataIndex: 'id',
-              key: 'id'
+              dataIndex: 'needDeliverTotalNum',
+              key: 'needDeliverTotalNum'
             },
             {
               title: '已出库商品数',
-              dataIndex: 'starLevel',
-              key: 'starLevel',
+              dataIndex: 'storageOutTotalNum',
+              key: 'storageOutTotalNum',
             },
             {
               title: '当前可用库存',
-              dataIndex: 'cost',
-              key: 'cost',
+              dataIndex: 'usableNum',
+              key: 'usableNum',
+              render: (text, record) => {
+                if(record.good){
+                 return  record.good.storeNow - record.reservedTotalNum
+                }else {
+                  return ''
+                }
+              }
             },
             {
               title: '需补充库存数',
-              dataIndex: 'isClear',
-              key: 'isClear'
+              dataIndex: 'needAddNum',
+              key: 'needAddNum',
+              render: (text, record) => {
+                if(record.good){
+                 return  record.needDeliverTotalNum - record.good.storeNow
+                }else {
+                  return ''
+                }
+              }
             },
             {
               title: '状态',
-              dataIndex: 'remark',
-              key: 'remark',
+              dataIndex: 'goodOnsaleStatusText',
+              key: 'goodOnsaleStatusText',
+              render: (text, record) => {
+                if(record.good){
+                 return  record.good.onsaleStatusText
+                }else {
+                  return ''
+                }
+              }
             },
             {
               title: '更新时间',
-              dataIndex: 'remark2',
-              key: 'remark2',
+              dataIndex: 'goodModifyDate',
+              key: 'goodModifyDate',
+              render: (text, record) => {
+                if(record.good){
+                 return  record.good.modifyDate
+                }else {
+                  return ''
+                }
+              }
             },
             {
               title: '操作',
               key: 'operation',
               render: (text, record) => (
                 <span>
-                  <Link to={`/order/orders/${rest.params.id}/measures/edit/${record.id}`}><Icon type="edit" />编辑</Link>
-                  <span className="ant-divider"></span>
-                  <Popconfirm title="确定要删除这个商品信息吗？" onConfirm={() => {
-
-                  } } onCancel={() => { } }>
-                    <a href="#"><Icon type="delete" />删除</a>
-                  </Popconfirm>
-                  <span className="ant-divider"></span>
                   <Link ><Icon type="edit" />商品属性</Link>
                   <span className="ant-divider"></span>
-                  <Link to={`/storage/storageGoods/storageIns/${record.id}`}><Icon type="edit" />入库历史</Link>
+                  <Link to={`/storage/storageIns/good/${record.good?record.good.id:''}`}><Icon type="edit" />入库历史</Link>
                   <span className="ant-divider"></span>
-                  <Link to={`/storage/storageGoods/storageOuts/${record.id}`}><Icon type="edit" />出库历史</Link>
+                  <Link to={`/storage/storageGoodsStatus/storageOuts/${record.id}`}><Icon type="edit" />出库历史</Link>
                   <span className="ant-divider"></span>
-                  <Link to={`/storage/storageGoods/batchDetail/${record.id}`}><Icon type="edit" />批次明细</Link>
+                  <Link to={`/storage/storageGoodsStatus/batchDetail/${record.id}`}><Icon type="edit" />批次明细</Link>
                 </span>
               ),
             }]
         }
         rowKey={record => record.id}
-        dataSource={storageGoods.list}
-        pagination={storageGoods.pagination}
-        loading={storageGoods.loading}
+        dataSource={storageGoodsStatus.list}
+        pagination={storageGoodsStatus.pagination}
+        loading={storageGoodsStatus.loading}
         onChange={onTableChange}
         />
     </Container>
@@ -235,5 +277,11 @@ List.propTypes = {
 
 export default Form.create({
   mapPropsToFields: (props) => {
+    const query = props.storageGoodsStatus.query;
+    return {
+      fuzzyName: {
+        value: query.fuzzyName
+      }
+    }
   }
 })(List);

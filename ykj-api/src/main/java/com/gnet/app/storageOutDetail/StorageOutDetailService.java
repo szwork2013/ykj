@@ -29,8 +29,8 @@ public class StorageOutDetailService {
    * List<StorageOut> 出库明细集合
    */
   @Transactional(readOnly = true)
-  public List<StorageOutDetail> selectStorageOutDetailListByStorageOutId(String storageOutId) {
-    return this.storageOutDetailMapper.selectStorageOutDetailListByStorageOutId(storageOutId);
+  public List<StorageOutDetail> selectStorageOutDetailListByCondition(StorageOutDetailCondition condition) {
+    return this.storageOutDetailMapper.selectStorageOutDetailListByCondition( condition);
   }
 
   /**
@@ -41,14 +41,14 @@ public class StorageOutDetailService {
    * Page<StorageOut> 出库明细分页集合
    */
   @Transactional(readOnly = true)
-  public Page<StorageOutDetail> paginationStorageOutDetailListByStorageOutId(String storageOutId, Pageable pageable) {
+  public Page<StorageOutDetail> paginationStorageOutDetailListByCondition(StorageOutDetailCondition condition, Pageable pageable) {
 
     Page<StorageOutDetail> pageResult = PageUtil.pagination(pageable, null,
         new PageUtil.Callback<StorageOutDetail>() {
 
           @Override
           public List<StorageOutDetail> getPageContent() {
-            return storageOutDetailMapper.selectStorageOutDetailListByStorageOutId(storageOutId);
+            return storageOutDetailMapper.selectStorageOutDetailListByCondition(condition);
           }
 
         });

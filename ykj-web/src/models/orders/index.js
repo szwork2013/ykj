@@ -19,9 +19,67 @@ const mergeQuery = (oldQuery, newQuery) => {
 
 const initialState = {
   query: {},
-  orders: [],
+  orders: [{
+    orderNo : 'FW201610080001',
+    type : '预订单',
+    payStatus : '未付款',
+    orderDate : '2016-10-08',
+    address : '小和山科技学院体育场',
+    orderSourceName : '同行介绍',
+    orderResponsibleName : '赵少'
+  },{
+    orderNo : 'FW201610080002',
+    type : '预订单',
+    payStatus : '部分付款',
+    orderDate : '2016-10-08',
+    address : '钱江科技城',
+    orderSourceName : '网站',
+    orderResponsibleName : '赵少'
+  },{
+    orderNo : 'FW201610080003',
+    type : '进行中',
+    payStatus : '已付款',
+    orderDate : '2016-10-08',
+    address : '城战火车站',
+    orderSourceName : '设计师',
+    orderResponsibleName : '刘洋'
+  }],
   stateStatisticalResult : [],
-  currentOrder : {},
+  currentOrder : {
+    orderNo : 'FW201610080003',
+    type : '进行中',
+    payStatus : '已付款',
+    orderDate : '2016-10-08',
+    address : '城战火车站',
+    orderSourceName : '设计师',
+    orderResponsibleName : '刘洋',
+    orderGoods : [{
+      goodName : '木板',
+      goodModel : '兔宝宝系列',
+      initPosition : '大厅',
+      unit : '米',
+      orderGoodsNum : '10',
+      goodPrice : 100,
+      strikeUnitPrice : 80,
+      goodStoreNow : 100,
+      reservedGoods : 50,
+      reservedDate : '2016-11-15',
+      remark : '尽快送货'
+    },{
+      goodName : '坐便器',
+      goodModel : 'TOTO',
+      initPosition : '厨房',
+      unit : '个',
+      orderGoodsNum : '10',
+      goodPrice : 2300,
+      strikeUnitPrice : 1800,
+      goodStoreNow : 100,
+      reservedGoods : 10,
+      reservedDate : '2016-11-25',
+      remark : '尽快送货'
+    }]
+
+  },
   //模糊匹配到的用户列表
   fuzzyCustomerList : [],
   current: {},

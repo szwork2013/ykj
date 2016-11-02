@@ -1,7 +1,7 @@
 
 export default state => {
   return {
-    storageGoods: state.storageGoods,
+    storageInDetails: state.storageInDetails,
     componentDataSource: state.componentDataSource
   }
 }

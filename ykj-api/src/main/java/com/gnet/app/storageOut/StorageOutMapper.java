@@ -17,4 +17,5 @@ public interface StorageOutMapper extends Mapper<StorageOut> {
    */
   public List<StorageOut> selectStorageOutHistoryDataListByCondition(StorageOutCondition condition);
   
+  public List<StorageOut> selectStorageOutGoodHistoryDataListByCondition(StorageOutCondition condition);
 }

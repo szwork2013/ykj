@@ -48,7 +48,7 @@ public class StorageOutController {
   @RequestMapping(value = "/{id}", method = RequestMethod.GET)
   public ResponseEntity<?> getStorageOut(@PathVariable("id") String id) {
     StorageOut storageOut = storageOutService.getStorageOut(id);
-    if (null != storageOut) {
+    if (null == storageOut) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND)
           .body(new StorageOutErrorBuilder(StorageOutErrorBuilder.ERROR_STORAGEOUT_NULL, "找不到该出库单信息").build());
     }

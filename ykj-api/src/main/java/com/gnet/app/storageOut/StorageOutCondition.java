@@ -49,4 +49,6 @@ public class StorageOutCondition{
    */
   private String storageOutEndDate;
   
+  private String orderId;
+  
 }

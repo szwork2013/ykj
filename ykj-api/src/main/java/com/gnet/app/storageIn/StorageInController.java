@@ -48,7 +48,7 @@ public class StorageInController {
   @RequestMapping(value = "/{id}", method = RequestMethod.GET)
   public ResponseEntity<?> getStorageIn(@PathVariable("id") String id) {
     StorageIn storageIn = storageInService.getStorageIn(id);
-    if (null != storageIn) {
+    if (null == storageIn) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND)
           .body(new StorageInErrorBuilder(StorageInErrorBuilder.ERROR_STORAGEIN_NULL, "找不到该出入单信息").build());
     }
