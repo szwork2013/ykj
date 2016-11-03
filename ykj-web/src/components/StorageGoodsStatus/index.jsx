@@ -39,11 +39,11 @@ const List = ({ form, storageGoodsStatus, componentDataSource, dispatch, ...rest
       },
       {
         label: "入库操作",
-        url: '',
+        url: '/storage/storageGoodsStatus/storageIns/add',
       },
       {
         label: "出库操作",
-        url: '',
+        url: '/storage/storageGoodsStatus/storageOuts/add',
       },
       {
         label: "库存导入",
@@ -76,6 +76,14 @@ const List = ({ form, storageGoodsStatus, componentDataSource, dispatch, ...rest
     ]
   }
 
+  const getId = (record) => {
+    if (record.good) {
+      return record.good.id || ''
+    } else {
+      return ''
+    }
+  }
+
   return (
     <Container
       { ...rest }
@@ -90,11 +98,11 @@ const List = ({ form, storageGoodsStatus, componentDataSource, dispatch, ...rest
               <Button type="primary" onClick={() => {
 
                 const formData = form.getFieldsValue();
-                 dispatch({
-                        type: 'storageGoodsStatus/setQuery',
-                        payload: formData
-                    });
-                
+                dispatch({
+                  type: 'storageGoodsStatus/setQuery',
+                  payload: formData
+                });
+
               } } >查询</Button>
               <Button type="ghost" onClick={() => {
                 form.resetFields();
@@ -112,7 +120,7 @@ const List = ({ form, storageGoodsStatus, componentDataSource, dispatch, ...rest
                     <Input
                       placeholder="请输入商品名称"
                       style={{ width: 250 }}
-                      {...getFieldProps('fuzzyName')}
+                      {...getFieldProps('fuzzyName') }
                       >
                     </Input>
                   </FormItem>
@@ -139,9 +147,9 @@ const List = ({ form, storageGoodsStatus, componentDataSource, dispatch, ...rest
               dataIndex: 'goodName',
               key: 'goodName',
               render: (text, record) => {
-                if(record.good){
-                 return record.good.name || ''
-                }else {
+                if (record.good) {
+                  return record.good.name || ''
+                } else {
                   return ''
                 }
               }
@@ -151,9 +159,9 @@ const List = ({ form, storageGoodsStatus, componentDataSource, dispatch, ...rest
               dataIndex: 'goodModel',
               key: 'goodModel',
               render: (text, record) => {
-                if(record.good){
-                 return record.good.model || ''
-                }else {
+                if (record.good) {
+                  return record.good.model || ''
+                } else {
                   return ''
                 }
               }
@@ -163,9 +171,9 @@ const List = ({ form, storageGoodsStatus, componentDataSource, dispatch, ...rest
               dataIndex: 'goodPrice',
               key: 'goodPrice',
               render: (text, record) => {
-                if(record.good){
-                 return record.good.price || ''
-                }else {
+                if (record.good) {
+                  return record.good.price || ''
+                } else {
                   return ''
                 }
               }
@@ -175,9 +183,9 @@ const List = ({ form, storageGoodsStatus, componentDataSource, dispatch, ...rest
               dataIndex: 'goodStoreNow',
               key: 'goodStoreNow',
               render: (text, record) => {
-                if(record.good){
-                 return record.good.storeNow || ''
-                }else {
+                if (record.good) {
+                  return record.good.storeNow || ''
+                } else {
                   return ''
                 }
               }
@@ -202,9 +210,9 @@ const List = ({ form, storageGoodsStatus, componentDataSource, dispatch, ...rest
               dataIndex: 'usableNum',
               key: 'usableNum',
               render: (text, record) => {
-                if(record.good){
-                 return  record.good.storeNow - record.reservedTotalNum
-                }else {
+                if (record.good) {
+                  return record.good.storeNow - record.reservedTotalNum
+                } else {
                   return ''
                 }
               }
@@ -214,9 +222,9 @@ const List = ({ form, storageGoodsStatus, componentDataSource, dispatch, ...rest
               dataIndex: 'needAddNum',
               key: 'needAddNum',
               render: (text, record) => {
-                if(record.good){
-                 return  record.needDeliverTotalNum - record.good.storeNow
-                }else {
+                if (record.good) {
+                  return record.needDeliverTotalNum - record.good.storeNow
+                } else {
                   return ''
                 }
               }
@@ -226,9 +234,9 @@ const List = ({ form, storageGoodsStatus, componentDataSource, dispatch, ...rest
               dataIndex: 'goodOnsaleStatusText',
               key: 'goodOnsaleStatusText',
               render: (text, record) => {
-                if(record.good){
-                 return  record.good.onsaleStatusText
-                }else {
+                if (record.good) {
+                  return record.good.onsaleStatusText
+                } else {
                   return ''
                 }
               }
@@ -238,9 +246,9 @@ const List = ({ form, storageGoodsStatus, componentDataSource, dispatch, ...rest
               dataIndex: 'goodModifyDate',
               key: 'goodModifyDate',
               render: (text, record) => {
-                if(record.good){
-                 return  record.good.modifyDate
-                }else {
+                if (record.good) {
+                  return record.good.modifyDate
+                } else {
                   return ''
                 }
               }
@@ -252,7 +260,7 @@ const List = ({ form, storageGoodsStatus, componentDataSource, dispatch, ...rest
                 <span>
                   <Link ><Icon type="edit" />商品属性</Link>
                   <span className="ant-divider"></span>
-                  <Link to={`/storage/storageIns/good/${record.good?record.good.id:''}`}><Icon type="edit" />入库历史</Link>
+                  <Link to={`/storage/storageIns/good/${record.good ? record.good.id : ''}`}><Icon type="edit" />入库历史</Link>
                   <span className="ant-divider"></span>
                   <Link to={`/storage/storageGoodsStatus/storageOuts/${record.id}`}><Icon type="edit" />出库历史</Link>
                   <span className="ant-divider"></span>
@@ -261,7 +269,7 @@ const List = ({ form, storageGoodsStatus, componentDataSource, dispatch, ...rest
               ),
             }]
         }
-        rowKey={record => record.id}
+        rowKey={(record) => getId(record)}
         dataSource={storageGoodsStatus.list}
         pagination={storageGoodsStatus.pagination}
         loading={storageGoodsStatus.loading}

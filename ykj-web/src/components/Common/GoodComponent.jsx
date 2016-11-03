@@ -10,7 +10,9 @@ class GoodSelect extends Component {
 
     constructor(props) {
         super(props);
-        this.componentDataSourceName = "GOODS";
+        this.state = {
+            dataSource: []
+        }
     }
 
 
@@ -23,24 +25,29 @@ class GoodSelect extends Component {
     componentWillMount() {
         this.props.dispatch({
             type: 'componentDataSource/loadGoodsData',
-            payload: "ALL",
+            payload: {
+
+                callback: (data) => {
+                    this.setState({
+                        dataSource: data._embedded && data._embedded.goods || []
+                    })
+                }
+            }
+            
         });
-        console.log("数据加载完成")
 
     }
 
     componentWillUpdate() {
-        console.log("componentWillUpdate")
+        console.log("123")
     }
 
 
     handleSelect(onSelect, value, option) {
-        if (this.props.onSelect) {
-            const dataSource = this.props.componentDataSource[this.componentDataSourceName] || [];
-
-            dataSource.map(item => {
+        if (onSelect) {
+            this.state.dataSource.map(item => {
                 if (item.id === value) {
-                    return this.props.onSelect(item);
+                    return onSelect(item);
                 }
             })
         } else {
@@ -51,7 +58,6 @@ class GoodSelect extends Component {
 
     render() {
 
-        const dataSource =  this.props.componentDataSource[this.componentDataSourceName] || [];
         return (
             <Select showSearch
                 {...this.props.elementProps}
@@ -65,8 +71,8 @@ class GoodSelect extends Component {
                 disabled = {this.props.disabled}
                 >
                 {
-                    dataSource.map(item => {
-                        return <Select.Option key={item.id} value={item.id}>{item.name}</Select.Option>
+                    this.state.dataSource.map(item => {
+                        return <Select.Option key={item.id} value={item.id}>{item.model}</Select.Option>
                     })
                 }
             </Select >

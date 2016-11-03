@@ -3,7 +3,7 @@ import { connect } from 'dva';
 import { Link } from 'dva/router';
 
 import StorageIns from '../components/StorageIns';
-import Detail from '../components/StorageIns/Detail';
+import Add from '../components/StorageIns/Add';
 
 import selectors from '../models/storageIns/selectors';
 
@@ -12,9 +12,9 @@ const StorageInsPage = props => {
 }
 
 const List = connect(selectors)(StorageInsPage)
-const StorageInsDetail = connect(selectors)(Detail);
+const StorageInsAdd = connect(selectors)(Add);
 
 export {
   List as default,
-  StorageInsDetail
+  StorageInsAdd
 }

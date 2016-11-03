@@ -5,7 +5,7 @@ import request, { parseError } from '../../utils/request';
 import pathToRegexp from 'path-to-regexp';
 import querystring from 'querystring';
 
-import {searchHistory} from '../../services/storageOut'
+import {searchHistory,storageOut} from '../../services/storageOut'
 
 const mergeQuery = (oldQuery, newQuery) => {
     return {
@@ -136,7 +136,45 @@ export default {
             });
 
             const err = yield parseError(error);
-            yield message.error(`加载商品失败:${err.status} ${err.message}`, 3);
+            yield message.error(`加载出库记录失败:${err.status} ${err.message}`, 3);
+            return false;
+        },
+        /**
+         * 创建出库单
+         */
+        *storageOut({ payload }, { put, select }) {
+            yield put({
+                type: 'toggleSubmiting',
+                payload: true,
+            });
+
+            const { access_token} = yield select(state => {
+                return {
+                    'access_token': state.oauth.access_token
+                }
+            });
+
+            yield put({
+                type: 'merge',
+                payload: {
+                    currentItem: payload
+                },
+            });
+            const { data, error } = yield storageOut(access_token, payload);
+            console.log(error)
+            if (!error) {
+                yield message.success('创建出库单信息成功', 2);
+                yield put(routerRedux.goBack());
+                return;
+            }
+
+            const err = yield parseError(error);
+            yield message.error(`创建出库单信息失败:${err.status} ${err.message}`, 3);
+
+            yield put({
+                type: 'toggleSubmiting',
+                payload: false,
+            });
             return false;
         },
     },

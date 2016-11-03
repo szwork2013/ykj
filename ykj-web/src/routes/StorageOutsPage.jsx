@@ -3,7 +3,7 @@ import { connect } from 'dva';
 import { LOutk } from 'dva/router';
 
 import StorageOuts from '../components/StorageOuts';
-import Detail from '../components/StorageOuts/Detail';
+import Add from '../components/StorageOuts/Add';
 
 import selectors from '../models/storageOuts/selectors';
 
@@ -12,9 +12,9 @@ const StorageOutsPage = props => {
 }
 
 const List = connect(selectors)(StorageOutsPage)
-const StorageOutsDetail = connect(selectors)(Detail);
+const StorageOutsAdd = connect(selectors)(Add);
 
 export {
   List as default,
-  StorageOutsDetail
+  StorageOutsAdd
 }

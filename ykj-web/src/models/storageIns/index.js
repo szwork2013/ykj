@@ -5,7 +5,7 @@ import request, { parseError } from '../../utils/request';
 import pathToRegexp from 'path-to-regexp';
 import querystring from 'querystring';
 
-import {searchHistory} from '../../services/storageIn'
+import {searchHistory,storageIn} from '../../services/storageIn'
 
 const mergeQuery = (oldQuery, newQuery) => {
     return {
@@ -139,6 +139,43 @@ export default {
 
             const err = yield parseError(error);
             yield message.error(`加载商品失败:${err.status} ${err.message}`, 3);
+            return false;
+        },
+        /**
+         * 创建入库单
+         */
+        *storageIn({ payload }, { put, select }) {
+            yield put({
+                type: 'toggleSubmiting',
+                payload: true,
+            });
+
+            const { access_token} = yield select(state => {
+                return {
+                    'access_token': state.oauth.access_token
+                }
+            });
+
+            yield put({
+                type: 'merge',
+                payload: {
+                    currentItem: payload
+                },
+            });
+            const { data, error } = yield storageIn(access_token, payload);
+            if (!error) {
+                yield message.success('创建入库单信息成功', 2);
+                yield put(routerRedux.goBack());
+                return;
+            }
+
+            const err = yield parseError(error);
+            yield message.error(`创建入库单信息失败:${err.status} ${err.message}`, 3);
+
+            yield put({
+                type: 'toggleSubmiting',
+                payload: false,
+            });
             return false;
         },
     },

@@ -18,3 +18,14 @@ export async function getStorageIn(access_token, id) {
     }
   });
 }
+
+export async function storageIn(access_token, payload) {
+  return request(`/api/storageIns`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${access_token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload)
+  });
+}

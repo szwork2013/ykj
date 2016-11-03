@@ -1,7 +1,7 @@
 import { message } from 'antd';
 import request, { parseError, isApiUrl } from '../utils/request';
 import { searchCustomers, searchCodewordsByType, searchSubOfficesAndClerks, uploadOrderServiceAttachment, deleteOrderServiceAttachment, downloadOrderServiceAttachment, searchOrderServiceAttachment } from '../services/componentDataSource';
-
+import {searchGoodsAllByModel} from '../services/goods'
 
 export default {
   namespace: 'componentDataSource',
@@ -118,21 +118,42 @@ export default {
     /**
      * 加载数据字典信息
      */
-    *loadCodewordsData({ payload: typeValue }, { put, select }) {
+    *loadCodewordsData({ payload}, { put, select }) {
       const access_token = yield select(state => state.oauth.access_token);
-      const { data, error } = yield searchCodewordsByType(access_token, { typeValue });
+      const { data, error } = yield searchCodewordsByType(access_token, {typeValue : payload.typeValue});
       if (!error) {
-        yield put({
-          type: 'loadCodewordDataSourceSuccess',
-          payload: {
-            [typeValue]: data._embedded && data._embedded.codewords || []
-          },
-        })
+        if (payload.callback) {
+          payload.callback(data);
+        } else {
+          yield put({
+            type: 'loadCodewordDataSourceSuccess',
+            payload: {
+              [payload.typeValue] : data._embedded && data._embedded.codewords || []
+            },
+          })
+        }
         return true;
       }
 
       const err = yield parseError(error);
       yield message.error(`加载数据字典详情失败:${err.status} ${err.message}`, 3);
+      return false;
+    },
+    /**
+     * 加载商品信息
+     */
+    *loadGoodsData({ payload}, { put, select }) {
+      const access_token = yield select(state => state.oauth.access_token);
+      const { data, error } = yield searchGoodsAllByModel(access_token, 'ALL');
+       if (!error) {
+        if (payload.callback) {
+          payload.callback(data);
+        }
+        return true;
+      }
+
+      const err = yield parseError(error);
+      yield message.error(`加载商品信息失败:${err.status} ${err.message}`, 3);
       return false;
     },
     /**
