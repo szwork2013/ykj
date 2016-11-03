@@ -31,6 +31,17 @@
         <result column="storage_out_total_num" property="storageOutTotalNum" jdbcType="DECIMAL"/>
         <association property="good"  javaType="com.gnet.app.good.Good" resultMap="BaseGoodMap"></association>
     </resultMap>
+    
+    <resultMap id="GoodExtMap"  type="com.gnet.app.good.Good"  extends ="BaseGoodMap">
+        <collection property="storageInAndOutList" ofType="com.gnet.app.good.GoodStorageInAndOutRecord" >
+            <result column="type" property="type" jdbcType="INTEGER"/>
+            <result column="id" property="id" jdbcType="VARCHAR"/>
+            <result column="batch_number" property="batchNumber" jdbcType="VARCHAR"/>
+            <result column="change_date" property="changeDate" />
+            <result column="num" property="num" jdbcType="INTEGER"/>
+            <result column="cost" property="cost" jdbcType="DECIMAL"/>
+        </collection>
+    </resultMap>
 	
 	<select id="selectGoodsAllByCondition" resultMap="BaseGoodMap" parameterType="com.gnet.app.good.GoodCondition">
 		select t.*,s.store_now from ykj_storage_goods t left join ykj_storage_goods_status s on s.id = t.id
@@ -128,5 +139,13 @@
 		 </where>
 		GROUP BY
 		  t.id, t.name, t.model, t.price, s.store_now
+    </select>
+    
+    <select id="selectStorageInAndOutRecordsById" resultMap="GoodExtMap">
+        (select 0 as type,t.id,t.batch_number,t.change_date,s.num,s.cost from ykj_storage_in t,ykj_storage_in_detail s where t.id = s.storage_in_id
+        and s.storage_goods_id = #{id})
+        union all 
+        (select 1 as type,t.id,t.batch_number,t.change_date,s.num,0 cost from ykj_storage_out t,ykj_storage_out_detail s where t.id = s.storage_out_id
+        and s.storage_goods_id = #{id})
     </select>
 </mapper>

@@ -148,9 +148,22 @@ public class GoodService {
 	 */
 	public List<StorageGoodStatusDetail> selectStorageGoodStatusDetailList(List<String> orderList, Clerk clerk,
 			GoodCondition condition) {
-
 		condition.setBusinessId(clerk.getBusinessId());
 		return goodMapper.selectStorageGoodStatusDetailList(condition);
+	}
+	
+	/**
+   * 根据ID获取商品信息及其相关出入库详情
+   * 
+   * @return
+   */
+	public Good selectGoodInfoWithStorageInAndOutRecordById(String id){
+	  Good good = this.goodMapper.selectByPrimaryKey(id);
+	  if(null != good){
+	    good.setStorageInAndOutList(this.goodMapper.selectStorageInAndOutRecordsById(id));
+	  }
+	  
+	  return good;
 	}
 
 }

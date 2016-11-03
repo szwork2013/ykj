@@ -23,4 +23,6 @@ public interface GoodMapper extends Mapper<Good> {
 	
 	
 	public List<StorageGoodStatusDetail> selectStorageGoodStatusDetailList(GoodCondition condition);
+	
+	public List<GoodStorageInAndOutRecord> selectStorageInAndOutRecordsById(@Param("id")String id);
 }

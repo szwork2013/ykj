@@ -2,6 +2,7 @@ package com.gnet.app.good;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -99,5 +100,10 @@ public class Good extends BaseEntity {
 	
 	/** 销售状态文本*/
 	private @Transient String onsaleStatusText;
+	
+	/**
+	 * 出入库信息集合
+	 */
+	private @Transient List<GoodStorageInAndOutRecord> storageInAndOutList;
 
 }

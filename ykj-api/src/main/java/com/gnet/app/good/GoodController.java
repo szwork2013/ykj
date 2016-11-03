@@ -269,5 +269,25 @@ public class GoodController implements ResourceProcessor<RepositoryLinksResource
 		return ResponseEntity.ok(resources);
 
 	}
+	
+	/**
+	 * 获取商品的出入库批次信息
+	 * @param id
+	 * @return
+	 * ResponseEntity<?>
+	 */
+	@RequestMapping(value = "/{id}/storageInAndOutRecord", method = RequestMethod.GET)
+  public ResponseEntity<?> getGoodStorageInAndOutRecord(@PathVariable("id") String id) {
+    Good good = goodService.selectGoodInfoWithStorageInAndOutRecordById(id);
+    if (good == null) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(new GoodErrorBuilder(GoodErrorBuilder.ERROR_GOOD_NULL, "找不到该商品").build());
+    }
+
+    GoodResourceAssembler goodResourceAssembler = new GoodResourceAssembler();
+    GoodResource goodResource = goodResourceAssembler.toResource(good);
+
+    return ResponseEntity.ok(goodResource);
+  }
 
 }
