@@ -49,4 +49,21 @@ public interface OrderMapper extends Mapper<Order> {
 	 * @return
 	 */
 	public List<OrderTypeStatisticalResult> selectOrderTypeStatisticalResultByCondition(OrderCondition condition);
+	
+	
+	/**
+	 * 根据查询条件查询订单明细
+	 * @param condition
+	 * @return
+	 * List<Order>
+	 */
+	public List<Order> selectOrderDetailsByCondition(OrderCondition condition);
+	
+	/**
+   * 根据ID条件查询订单明细
+   * @param id
+   * @return
+   * Order
+   */
+	public Order getOrderDetailByIdAndBusinessId(@Param("id")String id,@Param("businessId")String businessId);
 }

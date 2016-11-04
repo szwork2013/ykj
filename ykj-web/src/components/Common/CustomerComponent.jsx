@@ -23,7 +23,13 @@ class CustomerSelect extends Component {
     componentWillMount() {
         this.props.dispatch({
             type: 'componentDataSource/loadCustomersData',
-            payload: "ALL",
+            payload: {
+                callback: (data) => {
+                    this.setState({
+                        dataSource: data._embedded && data._embedded.customers || []
+                    })
+                }
+            }
         });
 
     }

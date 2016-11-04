@@ -22,5 +22,10 @@ public class Constant {
 	 * 订单来源
 	 */
 	public static final String ORDER_SOURCE = "ORDER_SOURCE";
+	
+	/**
+	 * 订单类型
+	 */
+	public static final String ORDER_TYPE = "ORDER_TYPE";
 
 }

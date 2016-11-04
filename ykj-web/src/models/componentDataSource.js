@@ -1,7 +1,7 @@
 import { message } from 'antd';
 import request, { parseError, isApiUrl } from '../utils/request';
 import { searchCustomers, searchCodewordsByType, searchSubOfficesAndClerks, uploadOrderServiceAttachment, deleteOrderServiceAttachment, downloadOrderServiceAttachment, searchOrderServiceAttachment } from '../services/componentDataSource';
-import {searchGoodsAllByModel} from '../services/goods'
+import { searchGoodsAllByModel } from '../services/goods'
 
 export default {
   namespace: 'componentDataSource',
@@ -100,14 +100,18 @@ export default {
      */
     *loadCustomersData({ payload }, { put, select }) {
       const access_token = yield select(state => state.oauth.access_token);
-      const { data, error } = yield searchCustomers(access_token, payload);
+      const { data, error } = yield searchCustomers(access_token, 'ALL');
       if (!error) {
-        yield put({
-          type: 'loadCustomerDataSourceSuccess',
-          payload: {
-            customers: data._embedded && data._embedded.customers || []
-          }
-        })
+        if (payload.callback) {
+          payload.callback(data);
+        } else {
+          yield put({
+            type: 'loadCustomerDataSourceSuccess',
+            payload: {
+              customers: data._embedded && data._embedded.customers || []
+            }
+          })
+        }
         return true;
       }
 
@@ -120,7 +124,7 @@ export default {
      */
     *loadCodewordsData({ payload}, { put, select }) {
       const access_token = yield select(state => state.oauth.access_token);
-      const { data, error } = yield searchCodewordsByType(access_token, {typeValue : payload.typeValue});
+      const { data, error } = yield searchCodewordsByType(access_token, { typeValue: payload.typeValue });
       if (!error) {
         if (payload.callback) {
           payload.callback(data);
@@ -128,7 +132,7 @@ export default {
           yield put({
             type: 'loadCodewordDataSourceSuccess',
             payload: {
-              [payload.typeValue] : data._embedded && data._embedded.codewords || []
+              [payload.typeValue]: data._embedded && data._embedded.codewords || []
             },
           })
         }
@@ -145,7 +149,7 @@ export default {
     *loadGoodsData({ payload}, { put, select }) {
       const access_token = yield select(state => state.oauth.access_token);
       const { data, error } = yield searchGoodsAllByModel(access_token, 'ALL');
-       if (!error) {
+      if (!error) {
         if (payload.callback) {
           payload.callback(data);
         }
@@ -163,13 +167,17 @@ export default {
       const access_token = yield select(state => state.oauth.access_token);
       const { data, error } = yield searchSubOfficesAndClerks(access_token, id);
       if (!error) {
-        yield put({
-          type: 'loadOfficesAndClerksDataForTreeSuccess',
-          payload: {
-            data: data || [],
-            id: id
-          }
-        })
+        if (payload.callback) {
+          payload.callback(data);
+        } else {
+          yield put({
+            type: 'loadOfficesAndClerksDataForTreeSuccess',
+            payload: {
+              data: data || [],
+              id: id
+            }
+          })
+        }
         return true;
       }
 

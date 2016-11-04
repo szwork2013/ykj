@@ -25,7 +25,13 @@ export class ClerkTree extends Component {
     componentWillMount() {
         this.props.dispatch({
             type: 'componentDataSource/loadOfficesAndClerksDataForTree',
-            payload: 'ALL'
+            payload: {
+                callback: (data) => {
+                    this.setState({
+                        dataSource: data || []
+                    })
+                }
+            }
         });
     }
 
@@ -128,9 +134,9 @@ export class ClerkSelectModalInput extends Component {
                     title="选择人员"
                     visible={this.state.showModal}
                     onCancel={() => {
-                         this.hideModal();
+                        this.hideModal();
                     } }
-                    onOk={() => { this.props.onOk(this.state.value);this.hideModal(); } }
+                    onOk={() => { this.props.onOk(this.state.value); this.hideModal(); } }
                     >
                     <div style={{ padding: '20px' }}>
                         <ClerkTree

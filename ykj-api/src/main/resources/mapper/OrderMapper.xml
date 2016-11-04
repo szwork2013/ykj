@@ -3,66 +3,61 @@
 <mapper namespace="com.gnet.app.order.OrderMapper">
 	<resultMap id="BaseOrderMap" type="com.gnet.app.order.Order">
 		<id column="id" property="id" jdbcType="CHAR" />
-		<result column="order_no" property="orderNo" jdbcType="VARCHAR" />
-		<result column="customer_remark" property="customerRemark"
-			jdbcType="VARCHAR" />
-		<result column="address" property="address" jdbcType="VARCHAR" />
-		<result column="price_before_discount" property="priceBeforeDiscount"
-			jdbcType="DECIMAL" />
-		<result column="order_creator_id" property="orderCreatorId"
-			jdbcType="CHAR" />
-		<result column="is_need_install" property="isNeedInstall"
-			jdbcType="BOOLEAN" />
-		<result column="is_need_measure" property="isNeedMeasure"
-			jdbcType="BOOLEAN" />
-		<result column="type" property="type" jdbcType="INTEGER" />
-		<result column="phone_sec" property="phoneSec" jdbcType="VARCHAR" />
-		<result column="order_date" property="orderDate" jdbcType="DATE" />
-		<result column="is_need_delivery" property="isNeedDelivery"
-			jdbcType="BOOLEAN" />
-		<result column="private_remark" property="privateRemark"
-			jdbcType="VARCHAR" />
-		<result column="order_source" property="orderSource" jdbcType="INTEGER" />
-		<result column="is_del" property="isDel" jdbcType="BOOLEAN" />
-		<result column="finish_date" property="finishDate" />
-		<result column="attachment" property="attachment"
-			jdbcType="CHAR" />
-		<result column="attachment_name" property="attachmentName"
-			jdbcType="CHAR" />
-		<result column="order_responsible_id" property="orderResponsibleId"
-			jdbcType="CHAR" />
 		<result column="create_date" property="createDate" />
-		<result column="customer_id" property="customerId" jdbcType="CHAR" />
-		<result column="price_after_discount" property="priceAfterDiscount"
-			jdbcType="DECIMAL" />
-		<result column="modify_date" property="modifyDate" />
-		<result column="business_id" property="businessId" jdbcType="CHAR" />
-		<result column="strike_price" property="strikePrice" jdbcType="DECIMAL" />
-		<result column="receipt_price" property="receiptPrice"
-			jdbcType="DECIMAL" />
-		<result column="is_need_design" property="isNeedDesign"
-			jdbcType="BOOLEAN" />
-		<result column="orderResponsibleName" property="orderResponsibleName"
-			jdbcType="VARCHAR" />
-		<result column="customerName" property="customerName" jdbcType="VARCHAR" />
-		<result column="customerPhone" property="customerPhone"
-			jdbcType="VARCHAR" />
-		<result column="subscriptionIsFinish" property="subscriptionIsFinish"
-			jdbcType="BIT" />
-		<result column="orderResponsiblePhone" property="orderResponsiblePhone"
-			jdbcType="VARCHAR" />
-		<result column="typeName" property="typeName"
-			jdbcType="VARCHAR" />
-		<result column="orderSourceName" property="orderSourceName"
-			jdbcType="VARCHAR" />
-		<result column="businessName" property="businessName"
-			jdbcType="VARCHAR" />	
-		<result column="businessLogo" property="businessLogo"
-			jdbcType="VARCHAR" />	
-		<result column="businessServiceCall" property="businessServiceCall"
-			jdbcType="VARCHAR" />
-		
+        <result column="modify_date" property="modifyDate" />
+        <result column="order_responsible_id" property="orderResponsibleId"  jdbcType="CHAR" />
+        <result column="order_creator_id" property="orderCreatorId"  jdbcType="CHAR" />
+        <result column="customer_id" property="customerId" jdbcType="CHAR" />
+        <result column="business_id" property="businessId" jdbcType="CHAR" />
+        <result column="type" property="type" jdbcType="INTEGER" />
+        <result column="order_no" property="orderNo" jdbcType="VARCHAR" />
+        <result column="order_date" property="orderDate" jdbcType="DATE" />
+        <result column="phone_sec" property="phoneSec" jdbcType="VARCHAR" />
+        <result column="order_source" property="orderSource" jdbcType="INTEGER" />
+        <result column="address" property="address" jdbcType="VARCHAR" />
+        <result column="customer_remark" property="customerRemark"  jdbcType="VARCHAR" />
+        <result column="private_remark" property="privateRemark" jdbcType="VARCHAR" />
+        <result column="price_before_discount" property="priceBeforeDiscount" jdbcType="DECIMAL" />
+        <result column="price_after_discount" property="priceAfterDiscount" jdbcType="DECIMAL" />
+        <result column="strike_price" property="strikePrice" jdbcType="DECIMAL" />
+        <result column="receipt_price" property="receiptPrice" jdbcType="DECIMAL" />
+        <result column="is_need_cost_aduit" property="isNeedCostAduit" jdbcType="BOOLEAN" />    
+        <result column="is_need_delivery" property="isNeedDelivery" jdbcType="BOOLEAN" />    
+		<result column="is_need_install" property="isNeedInstall" jdbcType="BOOLEAN" />
+		<result column="is_need_measure" property="isNeedMeasure" jdbcType="BOOLEAN" />
+		<result column="is_need_design" property="isNeedDesign"  jdbcType="BOOLEAN" />
+		<result column="is_del" property="isDel" jdbcType="BOOLEAN" />
+        <result column="finish_date" property="finishDate" />
+        <result column="remark" property="remark" jdbcType="VARCHAR" />
+		<result column="attachment" property="attachment" jdbcType="CHAR" />
+        <result column="attachment_name" property="attachmentName" jdbcType="CHAR" />
 	</resultMap>
+	
+	<!-- 订单扩展信息映射 -->
+	<resultMap id="OrderExtMap" type="com.gnet.app.order.Order">
+        <association property="orderResponsibleClerk"  javaType="com.gnet.app.clerk.Clerk">  
+            <result property="id" column="order_responsible_id"  jdbcType="VARCHAR" /> 
+            <result property="name" column="order_responsible_name"  jdbcType="VARCHAR" /> 
+            <result property="phone" column="order_responsible_phone"  jdbcType="VARCHAR" /> 
+        </association>
+        <association property="orderCreateClerk"  javaType="com.gnet.app.clerk.Clerk">  
+            <result property="id" column="order_creator_id"  jdbcType="VARCHAR" /> 
+            <result property="name" column="order_creator_name"  jdbcType="VARCHAR" /> 
+            <result property="phone" column="order_creator_phone"  jdbcType="VARCHAR" /> 
+        </association>
+        <association property="customer"  javaType="com.gnet.app.customer.Customer">  
+            <result property="id" column="customer_id"  jdbcType="VARCHAR" /> 
+            <result property="name" column="customer_name"  jdbcType="VARCHAR" /> 
+            <result property="phone" column="customer_phone"  jdbcType="VARCHAR" />
+            <result property="organization" column="customer_organization"  jdbcType="VARCHAR" />
+        </association>
+        <association property="business"  javaType="com.gnet.app.business.Business">  
+            <result property="id" column="business_id"  jdbcType="VARCHAR" /> 
+            <result property="name" column="business_name"  jdbcType="VARCHAR" /> 
+            <result property="logo" column="business_logo"  jdbcType="VARCHAR" /> 
+            <result property="serviceCall" column="business_serviceCall"  jdbcType="VARCHAR" /> 
+        </association>
+    </resultMap>
 	
 	<resultMap id="OrderTypeStatisticalResultMap" type="com.gnet.app.order.OrderTypeStatisticalResult">
 		<result column="type" property="type" jdbcType="INTEGER" />
@@ -272,8 +267,82 @@
 				yo.finish_date between DATE_FORMAT(#{customDateStart},'%Y-%m-%d') and DATE_FORMAT(#{customDateEnd},'%Y-%m-%d')
 			</if>
 		</where>
-
 	</select>
+	
+	<!-- 根据查询条件获取订单明细 -->
+	<select id="selectOrderDetailsByCondition" resultMap="BaseOrderMap" parameterType="com.gnet.app.order.OrderCondition">
+	   SELECT
+		  yo.*,
+		  yckc.name AS order_creator_name,
+		  yckc.phone AS order_creator_phone,
+		  yck.name AS order_responsible_name,
+		  yck.phone AS order_responsible_phone,
+		  yc.name AS customer_name,
+		  yc.phone AS customer_phone,
+		  yc.organization AS customer_organization
+		FROM
+		  ykj_order AS yo 
+		LEFT JOIN ykj_customer AS yc ON yc.id = yo.customer_id AND yc.is_del = yo.is_del 
+		LEFT JOIN ykj_clerk AS yckc ON yckc.id = yo.order_responsible_id AND yckc.is_del = yo.is_del AND yckc.business_id = yo.business_id 
+		LEFT JOIN ykj_clerk AS yck ON yck.id = yo.order_responsible_id AND yck.is_del = yo.is_del AND yck.business_id = yo.business_id
+		<where>
+            <if test = "id != null and id != ''">
+                and yo.id = #{id}
+            </if>
+            <if test="orderResponsibleId != null and orderResponsibleId != ''">
+                and yo.order_responsible_id = #{orderResponsibleId}
+            </if>
+            <if test="orderCreatorId != null and orderCreatorId != ''">
+                and yo.order_creator_id = #{orderCreatorId}
+            </if>
+            <if test="customerId != null and customerId != ''">
+                and yo.customer_id = #{customerId}
+            </if>
+            <if test="type != null ">
+                and yo.type = #{type}
+            </if>
+            <if test="orderNo != null and orderNo != ''">
+                and yo.order_no = #{orderNo}
+            </if>
+            <if test="orderSource != null ">
+                and yo.orderSource = #{order_source}
+            </if>
+            <if test="isDel != null ">
+                and yo.is_del = #{isDel}
+            </if>
+            <if test="fuzzyText != null and fuzzyText != ''">
+                and concat_ws(',' ,yck.phone, yo.address, yo.order_no,yo.private_remark) like CONCAT('%',CONCAT(#{fuzzyText},'%'))
+            </if>
+            <if test="businessId != null and businessId != ''">
+                and yo.business_id = #{businessId}
+            </if>
+            <if test= "customDateFiled != null and customDateFiled == 'createDate' and customDateStart != null and customDateEnd != null">
+                and yo.create_date between DATE_FORMAT(#{customDateStart},'%Y-%m-%d') and DATE_FORMAT(#{customDateEnd},'%Y-%m-%d')
+            </if>
+            <if test= "customDateFiled != null and customDateFiled == 'finishDate' and customDateStart != null and customDateEnd != null">
+                yo.finish_date between DATE_FORMAT(#{customDateStart},'%Y-%m-%d') and DATE_FORMAT(#{customDateEnd},'%Y-%m-%d')
+            </if>
+        </where>
+	</select>
+	
+	<!-- 根据ID获取订单详情 -->
+	<select id="getOrderDetailByIdAndBusinessId" resultMap="BaseOrderMap" >
+       SELECT
+          yo.*,
+          yckc.name AS order_creator_name,
+          yckc.phone AS order_creator_phone,
+          yck.name AS order_responsible_name,
+          yck.phone AS order_responsible_phone,
+          yc.name AS customer_name,
+          yc.phone AS customer_phone,
+          yc.organization AS customer_organization
+        FROM
+          ykj_order AS yo 
+        LEFT JOIN ykj_customer AS yc ON yc.id = yo.customer_id AND yc.is_del = yo.is_del 
+        LEFT JOIN ykj_clerk AS yckc ON yckc.id = yo.order_responsible_id AND yckc.is_del = yo.is_del AND yckc.business_id = yo.business_id 
+        LEFT JOIN ykj_clerk AS yck ON yck.id = yo.order_responsible_id AND yck.is_del = yo.is_del AND yck.business_id = yo.business_id
+        where yo.id = #{id} and yo.business_id = #{businessId}
+    </select>
 	
 	<select id="getOrdersForPrintByCondition" resultMap="BaseOrderMap">
 		select yo.*, yck.name as orderResponsibleName,yck.phone orderResponsiblePhone, yc.name as

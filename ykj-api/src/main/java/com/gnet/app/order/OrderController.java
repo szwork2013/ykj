@@ -92,6 +92,15 @@ public class OrderController implements ResourceProcessor<RepositoryLinksResourc
 		return searchOrders(pageable, isAll, orderCondition, authentication);
 	}
 
+	/**
+	 * 订单搜索
+	 * @param pageable
+	 * @param isAll
+	 * @param orderCondition
+	 * @param authentication
+	 * @return
+	 * ResponseEntity<?>
+	 */
 	@RequestMapping(value = "/search", method = RequestMethod.GET)
 	public ResponseEntity<?> searchOrders(@PageableDefault Pageable pageable,
 			@RequestParam(name = "isall", required = false) Boolean isAll, OrderCondition orderCondition,
@@ -103,12 +112,12 @@ public class OrderController implements ResourceProcessor<RepositoryLinksResourc
 		// 判断是否分页
 		Resources<OrderResource> resources = null;
 		if (isAll != null && isAll) {
-			List<Order> orders = orderService.selectOrdersAllWithDetailByCondition(customUser.getClerk(),
-					orderCondition, pageable);
+			List<Order> orders = orderService.selectOrderDetailsByCondition(customUser.getClerk(),
+					orderCondition);
 			orderService.addSearchExtraData(orders);
 			resources = listResourcesAssembler.toResource(orders, new OrderResourceAssembler());
 		} else {
-			Page<Order> orders = orderService.paginationOrdersAllWithDetailByCondition(customUser.getClerk(),
+			Page<Order> orders = orderService.paginationOrderDetailsByCondition(customUser.getClerk(),
 					orderCondition, pageable);
 			orderService.addSearchExtraData(orders.getContent());
 			resources = pagedResourcesAssembler.toResource(orders, new OrderResourceAssembler());
@@ -116,66 +125,27 @@ public class OrderController implements ResourceProcessor<RepositoryLinksResourc
 
 		return ResponseEntity.ok(resources);
 	}
+	
+	/**
+	 * 根据ID获取订单明细
+	 * @param id
+	 * @return
+	 * ResponseEntity<?>
+	 */
+	@RequestMapping(value = "/detail/{id}", method = RequestMethod.GET)
+  public ResponseEntity<?> getOrder(@PathVariable("id") String id,Authentication authentication) {
+	  CustomUser customUser = (CustomUser) authentication.getPrincipal();
+    Order order = orderService.getOrderDetail(customUser.getClerk(), id);
+    if (order == null) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(new OrderErrorBuilder(OrderErrorBuilder.ERROR_ORDER_NULL, "找不到该订单").build());
+    }
 
-	// @RequestMapping(value = "/search", method = RequestMethod.GET)
-	// public ResponseEntity<?> searchOrders(
-	// @PageableDefault Pageable pageable,
-	// @RequestParam(name = "isall", required = false) Boolean isAll,
-	// @RequestParam(name = "type", required = false) Integer type,
-	// @RequestParam(name = "orderSource", required = false) Integer
-	// orderSource,
-	// @RequestParam(name = "orderResponsibleName", required = false) String
-	// orderResponsibleName,
-	// @RequestParam(name = "customerName", required = false) String
-	// customerName,
-	// @RequestParam(name = "startOrderDate", required = false) String
-	// startOrderDate,
-	// @RequestParam(name = "endOrderDate", required = false) String
-	// endOrderDate,
-	// @RequestParam(name = "mutiSearchColumn", required = false) String
-	// mutiSearchColumn,
-	// Authentication authentication
-	// ){
-	// CustomUser customUser = (CustomUser) authentication.getPrincipal();
-	// List<String> orderList = null;
-	//
-	// // 排序处理
-	// try {
-	// orderList = ParamSceneUtils.toOrder(pageable, OrderOrderType.class);
-	// } catch (NotFoundOrderPropertyException e) {
-	// return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new
-	// OrderErrorBuilder(OrderErrorBuilder.ERROR_SORT_PROPERTY_NOTFOUND,
-	// "排序字段不符合要求").build());
-	// } catch (NotFoundOrderDirectionException e) {
-	// return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new
-	// OrderErrorBuilder(OrderErrorBuilder.ERROR_SORT_DIRECTION_NOTFOUND,
-	// "排序方向不符合要求").build());
-	// }
-	//
-	//
-	// // 判断是否分页
-	// Resources<OrderResource> resources = null;
-	// if (isAll != null && isAll) {
-	// List<Order> orders = orderService.findAll(customUser.getClerk(), type,
-	// orderSource, orderResponsibleName,
-	// customerName, startOrderDate, endOrderDate, mutiSearchColumn, orderList);
-	//
-	// orderService.addSearchExtraData(orders);
-	// resources = listResourcesAssembler.toResource(orders, new
-	// OrderResourceAssembler());
-	// } else {
-	// Page<Order> orders = orderService.paginationAll(customUser.getClerk(),
-	// pageable, type, orderSource,
-	// orderResponsibleName, customerName, startOrderDate, endOrderDate,
-	// mutiSearchColumn, orderList);
-	//
-	// orderService.addSearchExtraData(orders.getContent());
-	// resources = pagedResourcesAssembler.toResource(orders, new
-	// OrderResourceAssembler());
-	// }
-	//
-	// return ResponseEntity.ok(resources);
-	// }
+    OrderResourceAssembler orderResourceAssembler = new OrderResourceAssembler();
+    OrderResource orderResource = orderResourceAssembler.toResource(order);
+
+    return ResponseEntity.ok(orderResource);
+  }
 
 	/**
 	 * 返回订单的测量列表
@@ -501,7 +471,7 @@ public class OrderController implements ResourceProcessor<RepositoryLinksResourc
 					new OrderErrorBuilder(Integer.valueOf(error.get("code").toString()), error.get("msg").toString())
 							.build());
 		}
-		Boolean result = orderService.create(order, customUser.getClerk().getId());
+		Boolean result = orderService.create(customUser.getClerk(),order);
 		if (result) {
 			return ResponseEntity.created(ControllerLinkBuilder
 					.linkTo(ControllerLinkBuilder.methodOn(OrderController.class).getOrder(order.getId())).toUri())
