@@ -15,8 +15,35 @@ const mergeQuery = (oldQuery, newQuery) => {
 
 const initialState = {
     query: {},
-    current: {},
-    customers: [],
+    current: {
+        name : '刘超',
+        statusName : '潜在客户',
+        phone : '13000000000',
+        buildingName : '文三小区',
+        decorateProcessName : '半包',
+        customerResponsibleName : '许仙',
+        needTime : '购物需求',
+        needProduct : '瓷砖'
+    },
+    customers: [{
+        name : '徐超',
+        statusName : '潜在客户',
+        phone : '13000000000',
+        buildingName : '文一小区',
+        decorateProcessName : '清包',
+        customerResponsibleName : '许之一',
+        needTime : '购物需求',
+        needProduct : '地板'
+    },{
+        name : '刘超',
+        statusName : '潜在客户',
+        phone : '13000000000',
+        buildingName : '文三小区',
+        decorateProcessName : '半包',
+        customerResponsibleName : '许仙',
+        needTime : '购物需求',
+        needProduct : '瓷砖'
+    }],
     loading: false,
     pagination: {
         current: 1,
@@ -34,12 +61,12 @@ export default {
         listSubscriptions({ dispatch, history }) {
             history.listen(location => {
                 if (location.pathname === '/customers/customers') {
-                    dispatch({ type: 'clear' })
-                    dispatch({
-                        type: 'setQuery',
-                        payload: location.query,
-                        origin: 'urlchange',
-                    });
+                    // dispatch({ type: 'clear' })
+                    // dispatch({
+                    //     type: 'setQuery',
+                    //     payload: location.query,
+                    //     origin: 'urlchange',
+                    // });
                 }
             });
         },
@@ -120,14 +147,14 @@ export default {
                 if (pathToRegexp('/customers/customers/:id/tracks').test(location.pathname)) {
                     const match = pathToRegexp('/customers/customers/:id/tracks').exec(location.pathname);
                     const id = match[1];
-                    dispatch({
-                        type: 'view',
-                        payload: id,
-                    });
-                    dispatch({
-                        type: 'tracks/list',
-                        payload: id,
-                    });
+                    // dispatch({
+                    //     type: 'view',
+                    //     payload: id,
+                    // });
+                    // dispatch({
+                    //     type: 'tracks/list',
+                    //     payload: id,
+                    // });
                 } 
             });
         },

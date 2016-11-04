@@ -99,6 +99,7 @@ const Detail = (props) => {
     labelCol: { span: 3 },
     wrapperCol: { span: 18 },
   }
+  
   return (
     <Container
       {...rest}
@@ -140,30 +141,7 @@ const Detail = (props) => {
                     hasFeedback
                     help={isFieldValidating('needTime') ? '校验中...' : (getFieldError('needTime') || []).join(', ')}
                     >
-                    <ClerkSelectModalInput
-                      idProps={clerkIdProps}
-                      nameProps={clerkNameProps}
-                      style={{ width: '80%' }}
-                      dispatch={dispatch}
-                      componentDataSource={componentDataSource}
-                      onOk={(value) => {
-                        setFieldsValue({
-                          clerkPhone: value.phone,
-                          clerkId: value.id,
-                          clerkName: value.name
-                        })
-                      } }
-                      visible={installations.clerkTreeModalShow}
-                      onCancel={() => {
-                        dispatch({
-                          type: 'installations/merge',
-                          payload: {
-                            clerkTreeModalShow: false
-                          },
-                        });
-                      } }
-                      >
-                    </ClerkSelectModalInput>
+                     <Input {...clerkNameProps} disabled={installations.submiting} />
                   </FormItem>
                 </Col>
               </Row>
@@ -308,23 +286,26 @@ export default Form.create({
   mapPropsToFields: (props) => {
     const installation = props.installations.currentItem;
     return {
-      name: {
-        value: installation.name
+      needTime : {
+        value : installation.needTime
       },
-      clerkId: {
-        value: installation.clerkId
+      clerkName : {
+        value : installation.clerkName
       },
-      needTime: {
-        value: installation.needTime
+      clerkPhone : {
+        value : installation.clerkPhone
       },
-      remark: {
-        value: installation.remark
+      orderGoodNum : {
+        value : installation.orderGoodNum
       },
-      cost: {
-        value: installation.cost
+      serviceCost : {
+        value : installation.serviceCost
       },
-      servicePosition: {
-        value: installation.servicePosition
+      remark : {
+        value : installation.remark
+      },
+      status : {
+        value : installation.status
       },
       ...props.mapPropsToFields(installation),
     }

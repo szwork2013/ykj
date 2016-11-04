@@ -5,6 +5,8 @@ import request, { parseError } from '../../utils/request';
 import pathToRegexp from 'path-to-regexp';
 import querystring from 'querystring';
 
+import { searchStorageGoodStatusDetails } from '../../services/storageGoodsStatus';
+
 const mergeQuery = (oldQuery, newQuery) => {
     return {
     ...oldQuery,
@@ -20,18 +22,18 @@ const initialState = {
      * 数据集合
      */
     list: [{
-        id : '1',
-        name : '实木地板',
-        model : '兔宝宝VIP版',
-        price : 100,
-        storeNow : 10,
-        reservedGoodsNum : 40,
-        notDeliverGoodsNum : 50,
-        outStorageGoodsNum : 50,
-        usableGoodsNum : 100,
-        replenishStockNum : 20,
-        status : '在售',
-        modifyDate : '2016-10-6'
+        id: '1',
+        name: '实木地板',
+        model: '兔宝宝VIP版',
+        price: 100,
+        storeNow: 10,
+        reservedGoodsNum: 40,
+        notDeliverGoodsNum: 50,
+        outStorageGoodsNum: 50,
+        usableGoodsNum: 100,
+        replenishStockNum: 20,
+        status: '在售',
+        modifyDate: '2016-10-6'
     }],
     /**
      * 当前操作对象
@@ -45,23 +47,41 @@ const initialState = {
     /**
      * 商品批次明细数据集合及分页信息
      */
-    goodBatchDetails : [{
-        storageOutId : 'A001',
-        num : 10
-    },{
-        storageInId : 'A002',
-        num : 10,
-        cost : 100
+    goodBatchDetails: [{
+        storageOutId: 'A001',
+        num: 10
+    }, {
+        storageInId: 'A002',
+        num: 10,
+        cost: 100
     }],
-    goodBatchDetailsPagination : {
-        current : 1
+    goodBatchDetailsPagination: {
+        current: 1
     }
 }
 
 export default {
-    namespace: 'storageGoods',
+    namespace: 'storageGoodsStatus',
 
     state: initialState,
+
+    subscriptions: {
+
+        listSubscriptions({ dispatch, history }) {
+            history.listen((location, state) => {
+                if (pathToRegexp('/storage/storageGoodsStatus').test(location.pathname)) {
+                    console.log("coming")
+                    dispatch({ type: 'clear' })
+                    dispatch({
+                        type: 'setQuery',
+                        payload: {
+                            
+                        }
+                    });
+                }
+            });
+        }
+    },
 
     effects: {
         /**
@@ -80,12 +100,12 @@ export default {
                 }
             });
 
-            const { data, error } = yield search(access_token, query);
+            const { data, error } = yield searchStorageGoodStatusDetails(access_token, query);
             if (!error) {
                 yield put({
-                    type: 'setMeasures',
+                    type: 'setStorageGoodsStatus',
                     payload: {
-                        list: data._embedded && data._embedded.orderSers || [],
+                        list: data._embedded && data._embedded.storageGoodStatusDetails || [],
                         pagination: {
                             current: data.page && data.page.number + 1,
                             total: data.page && data.page.totalElements,
@@ -107,7 +127,7 @@ export default {
             });
 
             const err = yield parseError(error);
-            yield message.error(`加载商品失败:${err.status} ${err.message}`, 3);
+            yield message.error(`加载商品库存失败:${err.status} ${err.message}`, 3);
             return false;
         },
     },
@@ -116,7 +136,7 @@ export default {
         setQuery(state, { payload: query }) {
             return { ...state, query: mergeQuery(state.query, query) }
         },
-        setMeasures(state, { payload }) {
+        setStorageGoodsStatus(state, { payload }) {
             return { ...state, ...payload }
         },
         toggleLoadding(state, { payload: loading }) {

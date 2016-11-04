@@ -8,7 +8,22 @@ import querystring from 'querystring';
 
 
 const initialState = {
-  tracks: [],
+  tracks: [{
+    customerResponsibleName : '张绍',
+    time : '2016-10-01',
+    way : '电话',
+    content : '看中瓷砖想购买'
+  },{
+    customerResponsibleName : '刘一',
+    time : '2016-10-05',
+    way : '电话',
+    content : '预定看瓷砖现货'
+  },{
+    customerResponsibleName : '刘一',
+    time : '2016-10-30',
+    way : '电话',
+    content : '订单确认中'
+  }],
   current: {},
   loading: false,
   submiting: false,

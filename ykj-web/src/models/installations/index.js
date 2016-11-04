@@ -20,11 +20,52 @@ const initialState = {
   /**
    * 数据集合
    */
-  list: [],
+  list: [{
+    needTime : '2016-11-18',
+    serviceTime : '2016-11-6',
+    servicePosition : '小和山浙江科技学院',
+    serviceStatus: '处理中',
+    clerkName : '赵框',
+    clerkPhone : '15896543685',
+    starLevel : '****',
+    cost : '',
+    isClear : false
+  },{
+    needTime : '2016-10-15',
+    serviceTime : '2016-10-11',
+    servicePosition : '小和山浙江科技学院',
+    serviceStatus: '已处理',
+    clerkName : '赵框',
+    clerkPhone : '15896543685',
+    starLevel : '****',
+    cost : '',
+    isClear : false
+  }],
   /**
    * 当前操作对象
    */
-  currentItem: {},
+  currentItem: {
+    needTime : '2016-11-11',
+    clerkName : '刘尚',
+    clerkPhone : '13085697485',
+    orderGoodNum : 10,
+    serviceCost:100,
+    remark : '已完成安装',
+    status : '已完成'
+  },
+  installGoods : [{
+    name : '木板',
+    model : '兔宝宝系列',
+    deliverNum : 10,
+    storageGoodsNum : 2,
+    remark : '由于客厅不平整，等修复后再施工'
+  },{
+    name : '坐便器',
+    model : 'TOTO',
+    deliverNum : 2,
+    storageGoodsNum : 0,
+    remark : ''
+  }],
   pagination: {
     current: 1,
   },
@@ -37,7 +78,12 @@ const initialState = {
   /**
    * 当前订单
    */
-  currentOrder: {},
+  currentOrder: {
+    orderNo : 'FW201610030005',
+    customerName : '刘凡',
+    customerPhone : '13988846325',
+    address : '小和山浙江科技学院'
+  },
   /**
    * 位置窗口查看
    */
@@ -89,16 +135,16 @@ export default {
           const match = pathToRegexp('/order/installations/:orderId/edit/:installationId').exec(location.pathname);
           const orderId = match[1];
           const installationId = match[2];
-          dispatch({
-            type: 'view',
-            payload: installationId,
-          });
-          dispatch({
-            type: 'initOrderInfo',
-            payload: {
-              orderId: orderId
-            },
-          });
+          // dispatch({
+          //   type: 'view',
+          //   payload: installationId,
+          // });
+          // dispatch({
+          //   type: 'initOrderInfo',
+          //   payload: {
+          //     orderId: orderId
+          //   },
+          // });
         }
       });
     },

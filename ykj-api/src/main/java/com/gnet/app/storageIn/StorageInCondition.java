@@ -1,6 +1,6 @@
 package com.gnet.app.storageIn;
 
-import com.gnet.app.CommonCondition;
+import java.util.Date;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -17,6 +17,11 @@ public class StorageInCondition{
   private static final long serialVersionUID = 5915801595398966199L;
   
   /**
+   * 主键
+   */
+  private String id;
+  
+  /**
    * 商家编码
    */
   private String businessId;
@@ -30,6 +35,11 @@ public class StorageInCondition{
    * 商品编码
    */
   private String goodId;
+  
+  /**
+   * 订单编号
+   */
+  private String orderId;
   
   /**
    * 批次号模糊值

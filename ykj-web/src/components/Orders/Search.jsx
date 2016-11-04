@@ -74,6 +74,7 @@ const Search = ({  orders, form, dispatch, ...rest }) => {
         {
             label: "新增订单",
             url: '/order/orders/add',
+            type : 'primary'
         },
         {
             label: "订单导入",

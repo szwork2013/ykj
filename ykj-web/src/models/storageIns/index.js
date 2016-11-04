@@ -5,6 +5,8 @@ import request, { parseError } from '../../utils/request';
 import pathToRegexp from 'path-to-regexp';
 import querystring from 'querystring';
 
+import {searchHistory,storageIn} from '../../services/storageIn'
+
 const mergeQuery = (oldQuery, newQuery) => {
     return {
     ...oldQuery,
@@ -43,25 +45,54 @@ const initialState = {
     loading: false,
     submiting: false,
     /**
-     * 入库明细数据
+     * 商品编码
      */
-    detailList: [{
-        name: '实木地板',
-        model: '兔宝宝VIP版',
-        totalNum : 50,
-        status: '在售'
-    },{
-        name: '大理石此砖',
-        model: '兔宝宝VIP版',
-        totalNum : 50,
-        status: '在售'
-    }]
+    goodId : undefined
 }
 
 export default {
     namespace: 'storageIns',
 
     state: initialState,
+    
+    subscriptions: {
+
+        listSubscriptions({ dispatch, history }) {
+            history.listen((location, state) => {
+                if (pathToRegexp('/storage/storageIns/good/:goodId').test(location.pathname)) {
+                    const match = pathToRegexp('/storage/storageIns/good/:goodId').exec(location.pathname);
+                    const goodId = match[1];
+                    console.log("商品号："+goodId);
+                    dispatch({ type: 'clear' })
+                    dispatch({
+                        type: 'merge',
+                        payload: {
+                            "goodId" : goodId
+                        }
+                    });
+                    dispatch({
+                        type: 'setQuery',
+                        payload: {
+                        }
+                    });
+                }
+                if (pathToRegexp('/storage/storageIns').test(location.pathname)) {
+                    console.log("coming")
+                    dispatch({ type: 'clear' })
+                    dispatch({
+                        type: 'setQuery',
+                        payload: {
+                            
+                        }
+                    });
+                }
+                
+
+
+                
+            });
+        }
+    },
 
     effects: {
         /**
@@ -73,23 +104,23 @@ export default {
                 payload: true,
             });
 
-            const { access_token, oldQuery } = yield select(state => {
+            const { access_token, oldQuery,goodId } = yield select(state => {
                 return {
                     'access_token': state.oauth.access_token,
-                    'oldQuery': state.measures.query,
+                    'oldQuery': state.storageIns.query,
+                    'goodId' : state.storageIns.goodId
                 }
             });
-
-            const { data, error } = yield search(access_token, query);
+            const { data, error } = yield searchHistory(access_token, {...query,goodId});
             if (!error) {
                 yield put({
-                    type: 'setMeasures',
+                    type: 'merge',
                     payload: {
-                        list: data._embedded && data._embedded.orderSers || [],
+                        list: data._embedded && data._embedded.storageIns || [],
                         pagination: {
                             current: data.page && data.page.number + 1,
                             total: data.page && data.page.totalElements,
-                        },
+                        }
                     },
                 });
 
@@ -108,6 +139,43 @@ export default {
 
             const err = yield parseError(error);
             yield message.error(`加载商品失败:${err.status} ${err.message}`, 3);
+            return false;
+        },
+        /**
+         * 创建入库单
+         */
+        *storageIn({ payload }, { put, select }) {
+            yield put({
+                type: 'toggleSubmiting',
+                payload: true,
+            });
+
+            const { access_token} = yield select(state => {
+                return {
+                    'access_token': state.oauth.access_token
+                }
+            });
+
+            yield put({
+                type: 'merge',
+                payload: {
+                    currentItem: payload
+                },
+            });
+            const { data, error } = yield storageIn(access_token, payload);
+            if (!error) {
+                yield message.success('创建入库单信息成功', 2);
+                yield put(routerRedux.goBack());
+                return;
+            }
+
+            const err = yield parseError(error);
+            yield message.error(`创建入库单信息失败:${err.status} ${err.message}`, 3);
+
+            yield put({
+                type: 'toggleSubmiting',
+                payload: false,
+            });
             return false;
         },
     },

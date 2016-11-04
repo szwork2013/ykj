@@ -8,4 +8,5 @@ public interface StorageInMapper extends Mapper<StorageIn> {
   
   public List<StorageIn> selectStorageInHistoryDataListByCondition(StorageInCondition condition);
   
+  public List<StorageIn> selectStorageInGoodHistoryDataListByCondition(StorageInCondition condition);
 }

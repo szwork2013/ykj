@@ -25,11 +25,22 @@
 		<result column="store_now" property="storeNow" jdbcType="DECIMAL"/>
     </resultMap>
     
-    <resultMap id="StorageGoodStatusDetail" type="com.gnet.app.good.StorageGoodStatusDetail" >
-        <result column="reserved_goods" property="reservedGoods" jdbcType="DECIMAL"/>
-        <result column="need_deliver_num" property="needDeliverNum" jdbcType="DECIMAL"/>
-        <result column="storage_out_num" property="storageOutNum" jdbcType="DECIMAL"/>
-        <association property="good"  javaType="com.gnet.app.good.Good" resultMap="supervisorResultMap"></association>
+    <resultMap id="StorageGoodStatusDetailMap" type="com.gnet.app.good.StorageGoodStatusDetail" >
+        <result column="reserved_total_num" property="reservedTotalNum" jdbcType="DECIMAL"/>
+        <result column="need_deliver_total_num" property="needDeliverTotalNum" jdbcType="DECIMAL"/>
+        <result column="storage_out_total_num" property="storageOutTotalNum" jdbcType="DECIMAL"/>
+        <association property="good"  javaType="com.gnet.app.good.Good" resultMap="BaseGoodMap"></association>
+    </resultMap>
+    
+    <resultMap id="GoodExtMap"  type="com.gnet.app.good.Good"  extends ="BaseGoodMap">
+        <collection property="storageInAndOutList" ofType="com.gnet.app.good.GoodStorageInAndOutRecord" >
+            <result column="type" property="type" jdbcType="INTEGER"/>
+            <result column="id" property="id" jdbcType="VARCHAR"/>
+            <result column="batch_number" property="batchNumber" jdbcType="VARCHAR"/>
+            <result column="change_date" property="changeDate" />
+            <result column="num" property="num" jdbcType="INTEGER"/>
+            <result column="cost" property="cost" jdbcType="DECIMAL"/>
+        </collection>
     </resultMap>
 	
 	<select id="selectGoodsAllByCondition" resultMap="BaseGoodMap" parameterType="com.gnet.app.good.GoodCondition">
@@ -99,16 +110,16 @@
     </select>
     
     <!-- 根据查询条件查询库存商品状态明细清单 -->
-    <select id="selectStorageGoodStatusDetailList" resultMap="StorageGoodStatusDetail" parameterType="com.gnet.app.good.GoodCondition">
+    <select id="selectStorageGoodStatusDetailList" resultMap="StorageGoodStatusDetailMap" parameterType="com.gnet.app.good.GoodCondition">
         SELECT
 		  t.id,
 		  t.name,
 		  t.model,
 		  t.price,
 		  s.store_now,
-		  SUM(w.reserved_goods) AS reserved_goods,
-		  SUM(w.need_deliver_num) AS need_deliver_num,
-		  sum(e.num) storage_out_num,
+		  SUM(w.reserved_goods) AS reserved_total_num,
+		  SUM(w.need_deliver_num) AS need_deliver_total_num,
+		  sum(e.num) storage_out_total_num,
 		  t.onsale_status,
 		  (select a.value from sc_codeword a,sc_codeword_type b where b.id=a.codeword_type_id and a.code=t.onsale_status and b.type_value = 'ONSALE_STATUS') onsale_status_text, 
 		  t.modify_date
@@ -128,5 +139,13 @@
 		 </where>
 		GROUP BY
 		  t.id, t.name, t.model, t.price, s.store_now
+    </select>
+    
+    <select id="selectStorageInAndOutRecordsById" resultMap="GoodExtMap">
+        (select 0 as type,t.id,t.batch_number,t.change_date,s.num,s.cost from ykj_storage_in t,ykj_storage_in_detail s where t.id = s.storage_in_id
+        and s.storage_goods_id = #{id})
+        union all 
+        (select 1 as type,t.id,t.batch_number,t.change_date,s.num,0 cost from ykj_storage_out t,ykj_storage_out_detail s where t.id = s.storage_out_id
+        and s.storage_goods_id = #{id})
     </select>
 </mapper>

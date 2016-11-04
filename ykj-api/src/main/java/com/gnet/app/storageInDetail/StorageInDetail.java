@@ -8,6 +8,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import com.gnet.app.good.Good;
+import com.gnet.app.storageIn.StorageIn;
 import com.gnet.mybatis.BaseEntity;
 
 import lombok.Getter;
@@ -63,6 +64,11 @@ public class StorageInDetail extends BaseEntity {
    * 商品信息
    */
   private @Transient Good good;
+  
+  /**
+   * 入库信息
+   */
+  private @Transient StorageIn storageIn;
   
   
 }

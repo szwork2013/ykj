@@ -68,7 +68,7 @@ const GuideMenu = ({ menuCurrent, menuOpenKeys, dispatch }) => {
         title={ <span><Icon type="mail" /><span>库存管理</span></span> }
       >
         <Menu.Item key="/stock/list">
-          <Link to="/stock/list">库存列表</Link>
+          <Link to="/storage/storageGoodsStatus">库存列表</Link>
         </Menu.Item>
         <Menu.Item key="/stock/goods">
           <Link to="/stock/goods">商品列表</Link>

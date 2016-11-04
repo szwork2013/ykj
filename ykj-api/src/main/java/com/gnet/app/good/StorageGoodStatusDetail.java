@@ -1,8 +1,16 @@
 package com.gnet.app.good;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 
-public class StorageGoodStatusDetail {
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
+@Setter
+@Getter
+@ToString
+public class StorageGoodStatusDetail implements Serializable{
 
   /** 
    * @Fields serialVersionUID : 
@@ -18,16 +26,16 @@ public class StorageGoodStatusDetail {
   /**
    * 预留库存数
    */
-  private BigDecimal reservedGoods;
+  private BigDecimal reservedTotalNum;
 
   /**
    * 未发货商品数
    */
-  private BigDecimal needDeliverNum;
+  private BigDecimal needDeliverTotalNum;
 
   /**
    * 已出库商品数
    */
-  private BigDecimal storageOutNum;
+  private BigDecimal storageOutTotalNum;
 
 }

@@ -33,22 +33,20 @@ const List = ({ customers, form, children, dispatch, ...rest }) => {
             {
                 label: "新增客户",
                 url: '/customers/customers/add',
-            },
-            {
-                label: "客户导入",
-                url: '',
+                type : 'primary',
+                size : 'large'
             },
             {
                 label: "客户导出",
                 url: '',
-            },
-            {
-                label: "客户导入模板",
-                url: '',
+                type : 'default',
+                size : 'large'
             },
             {
                 label: "群发信息",
                 url: '',
+                type : 'default',
+                size : 'large'
             },
         ]
     }
@@ -77,6 +75,7 @@ const List = ({ customers, form, children, dispatch, ...rest }) => {
             </Select>
         )
     }
+    const menutd = "line-height:10px;"
         
     return (
         <Container
@@ -190,24 +189,20 @@ const List = ({ customers, form, children, dispatch, ...rest }) => {
                         {
                             title: '操作',
                             key: 'operation',
-                            width: 150,
+                            width: 350,
                             render: (text, record) => (
-                                <table>
-                                    <tbody>
-                                        <tr>
-                                            <td><Link to={`/customers/customers/${record.id}/houses`}><Icon type="edit" />房产信息</Link></td>
-                                            <td>
+                                <span>
+                                            <Link to={`/customers/customers/${record.id}/houses`}><Icon type="home" />房产信息</Link>
+                                            <span className="ant-divider"></span>
                                                 <Popconfirm title="确定要删除这个客户吗？" onConfirm={ () => onDelete(record.id) } onCancel={() => { } }>
                                                 <a href="#"><Icon type="delete" />删除</a>
                                                 </Popconfirm>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td><Link to={`/customers/customers/${record.id}/tracks`}><Icon type="edit" />更进记录</Link></td>
-                                            <td><Link to={`/customers/customers/edit/${record.id}`}><Icon type="edit" />编辑</Link></td>
-                                        </tr>
-                                        <tr>
-                                            <td>
+                                       <span className="ant-divider"></span>
+                                          <Link to={`/customers/customers/${record.id}/tracks`}><Icon type="eye" />更进记录</Link>
+                                          <span className="ant-divider"></span>
+                                           <Link to={`/customers/customers/edit/${record.id}`}><Icon type="edit" />编辑</Link>
+                                           <span className="ant-divider"></span>
+                                       
                                             {
                                                 record.isEffectivity 
                                                 ?
@@ -220,7 +215,7 @@ const List = ({ customers, form, children, dispatch, ...rest }) => {
                                                     } } 
                                                     onCancel={() => { } }>
                                                     <a href="javascript:;">
-                                                        <Icon type="edit" />
+                                                        <Icon type="lock" />
                                                         置为无效
                                                     </a>
                                                 </Popconfirm> 
@@ -234,16 +229,13 @@ const List = ({ customers, form, children, dispatch, ...rest }) => {
                                                     }} 
                                                     onCancel={() => { } }>
                                                     <a href="javascript:;">
-                                                        <Icon type="edit" />
+                                                        <Icon type="unlock" />
                                                         置为有效
                                                     </a>
                                                 </Popconfirm> 
                                             }
-                                            </td>
-                                            <td></td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                                            </span>
+                                           
                             ),
                         }
                     ]

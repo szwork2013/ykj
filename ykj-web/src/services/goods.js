@@ -1,6 +1,20 @@
 import request from '../utils/request';
 import querystring from 'querystring';
 
+
+/**
+ * 根据商品型号搜索商品信息
+ */
+export async function searchGoodsAllByModel(access_token, model) {
+  return request(`/api/goods/searchGoodsAllByModel/${model}`, {
+    headers: {
+      'Authorization': `Bearer ${access_token}`,
+      'Content-Type': 'application/json',
+    },
+  })
+}
+
+
 export async function search(query, access_token) {
 	return request(`/api/goods/search?${querystring.stringify(query)}`, {
 		method: 'GET',

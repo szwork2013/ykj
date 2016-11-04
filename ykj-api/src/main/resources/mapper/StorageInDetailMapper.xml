@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.gnet.app.storageInDetail.StorageInDetailMapper">
+	<resultMap id="BaseStorageInDetailMap" type="com.gnet.app.storageInDetail.StorageInDetail">
+		<id column="id" property="id" jdbcType="CHAR" />
+		<result column="create_date" property="createDate" />
+		<result column="modify_date" property="modifyDate" />
+		<result column="storage_goods_id" property="storageGoodsId"
+			jdbcType="CHAR" />
+		<result column="storage_in_id" property="storageInId" jdbcType="CHAR" />
+		<result column="num" property="num" jdbcType="INTEGER" />
+		<result column="cost" property="cost" jdbcType="DECIMAL" />
+	</resultMap>
+
+	<resultMap id="StorageInDetailExtMap" type="com.gnet.app.storageInDetail.StorageInDetail"
+		extends="BaseStorageInDetailMap">
+		<result column="type_name" property="typeName" jdbcType="VARCHAR" />
+		<association property="good" javaType="com.gnet.app.good.Good">
+			<result column="storage_goods_id" property="id" jdbcType="CHAR" />
+			<result column="good_name" property="name" jdbcType="VARCHAR" />
+			<result column="good_model" property="model" jdbcType="VARCHAR" />
+			<result column="good_type" property="type" jdbcType="VARCHAR" />
+			<result column="good_onsale_status" property="onsaleStatus"
+				jdbcType="INTEGER" />
+			<result column="good_onsale_status_text" property="onsaleStatusText"
+				jdbcType="VARCHAR" />
+		</association>
+		<association property="storageIn" javaType="com.gnet.app.storageIn.StorageIn">
+			<result column="storage_in_id" property="id" jdbcType="CHAR" />
+			<result column="storage_in_batch_number" property="batchNumber"
+				jdbcType="VARCHAR" />
+		</association>
+	</resultMap>
+
+
+	<select id="selectStorageInDetailListByCondition" resultMap="StorageInDetailExtMap" 
+	parameterType="com.gnet.app.storageInDetail.StorageInDetailCondition">
+		SELECT
+		t.*,
+		s.name AS good_name,
+		s.model AS good_model,
+		s.type AS good_type,
+		s.onsale_status AS good_onsale_status,
+		(SELECT a.value FROM sc_codeword AS a, sc_codeword_type AS b WHERE
+		b.id = a.codeword_type_id AND a.code = s.onsale_status
+		AND b.type_value = 'ONSALE_STATUS') AS good_onsale_status_text,
+		w.batch_number AS storage_in_batch_number
+		FROM
+		ykj_storage_in_detail AS t
+		LEFT JOIN ykj_storage_goods AS s ON s.id = t.storage_goods_id
+		LEFT JOIN ykj_storage_in AS w ON t.storage_in_id = w.id
+		<where>
+			<if test="storageInId != null and storageInId !=''">
+				and t.storage_in_id = #{storageInId}
+			</if>
+			<if test="storageGoodsId != null and storageGoodsId !=''">
+				and t.storage_goods_id = #{storageGoodsId}
+			</if>
+		</where>
+	</select>
+
+</mapper>

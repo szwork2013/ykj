@@ -23,6 +23,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.gnet.app.order.Order;
+import com.gnet.app.order.OrderResource;
+import com.gnet.app.order.OrderResourceAssembler;
 import com.gnet.resource.boolResource.BooleanResourceAssembler;
 import com.gnet.resource.listResource.ListResourcesAssembler;
 import com.gnet.security.user.CustomUser;
@@ -41,6 +44,10 @@ public class GoodController implements ResourceProcessor<RepositoryLinksResource
 	private PagedResourcesAssembler<Good> pagedResourcesAssembler;
 	@Autowired
 	private ListResourcesAssembler<Good> listResourcesAssembler;
+	@Autowired
+	private PagedResourcesAssembler<StorageGoodStatusDetail> pagedStorageGoodStatusDetailResourcesAssembler;
+	@Autowired
+	private ListResourcesAssembler<StorageGoodStatusDetail> listStorageGoodStatusDetailResourcesAssembler;
 
 	@RequestMapping(method = RequestMethod.GET)
 	public ResponseEntity<?> getGoods(@PageableDefault Pageable pageable,
@@ -134,12 +141,14 @@ public class GoodController implements ResourceProcessor<RepositoryLinksResource
 		good.setId(id);
 		good.setBusinessId(businessId);
 
-//		Map<String, Object> error = GoodValidator.validateBeforeUpdateGood(good);
-//		if (error != null) {
-//			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-//					new GoodErrorBuilder(Integer.valueOf(error.get("code").toString()), error.get("msg").toString())
-//							.build());
-//		}
+		// Map<String, Object> error =
+		// GoodValidator.validateBeforeUpdateGood(good);
+		// if (error != null) {
+		// return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+		// new GoodErrorBuilder(Integer.valueOf(error.get("code").toString()),
+		// error.get("msg").toString())
+		// .build());
+		// }
 
 		Boolean result = goodService.update(good);
 
@@ -198,17 +207,17 @@ public class GoodController implements ResourceProcessor<RepositoryLinksResource
 
 	/**
 	 * 根据商品类型搜索所有对应的商品
+	 * 
 	 * @param model
 	 * @param authentication
 	 * @return
 	 */
 	@RequestMapping(value = "/searchGoodsAllByModel/{model}", method = RequestMethod.GET)
-	public ResponseEntity<?> searchGoodsAllByModel(@PathVariable("model") String model,
-			Authentication authentication) {
+	public ResponseEntity<?> searchGoodsAllByModel(@PathVariable("model") String model, Authentication authentication) {
 		CustomUser customUser = (CustomUser) authentication.getPrincipal();
 		String businessId = customUser.getClerk().getBusinessId();
-		
-		if("ALL".equalsIgnoreCase(model)){
+
+		if ("ALL".equalsIgnoreCase(model)) {
 			model = "";
 		}
 
@@ -218,35 +227,67 @@ public class GoodController implements ResourceProcessor<RepositoryLinksResource
 
 		return ResponseEntity.ok(resources);
 	}
+
+	/**
+	 * 根据商品类型搜索所有对应的商品
+	 * 
+	 * @param model
+	 * @param authentication
+	 * @return
+	 */
+	@RequestMapping(value = "/searchStorageGoodStatusDetails", method = RequestMethod.GET)
+	public ResponseEntity<?> searchStorageGoodStatusDetails(@PageableDefault Pageable pageable,
+			@RequestParam(name = "isall", required = false) Boolean isAll, GoodCondition condition,
+			Authentication authentication) {
+		CustomUser customUser = (CustomUser) authentication.getPrincipal();
+		List<String> orderList = null;
+
+		// 排序处理
+		try {
+			orderList = ParamSceneUtils.toOrder(pageable, GoodOrderType.class);
+		} catch (NotFoundOrderPropertyException e) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND)
+					.body(new GoodErrorBuilder(GoodErrorBuilder.ERROR_SORT_PROPERTY_NOTFOUND, "排序字段不符合要求").build());
+		} catch (NotFoundOrderDirectionException e) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND)
+					.body(new GoodErrorBuilder(GoodErrorBuilder.ERROR_SORT_DIRECTION_NOTFOUND, "排序方向不符合要求").build());
+		}
+
+		// 判断是否分页
+		Resources<StorageGoodStatusDetailResource> resources = null;
+		if (isAll != null && isAll) {
+			List<StorageGoodStatusDetail> storageGoodStatusDetails = goodService
+					.selectStorageGoodStatusDetailList(orderList, customUser.getClerk(), condition);
+			resources = listStorageGoodStatusDetailResourcesAssembler.toResource(storageGoodStatusDetails, new StorageGoodStatusDetailResourceAssembler());
+		} else {
+			Page<StorageGoodStatusDetail> storageGoodStatusDetails = goodService
+					.paginationStorageGoodStatusDetailList(pageable, orderList, customUser.getClerk(), condition);
+
+			resources = pagedStorageGoodStatusDetailResourcesAssembler.toResource(storageGoodStatusDetails, new StorageGoodStatusDetailResourceAssembler());
+		}
+
+		return ResponseEntity.ok(resources);
+
+	}
 	
 	/**
-   * 根据商品类型搜索所有对应的商品
-   * @param model
-   * @param authentication
-   * @return
-   */
-	@RequestMapping(value = "/searchStorageGoodStatusDetails", method = RequestMethod.GET)
-  public ResponseEntity<?> searchStorageGoodStatusDetails(@PageableDefault Pageable pageable,
-      @RequestParam(name = "isall", required = false) Boolean isAll,GoodCondition condition,
-      Authentication authentication) {
-    CustomUser customUser = (CustomUser) authentication.getPrincipal();
-    List<String> orderList = null;
-
-    // 排序处理
-    try {
-      orderList = ParamSceneUtils.toOrder(pageable, GoodOrderType.class);
-    } catch (NotFoundOrderPropertyException e) {
+	 * 获取商品的出入库批次信息
+	 * @param id
+	 * @return
+	 * ResponseEntity<?>
+	 */
+	@RequestMapping(value = "/{id}/storageInAndOutRecord", method = RequestMethod.GET)
+  public ResponseEntity<?> getGoodStorageInAndOutRecord(@PathVariable("id") String id) {
+    Good good = goodService.selectGoodInfoWithStorageInAndOutRecordById(id);
+    if (good == null) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND)
-          .body(new GoodErrorBuilder(GoodErrorBuilder.ERROR_SORT_PROPERTY_NOTFOUND, "排序字段不符合要求").build());
-    } catch (NotFoundOrderDirectionException e) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND)
-          .body(new GoodErrorBuilder(GoodErrorBuilder.ERROR_SORT_DIRECTION_NOTFOUND, "排序方向不符合要求").build());
+          .body(new GoodErrorBuilder(GoodErrorBuilder.ERROR_GOOD_NULL, "找不到该商品").build());
     }
 
-    // 判断是否分页
-    Page<StorageGoodStatusDetail> storageGoodStatusDetails = goodService.paginationStorageGoodStatusDetailList(pageable, orderList,customUser.getClerk(),condition);
+    GoodResourceAssembler goodResourceAssembler = new GoodResourceAssembler();
+    GoodResource goodResource = goodResourceAssembler.toResource(good);
 
-    return ResponseEntity.ok(storageGoodStatusDetails);
+    return ResponseEntity.ok(goodResource);
   }
 
 }

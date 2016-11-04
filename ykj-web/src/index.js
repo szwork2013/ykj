@@ -70,10 +70,12 @@ app.model(require('./models/users'))
 
 app.model(require('./models/componentDataSource'));
 
-/**************系统管理*****************/
-app.model(require('./models/storageGoods'));
+/**************库存管理*****************/
+app.model(require('./models/storageGoodsStatus'));
 app.model(require('./models/storageIns'));
+app.model(require('./models/storageInDetails'));
 app.model(require('./models/storageOuts'));
+app.model(require('./models/storageOutDetails'));
 
 
 // 4. Router

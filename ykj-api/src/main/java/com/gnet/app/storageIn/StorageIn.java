@@ -31,6 +31,21 @@ public class StorageIn extends BaseEntity {
   private static final long serialVersionUID = -4793625098406919639L;
 
   /**
+   * 类型：其他
+   */
+  public final static Integer TYPE_OTHER = 0;
+  
+  /**
+   * 类型：采购入库
+   */
+  public final static Integer TYPE_PROCUREMENT = 1;
+  
+  /**
+   * 类型：退货入库
+   */
+  public final static Integer TYPE_RETURN = 2;
+  
+  /**
    * 创建时间
    */
   private Date createDate;

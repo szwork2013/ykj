@@ -12,7 +12,8 @@ class CodewordSelect extends Component {
         super(props);
         this.componentDataSourceName = "codewords";
         this.state = {
-            type : this.props.type
+            type: this.props.type,
+            dataSource: []
         }
     }
 
@@ -24,11 +25,17 @@ class CodewordSelect extends Component {
     }
 
     componentWillMount() {
-        console.log("componentWillMount")
-        console.log(this.state.type)
         this.props.dispatch({
             type: 'componentDataSource/loadCodewordsData',
-            payload: this.state.type,
+            payload: {
+                typeValue: this.state.type,
+                callback: (data) => {
+                    this.setState({
+                        dataSource: data._embedded && data._embedded.codewords || []
+                    })
+                }
+            }
+
         });
     }
 
@@ -37,12 +44,11 @@ class CodewordSelect extends Component {
 
 
     handleSelect(onSelect, value, option) {
-        if (this.props.onSelect) {
-            const dataSource = this.props.componentDataSource[this.componentDataSourceName][this.state.type] || [];
-            console.dir(dataSource)
+        if (onSelect) {
+            console.dir(this.state.dataSource)
             dataSource.map(item => {
                 if (item.id === value) {
-                    return this.props.onSelect(item);
+                    return onSelect(item);
                 }
             })
         } else {
@@ -50,9 +56,8 @@ class CodewordSelect extends Component {
         }
 
     }
-    
+
     render() {
-        const dataSource =  this.props.componentDataSource[this.componentDataSourceName][this.state.type] || [];
         return (
             <Select showSearch
                 {...this.props.elementProps}
@@ -61,12 +66,12 @@ class CodewordSelect extends Component {
                     this.handleSelect(this.props.onSelect, value, option)
                     return true;
                 } }
-                optionFilterProp = {"children"}
-                defaultActiveFirstOption = {false}
-                disabled = {this.props.disabled}
+                optionFilterProp={"children"}
+                defaultActiveFirstOption={false}
+                disabled={this.props.disabled}
                 >
                 {
-                    dataSource.map(item => {
+                    this.state.dataSource.map(item => {
                         return <Select.Option key={item.code} value={item.code}>{item.value}</Select.Option>
                     })
                 }

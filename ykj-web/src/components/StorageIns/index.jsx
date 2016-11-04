@@ -1,6 +1,6 @@
 import React, { PropTypes } from 'react';
 import { Link } from 'dva/router';
-import { Button, Icon, Tabs, Form, Input, Popconfirm, Row, Col, Modal, Checkbox,DatePicker } from 'antd';
+import { Button, Icon, Tabs, Form, Input, Popconfirm, Row, Col, Modal, Checkbox, DatePicker } from 'antd';
 
 import CodewordSelect from '../Common/CodewordComponent';
 import Container from '../Container';
@@ -32,6 +32,29 @@ const List = ({ form, storageIns, componentDataSource, dispatch, ...rest }) => {
     wrapperCol: { span: 14 },
   };
 
+  const formatDate = (date, format) => {
+    const o = {
+      "M+": date.getMonth() + 1, //month 
+      "d+": date.getDate(), //day 
+      "h+": date.getHours(), //hour 
+      "m+": date.getMinutes(), //minute 
+      "s+": date.getSeconds(), //second 
+      "q+": Math.floor((date.getMonth() + 3) / 3), //quarter 
+      "S": date.getMilliseconds() //millisecond 
+    }
+
+    if (/(y+)/.test(format)) {
+      format = format.replace(RegExp.$1, (date.getFullYear() + "").substr(4 - RegExp.$1.length));
+    }
+
+    for (let k in o) {
+      if (new RegExp("(" + k + ")").test(format)) {
+        format = format.replace(RegExp.$1, RegExp.$1.length == 1 ? o[k] : ("00" + o[k]).substr(("" + o[k]).length));
+      }
+    }
+    return format;
+  }
+
   return (
     <Container
       { ...rest }
@@ -46,10 +69,21 @@ const List = ({ form, storageIns, componentDataSource, dispatch, ...rest }) => {
               <Button type="primary" onClick={() => {
 
                 const formData = form.getFieldsValue();
-                console.log(formData);
+
+                const newFormData = {};
+                newFormData.type = formData.type;
+                newFormData.fuzzyBatchNumber = formData.fuzzyBatchNumber;
+                if (formData.date) {
+                  newFormData.storageInStartDate = formatDate(formData.date[0],'yyyy-MM-dd'),
+                  newFormData.storageInEndDate = formatDate(formData.date[1],'yyyy-MM-dd')
+                }
+                 dispatch({
+                   type: 'storageIns/setQuery',
+                   payload: newFormData
+                 });
               } } >查询</Button>
               <Button type="ghost" onClick={() => {
-                form.resetFieldsValue();
+                form.resetFields();
               } } >重置</Button>
             </ButtonGroup>
 
@@ -63,15 +97,10 @@ const List = ({ form, storageIns, componentDataSource, dispatch, ...rest }) => {
                     label="来源"
                     >
                     <CodewordSelect
-                      {...getFieldProps('type', {
-                        initialValue: storageIns.query.type || [],
-                        rules: [
-                          { required: false }
-                        ]
-                      })}
-                      type={'STORAGE_IN_SOURCE'}
-                      dispatch = {dispatch}
-                      componentDataSource = {componentDataSource}
+                      elementProps={getFieldProps('type')}
+                      type={"STORAGE_IN_SOURCE"}
+                      dispatch={dispatch}
+                      componentDataSource={componentDataSource}
                       >
                     </CodewordSelect>
                   </FormItem>
@@ -83,15 +112,7 @@ const List = ({ form, storageIns, componentDataSource, dispatch, ...rest }) => {
                     >
                     <RangePicker
                       style={{ width: 200 }}
-                      onChange={() => {
-
-                      } }
-                      {...getFieldProps('date', {
-                        initialValue: storageIns.query.date || [],
-                        rules: [
-                          { required: false }
-                        ]
-                      })}
+                      {...getFieldProps('date') }
                       />
                   </FormItem>
                 </Col>
@@ -102,12 +123,7 @@ const List = ({ form, storageIns, componentDataSource, dispatch, ...rest }) => {
                     >
                     <Input
                       style={{ width: 200 }}
-                      {...getFieldProps('batchNumber', {
-                        initialValue: storageIns.query.date || [],
-                        rules: [
-                          { required: false }
-                        ]
-                      })}
+                      {...getFieldProps('fuzzyBatchNumber') }
                       />
                   </FormItem>
                 </Col>
@@ -116,63 +132,71 @@ const List = ({ form, storageIns, componentDataSource, dispatch, ...rest }) => {
           </Tabs>
         </Form>
       </BoxTabs>
-    <BoxTable
-      noPadding
-      scroll={{ x: 1000 }}
-      columns={
-        [
-          {
-            title: '序号',
-            dataIndex: 'index',
-            key: 'index',
-            render: (text, record, index) => index + 1
-          },
-          {
-            title: '来源',
-            dataIndex: 'name',
-            key: 'name',
-          },
-          {
-            title: '入库单号',
-            dataIndex: 'status',
-            key: 'status'
-          },
-          {
-            title: '入库日期',
-            dataIndex: 'servicePosition',
-            key: 'servicePosition'
-          },
-          {
-            title: '操作人',
-            dataIndex: 'serviceTime',
-            key: 'serviceTime',
-          },
-          {
-            title: '入库数量',
-            dataIndex: 'clerkName',
-            key: 'clerkName',
-          },
-          {
-            title: '备注',
-            dataIndex: 'id',
-            key: 'id'
-          },
-          {
-            title: '操作',
-            key: 'operation',
-            render: (text, record) => (
-              <span>
-                <Link to={`/storage/storageIns/detail/${record.id}`}><Icon type="edit" />明细</Link>
-              </span>
-            ),
-          }]
-      }
-      rowKey={record => record.id}
-      dataSource={storageIns.list}
-      pagination={storageIns.pagination}
-      loading={storageIns.loading}
-      onChange={onTableChange}
-      />
+      <BoxTable
+        noPadding
+        scroll={{ x: 1000 }}
+        columns={
+          [
+            {
+              title: '序号',
+              dataIndex: 'index',
+              key: 'index',
+              render: (text, record, index) => index + 1
+            },
+            {
+              title: '来源',
+              dataIndex: 'typeName',
+              key: 'typeName',
+            },
+            {
+              title: '批次号',
+              dataIndex: 'batchNumber',
+              key: 'batchNumber'
+            },
+            {
+              title: '入库日期',
+              dataIndex: 'changeDate',
+              key: 'changeDate'
+            },
+            {
+              title: '操作人',
+              dataIndex: 'clerkName',
+              key: 'clerkName',
+              render: (text, record, index) => {
+                if (record.clerk) {
+                  return record.clerk.name || ''
+                } else {
+                  return '';
+                }
+              }
+            },
+            {
+              title: '入库数量',
+              dataIndex: 'inTotalNum',
+              key: 'inTotalNum',
+            },
+            {
+              title: '备注',
+              dataIndex: 'remark',
+              key: 'remark'
+            },
+            {
+              title: '操作',
+              key: 'operation',
+              render: (text, record) => (
+                <span>
+                  
+                  <Link to={`/storage/storageIns/detail/${record.id}`}><Icon type="edit" />明细</Link>
+                </span>
+              ),
+            }]
+        }
+        rowKey={record => record.id}
+        dataSource={storageIns.list}
+        pagination={storageIns.pagination}
+        loading={storageIns.loading}
+        onChange={onTableChange}
+        />
     </Container >
   )
 }
@@ -183,5 +207,17 @@ List.propTypes = {
 
 export default Form.create({
   mapPropsToFields: (props) => {
+    const query = props.storageIns.query;
+    return {
+      type: {
+        value: query.type
+      },
+      fuzzyBatchNumber: {
+        value: query.fuzzyBatchNumber
+      },
+      date: {
+        value : query.date
+      }
+    }
   }
 })(List);
