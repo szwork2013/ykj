@@ -59,6 +59,7 @@ app.model(require('./models/cgroup'));
 
 /**************采购管理*****************/
 app.model(require('./models/suppliers'));
+app.model(require('./models/indents'));
 
 /**************xx管理*****************/
 app.model(require('./models/goods'));

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.gnet.app.indents.IndentsMapper" >
+    <resultMap id="BaseGroupMapper" type="com.gnet.app.indents.Indents" >
+        <id column="id" property="id" jdbcType="VARCHAR" />
+        <result column="create_date" property="createDate" jdbcType="TIMESTAMP" />
+        <result column="modify_date" property="modifyDate" jdbcType="TIMESTAMP"/>
+        <result column="supplier_id" property="supplierId" jdbcType="VARCHAR"/>
+        <result column="status" property="status" jdbcType="INTEGER"/>
+        <result column="aduit_date" property="aduitDate" jdbcType="TIMESTAMP"/>
+        <result column="aduit_id" property="aduitId" jdbcType="VARCHAR" />
+        <result column="clerk_id" property="clerkId" jdbcType="VARCHAR"/>
+        <result column="indent_no" property="indentNo" jdbcType="VARCHAR" />
+        <result column="indent_date" property="indentDate" jdbcType="TIMESTAMP"/>
+        <result column="total_price" property="totalPrice" jdbcType="DECIMAL"/>
+        <result column="paid" property="paid" jdbcType="DECIMAL"/>
+        <result column="residual_payment" property="residualPayment" jdbcType="DECIMAL"/>
+        <result column="business_id" property="businessId" jdbcType="VARCHAR" />
+        <result column="payable" property="payable" jdbcType="DECIMAL"/>
+        <result column="remark" property="remark" jdbcType="VARCHAR" />
+        <result column="is_del" property="isDel" jdbcType="VARCHAR"/>
+
+    </resultMap>
+
+
+    
+    <select id="selectPageAll" resultMap="BaseGroupMapper">
+		select * from ykj_storage_indent
+		<where>
+			<if test=" name != null and name != ''">
+                and name like CONCAT('%',CONCAT(#{indentNo},'%'))
+            </if>
+		</where>
+	</select>
+</mapper>

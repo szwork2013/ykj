@@ -38,6 +38,7 @@ import CgroupPage, { CgroupEdit } from './routes/CgroupPage';
 
 /*--------------------------------采购管理-------------------------------------- */
 import SuppliersPage, { SupplierAdd, SupplierEdit } from './routes/SuppliersPage';
+import IndentsPage, { IndentAdd, IndentEdit } from './routes/IndentsPage';
 
 
 /*--------------------------------系统管理-------------------------------------- */
@@ -135,9 +136,9 @@ export default ({ history }) => {
           <Route breadcrumbName="采购管理" path="indents">
             <IndexRedirect to="indents" />
             <Route breadcrumbName="采购列表" path="indents" >
-              <IndexRoute component={SuppliersPage} />
-              <Route breadcrumbName="添加采购信息" path="add" component={SupplierAdd} />
-              <Route breadcrumbName="编辑采购信息" path="edit/:id" component={SupplierEdit} />
+              <IndexRoute component={IndentsPage} />
+              <Route breadcrumbName="添加采购信息" path="add" component={IndentAdd} />
+              <Route breadcrumbName="编辑采购信息" path="edit/:id" component={IndentEdit} />
             </Route>
             <Route breadcrumbName="品牌/供货商列表" path="suppliers" >
               <IndexRoute component={SuppliersPage} />
