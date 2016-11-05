@@ -1,7 +1,7 @@
 import { message } from 'antd';
 import request, { parseError, isApiUrl } from '../utils/request';
 import { searchCustomers, searchCodewordsByType, searchSubOfficesAndClerks, uploadOrderServiceAttachment, deleteOrderServiceAttachment, downloadOrderServiceAttachment, searchOrderServiceAttachment } from '../services/componentDataSource';
-import { searchGoodsAllByModel } from '../services/goods'
+import { searchOnSaleGoodDetails } from '../services/goods'
 
 export default {
   namespace: 'componentDataSource',
@@ -148,7 +148,7 @@ export default {
      */
     *loadGoodsData({ payload}, { put, select }) {
       const access_token = yield select(state => state.oauth.access_token);
-      const { data, error } = yield searchGoodsAllByModel(access_token, 'ALL');
+      const { data, error } = yield searchOnSaleGoodDetails(access_token);
       if (!error) {
         if (payload.callback) {
           payload.callback(data);
@@ -163,9 +163,9 @@ export default {
     /**
      * 加载针对树的组织及人员数据信息
      */
-    *loadOfficesAndClerksDataForTree({ payload: id}, { put, select }) {
+    *loadOfficesAndClerksDataForTree({ payload}, { put, select }) {
       const access_token = yield select(state => state.oauth.access_token);
-      const { data, error } = yield searchSubOfficesAndClerks(access_token, id);
+      const { data, error } = yield searchSubOfficesAndClerks(access_token, 'ALL');
       if (!error) {
         if (payload.callback) {
           payload.callback(data);

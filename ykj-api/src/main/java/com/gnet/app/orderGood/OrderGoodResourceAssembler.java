@@ -5,6 +5,7 @@ import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 
 public class OrderGoodResourceAssembler implements ResourceAssembler<OrderGood, OrderGoodResource> {
 
+	
 	@Override
 	public OrderGoodResource toResource(OrderGood entity) {
 		OrderGoodResource resource = new OrderGoodResource(entity);

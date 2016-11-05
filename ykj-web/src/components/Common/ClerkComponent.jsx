@@ -1,9 +1,9 @@
 import React, { PropTypes, Component } from 'react';
-import { Tree, Input, Modal, Icon } from 'antd';
+import { Form, Tree, Input, Modal, Icon } from 'antd';
 import { routerRedux } from 'dva/router';
 import { Link } from 'dva/router';
 
-
+const FormItem = Form.FormItem;
 /**
  * 员工树组件
  */
@@ -13,6 +13,7 @@ export class ClerkTree extends Component {
         super(props);
         this.componentDataSourceName = "officeClerks";
         this.state = {
+            dataSource: [],
             value: []
         }
     }
@@ -59,7 +60,7 @@ export class ClerkTree extends Component {
 
     render() {
 
-        const treeData = this.props.componentDataSource[this.componentDataSourceName] || [];
+        const treeData = this.state.dataSource || [];
         const loop = data => data.map((item) => {
             if (item.children) {
                 return <Tree.TreeNode nodeData={item.data} title={item.name} key={item.key} disableCheckbox={true}>{loop(item.children)}</Tree.TreeNode>;
@@ -116,20 +117,25 @@ export class ClerkSelectModalInput extends Component {
     }
 
     onSelect(nodeData) {
+        const {form} = this.props;
         this.setState({
             value: nodeData
         })
+
+
+
     }
 
 
     render() {
-        const { dispatch, componentDataSource } = this.props;
+        const { dispatch, form, elementProps, layout, label } = this.props;
         return (
-            <div>
+            <div style={this.props.style}>
                 <Input type='hidden' {...this.props.idProps} />
                 <Input {...this.props.nameProps} addonAfter={<a href="javascript:;"><Icon type="edit" onClick={() => {
                     this.showModal();
                 } } /></a>} />
+
                 <Modal
                     title="选择人员"
                     visible={this.state.showModal}
@@ -142,7 +148,6 @@ export class ClerkSelectModalInput extends Component {
                         <ClerkTree
                             checkable={true}
                             dispatch={dispatch}
-                            componentDataSource={componentDataSource}
                             onSelect={(data) => {
                                 this.onSelect(data);
                             } }

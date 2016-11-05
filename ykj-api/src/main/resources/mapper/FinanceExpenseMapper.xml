@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.gnet.app.financeExpense.FinanceExpenseMapper" >
+    <resultMap id="BaseFinanceExpenseMap" type="com.gnet.app.financeExpense.FinanceExpense" >
+        <id column="id" property="id" jdbcType="CHAR" />
+		<result column="create_date" property="createDate" />
+		<result column="modify_date" property="modifyDate" />
+		<result column="order_id" property="orderId" jdbcType="CHAR"/>
+		<result column="type" property="type" jdbcType="INTEGER"/>
+		<result column="way" property="way" jdbcType="INTEGER"/>
+		<result column="money" property="money" jdbcType="DECIMAL"/>
+		<result column="record_date" property="recordDate" />
+		<result column="record_person_id" property="recordPersonId" jdbcType="VARCHAR"/>
+		<result column="business_id" property="businessId" jdbcType="VARCHAR"/>
+		<result column="remark" property="remark" jdbcType="VARCHAR"/>
+    </resultMap>
+    
+    <select id="selectFinanceExpenseDetailsByCondition" resultMap="BaseFinanceExpenseMap" parameterType="com.gnet.app.financeExpense.FinanceExpenseCondition">
+    	SELECT
+		  t.* 
+		FROM
+		  ykj_finance_expense t
+		<where>
+			<if test="recordPersonId != null and recordPersonId != ''">
+				and t.record_person_id = #{recordPersonId}
+			</if>
+			<if test="type != null">
+				and t.type = #{type}
+			</if>
+			<if test="way != null">
+				and t.way = #{way}
+			</if>
+			<if test="orderId != null and orderId != ''">
+				and t.order_id = #{orderId}
+			</if>
+			<if test="fuzzyOrderId != null and fuzzyOrderId != ''">
+				and t.order_id like '%${@com.gnet.utils.string.StringEscapeUtils@escapeSql(fuzzyOrderId)}%'
+			</if>
+			<if test="businessId != null and businessId != ''">
+				and t.business_id = #{businessId}
+			</if>
+		</where>
+    </select>
+</mapper>

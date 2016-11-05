@@ -547,7 +547,7 @@ public class OrderController implements ResourceProcessor<RepositoryLinksResourc
 		}
 
 		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-				.body(new OrderErrorBuilder(OrderErrorBuilder.ERROR_DELETED, "删除错误").build());
+				.body(new OrderErrorBuilder(OrderErrorBuilder.ERROR_EDITED, "修改错误").build());
 	}
 
 	/**

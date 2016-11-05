@@ -8,6 +8,8 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import com.gnet.app.storageGoodStatus.StorageGoodStatus;
+import com.gnet.app.supplier.Supplier;
 import com.gnet.mybatis.BaseEntity;
 
 import lombok.Getter;
@@ -68,6 +70,9 @@ public class Good extends BaseEntity {
 	/** 单位 **/
 	private Integer unit;
 	
+	/** 单位文本 **/
+	private @Transient String unitText;
+	
 	/** 最小单位 **/
 	private Integer atomUnit;
 	
@@ -86,11 +91,11 @@ public class Good extends BaseEntity {
 	/** 重 **/
 	private BigDecimal weight;
 	
-	/** 当前库存 */
-	private BigDecimal storeNow;
-	
 	/** 在售状态,0:在售,1:下架,2:停产 **/
 	private Integer onsaleStatus;
+	
+	/** 销售状态文本*/
+	private @Transient String onsaleStatusText;
 	
 	/** 商家编号 **/
 	private String businessId;
@@ -98,8 +103,12 @@ public class Good extends BaseEntity {
 	/** 外置参数：原值 **/
 	private @Transient String originValue;
 	
-	/** 销售状态文本*/
-	private @Transient String onsaleStatusText;
+
+	/** 商品状态 */
+	private @Transient StorageGoodStatus storageGoodStatus;
+	
+	/** 商品供货商**/
+	private @Transient Supplier supplier;
 	
 	/**
 	 * 出入库信息集合

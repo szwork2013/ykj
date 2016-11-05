@@ -18,19 +18,18 @@ const Add = (props) => {
         orderGoods.map((item)=>{
           item.discountRate =  isNaN((item.strikeUnitPrice/item.price).toFixed(2)) ? `1.00` : `${(item.strikeUnitPrice/item.price).toFixed(2)}`;
         })
-      
         form.validateFieldsAndScroll((errors, values) => {
-          // if (!!errors) {
-          //   return;
-          // }
+          if (!!errors) {
+            return;
+          }
 		  
           const formData = form.getFieldsValue();
 		      formData.orderGoods = orderGoods;
           console.log(formData)
-          // dispatch({
-          //   type: 'orders/add',
-          //   payload: formData,
-          // })
+          dispatch({
+            type: 'orders/add',
+            payload: formData,
+          })
         });
 		
       } }

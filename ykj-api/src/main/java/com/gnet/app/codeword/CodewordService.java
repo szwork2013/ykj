@@ -132,7 +132,7 @@ public class CodewordService {
   public Map<String, Codeword> selectCodeword(String businessId, String typeValue) {
     List<Codeword> codewordList = this.codewordMapper.selectCodewordsByBusiness(businessId, typeValue);
     Map<String, Codeword> map = new HashMap<String, Codeword>();
-    if (CollectionUtils.isEmpty(codewordList)) {
+    if (!CollectionUtils.isEmpty(codewordList)) {
       for (Codeword codeword : codewordList) {
         map.put(codeword.getCode(),codeword);
       }

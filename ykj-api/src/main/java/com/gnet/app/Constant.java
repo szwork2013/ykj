@@ -27,5 +27,17 @@ public class Constant {
 	 * 订单类型
 	 */
 	public static final String ORDER_TYPE = "ORDER_TYPE";
+	
+	/** 商品单位 **/
+	public static final String GOOD_UNIT = "GOOD_UNIT";
+	
+	/** 商品销售状态**/
+	public static final String GOOD_ONSALE_STATUS = "GOOD_ONSALE_STATUS";
+	
+	/** 付款类目 **/
+	public static final String PAY_CATEGORY = "PAY_CATEGORY";
+	
+	/** 付款方式 **/
+	public static final String PAY_WAY = "PAY_WAY";
 
 }

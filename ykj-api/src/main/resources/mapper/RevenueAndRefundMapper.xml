@@ -7,14 +7,21 @@
         <result column="modify_date" property="modifyDate" />
         <result column="order_id" property="orderId" jdbcType="CHAR" />
         <result column="category" property="category" jdbcType="INTEGER" />
-        <result column="category_name" property="categoryName" jdbcType="VARCHAR" />
         <result column="payment" property="payment" jdbcType="DECIMAL" />
         <result column="pay_way" property="payWay" jdbcType="INTEGER" />
-        <result column="pay_way_name" property="payWayName" jdbcType="VARCHAR" />
         <result column="recorder" property="recorder" jdbcType="VARCHAR" />
-        <result column="recorderName" property="recorderName" jdbcType="VARCHAR" />
         <result column="recorderDate" property="recorderDate" />
         <result column="remark" property="remark" jdbcType="VARCHAR" />
+    </resultMap>
+    
+    <resultMap id="RevenueAndRefundExtMap" type="com.gnet.app.revenueandrefund.RevenueAndRefund" extends="BaseRevenueAndRefundMap">
+        <association property="recorderClerk"  javaType="com.gnet.app.clerk.Clerk">
+        	<result property="id" column="recorder"  jdbcType="VARCHAR" /> 
+        	<result property="name" column="recorder_name"  jdbcType="VARCHAR" /> 
+        </association> 
+        <association property="order"  javaType="com.gnet.app.order.Order">
+        	<result property="id" column="order_id"  jdbcType="VARCHAR" /> 
+        </association> 
     </resultMap>
     
     <resultMap id="BaseAmountStatisticsMap" type="com.gnet.app.revenueandrefund.AmountStatistics" >
@@ -38,6 +45,23 @@
 		select t.*,q.name recorderName,
 		(select s.value from sc_codeword s,sc_codeword_type w where w.id=s.codeword_type_id and s.code=t.category and w.type_value = 'CATEGORY') category_name,
 		(select s.value from sc_codeword s,sc_codeword_type w where w.id=s.codeword_type_id and s.code=t.pay_way and w.type_value = 'PAYMENT_WAY') pay_way_name 
+		 from ykj_revenue_and_refund t left join ykj_clerk q on q.id = t.recorder
+		<where>
+			<if test=" orderId != null and orderId != ''">
+                and order_id = #{orderId}
+            </if>
+		    <if test=" category != null ">
+                and category  = #{category}
+            </if>
+            <if test=" payWay != null">
+                and pay_way = #{payWay}
+            </if>
+		</where>
+	</select>
+	
+	<!-- 2016-11-05 -->
+	<select id="selectRevenueAndRefundDetailsByCondition" resultMap="RevenueAndRefundExtMap" parameterType="com.gnet.app.revenueandrefund.RevenueAndRefundCondition">
+		select t.*,q.name recorder_name
 		 from ykj_revenue_and_refund t left join ykj_clerk q on q.id = t.recorder
 		<where>
 			<if test=" orderId != null and orderId != ''">

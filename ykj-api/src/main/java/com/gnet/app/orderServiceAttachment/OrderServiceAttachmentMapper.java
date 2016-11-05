@@ -19,4 +19,12 @@ public interface OrderServiceAttachmentMapper extends Mapper<OrderServiceAttachm
 	public List<OrderServiceAttachment> selectAttachmentsByOrderServiceId(
 			@Param("orderServiceId") String orderServiceId);
 
+	
+	/**
+	 * 根据订单号查询其下指定服务单的附件信息集合
+	 * @param orderId
+	 * @param serviceTypes
+	 * @return
+	 */
+	public List<OrderServiceAttachment> selectAttachmentsByOrderIdAndServiceType(@Param("orderId")String orderId,@Param("serviceTypes")Integer[] serviceTypes);
 }

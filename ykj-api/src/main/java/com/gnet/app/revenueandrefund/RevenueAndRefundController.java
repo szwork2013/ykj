@@ -63,10 +63,10 @@ public class RevenueAndRefundController implements ResourceProcessor<RepositoryL
 		// 判断是否分页
 		Resources<RevenueAndRefundResource> resources = null;
 		if (isAll != null && isAll) {
-			List<RevenueAndRefund> revenueAndRefundList = revenueAndRefundService.selectRevenueAndRefundsAllWithDetailByCondition(revenueAndRefundCondition);
+			List<RevenueAndRefund> revenueAndRefundList = revenueAndRefundService.selectRevenueAndRefundDetailsByCondition(revenueAndRefundCondition);
 			resources = listResourcesAssembler.toResource(revenueAndRefundList, new RevenueAndRefundResourceAssembler());
 		} else {
-			Page<RevenueAndRefund> revenueAndRefunds = revenueAndRefundService.paginationRevenueAndRefundsAllWithDetailByCondition(revenueAndRefundCondition, pageable);
+			Page<RevenueAndRefund> revenueAndRefunds = revenueAndRefundService.paginationRevenueAndRefundDetailsByCondition(revenueAndRefundCondition, pageable);
 			resources = pagedResourcesAssembler.toResource(revenueAndRefunds, new RevenueAndRefundResourceAssembler());
 		}
 		

@@ -15,6 +15,8 @@ import com.gnet.app.clerk.Clerk;
 import com.gnet.app.customer.Customer;
 import com.gnet.app.orderGood.OrderGood;
 import com.gnet.app.orderProcess.OrderProcess;
+import com.gnet.app.orderService.OrderSer;
+import com.gnet.app.orderServiceAttachment.OrderServiceAttachment;
 import com.gnet.app.revenueandrefund.AmountStatistics;
 import com.gnet.app.revenueandrefund.RevenueAndRefund;
 import com.gnet.mybatis.BaseEntity;
@@ -150,7 +152,12 @@ public class Order extends BaseEntity {
   /**
    * 外置参数 : 订单服务记录
    */
-  private @Transient List<OrderService> orderServices;
+  private @Transient List<OrderSer> orderServices;
+  
+  /**
+   * 外置参数 : 订单服务附件记录
+   */
+  private @Transient List<OrderServiceAttachment> orderServiceAttachments;
 
   /** 外置参数: 订单商品 **/
   private @Transient List<OrderGood> orderGoods;

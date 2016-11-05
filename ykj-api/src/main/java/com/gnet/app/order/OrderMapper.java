@@ -65,5 +65,5 @@ public interface OrderMapper extends Mapper<Order> {
    * @return
    * Order
    */
-	public Order getOrderDetailByIdAndBusinessId(@Param("id")String id,@Param("businessId")String businessId);
+	public Order getOrderDetailByIdAndBusinessId(@Param("businessId")String businessId,@Param("id")String id);
 }

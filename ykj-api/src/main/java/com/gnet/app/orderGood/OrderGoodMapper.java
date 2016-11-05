@@ -35,4 +35,11 @@ public interface OrderGoodMapper extends Mapper<OrderGood> {
 	 * @return
 	 */
 	public List<OrderGood> selectOrderGoodsAllWithDetailByCondition(OrderGoodCondition condition);
+
+	/**
+	 * 根据订单商品查询条件查询相关明细信息集合
+	 * @param condition
+	 * @return
+	 */
+	public List<OrderGood> selectOrderGoodDetailsByCondition(OrderGoodCondition condition);
 }

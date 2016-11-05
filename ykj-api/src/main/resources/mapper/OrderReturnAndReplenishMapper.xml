@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.gnet.app.orderReturnAndReplenish.OrderReturnAndReplenishMapper" >
+    <resultMap id="BaseOrderReturnAndReplenishMap" type="com.gnet.app.orderReturnAndReplenish.OrderReturnAndReplenish" >
+        <id column="id" property="id" jdbcType="CHAR" />
+		<result column="create_date" property="createDate" />
+		<result column="modify_date" property="modifyDate" />
+		<result column="type" property="type" jdbcType="INTEGER"/>
+		<result column="order_id" property="orderId" jdbcType="CHAR"/>
+		<result column="order_goods_id" property="orderGoodsId" jdbcType="CHAR"/>
+		<result column="rar_nums" property="rarNums" jdbcType="INTEGER"/>
+		<result column="strike_unit_price" property="strikeUnitPrice" jdbcType="DECIMAL"/>
+		<result column="init_position" property="initPosition" jdbcType="VARCHAR"/>
+		<result column="remark" property="remark" jdbcType="VARCHAR"/>
+    </resultMap>
+    
+    <resultMap id="OrderReturnAndReplenishExtMap" extends="BaseOrderReturnAndReplenishMap" type="com.gnet.app.orderReturnAndReplenish.OrderReturnAndReplenish" >
+        <association property="good"  javaType="com.gnet.app.good.Good">  
+            <result property="id" column="order_goods_id"  jdbcType="VARCHAR" /> 
+            <result property="name" column="good_name"  jdbcType="VARCHAR" /> 
+            <result property="model" column="good_model"  jdbcType="VARCHAR" /> 
+            <result property="unit" column="good_unit"  jdbcType="VARCHAR" /> 
+            <association property="supplier"  javaType="com.gnet.app.supplier.Supplier">  
+	            <result property="id" column="supper_id"  jdbcType="VARCHAR" /> 
+	            <result property="supplierName" column="supplier_name"  jdbcType="VARCHAR" />
+	        </association>
+        </association>
+    </resultMap>
+    
+    <select id="selectOrderReturnAndReplenishDetailsByCondition" resultMap="OrderReturnAndReplenishExtMap" parameterType="com.gnet.app.orderReturnAndReplenish.OrderReturnAndReplenishCondition">
+    	SELECT
+		  t.*,
+		  s.name good_name,
+		  s.model good_model,
+		  s.unit good_unit,
+		  w.supplier_name
+		FROM
+		  ykj_order_return_and_replenish t
+		    LEFT JOIN ykj_storage_goods s ON s.id = t.order_goods_id
+		    LEFT JOIN ykj_supplier w ON s.supplier_id = w.id
+		<where>
+			<if test="id != null and id != ''">
+				and t.id = #{id}
+			</if>
+			<if test="type != null">
+				and t.type = #{type}
+			</if>
+			<if test="orderId != null and orderId != ''">
+				and t.order_id = #{orderId}
+			</if>
+			<if test="orderGoodsId != null and orderGoodsId != ''">
+				and t.order_goods_id = #{orderGoodsId}
+			</if>
+		</where>
+    </select>
+</mapper>

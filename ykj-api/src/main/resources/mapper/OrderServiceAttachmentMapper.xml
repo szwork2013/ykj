@@ -5,21 +5,23 @@
 	<resultMap id="BaseOrderServiceAttachmentMap"
 		type="com.gnet.app.orderServiceAttachment.OrderServiceAttachment">
 		<id column="id" property="id" jdbcType="CHAR" />
+		<result column="create_date" property="createDate" />
+		<result column="modify_date" property="modifyDate" />
+		<result column="attachment_root" property="attachmentRoot"
+			jdbcType="VARCHAR" />
+		<result column="attachment_size" property="attachmentSize"
+			jdbcType="VARCHAR" />
 		<result column="attachment_filename" property="attachmentFilename"
 			jdbcType="VARCHAR" />
 		<result column="attachment_suffix" property="attachmentSuffix"
 			jdbcType="CHAR" />
-		<result column="remark" property="remark" jdbcType="VARCHAR" />
-		<result column="create_date" property="createDate" />
-		<result column="attachment_root" property="attachmentRoot"
-			jdbcType="VARCHAR" />
-		<result column="modify_date" property="modifyDate" />
+		<result column="attachment_source" property="attachmentSource"
+			jdbcType="CHAR" />
+		<result column="upload_date" property="uploadDate" jdbcType="DATE" />
 		<result column="upload_person_id" property="uploadPersonId"
 			jdbcType="CHAR" />
-		<result column="attachment_size" property="attachmentSize"
-			jdbcType="VARCHAR" />
 		<result column="service_id" property="serviceId" jdbcType="VARCHAR" />
-		<result column="upload_date" property="uploadDate" jdbcType="DATE" />
+		<result column="remark" property="remark" jdbcType="VARCHAR" />
 	</resultMap>
 
 	<resultMap id="ExtOrderServiceAttachmentMap"
@@ -71,5 +73,21 @@
 		join ykj_clerk s on s.id =
 		t.upload_person_id where t.service_id =
 		#{orderServiceId}
+	</select>
+	
+	<!-- 根据工单号获取指定服务类型的附件信息集合 -->
+	<select id="selectAttachmentsByOrderIdAndServiceType" resultMap="ExtOrderServiceAttachmentMap">
+		select
+		t.*,s.name uploadPersonName from ykj_order_service_attachment t 
+		join ykj_order_service w on w.id = t.service_id
+		left join ykj_clerk s on s.id = t.upload_person_id 
+		where w.order_id = #{orderId} 
+		<if test="serviceTypes != null and serviceTypes.length > 0">
+		and w.type in 
+		 <foreach collection="serviceTypes" item="serviceType" index="index"
+            open="(" close=")" separator=",">
+            #{serviceType}
+        </foreach>
+        </if>
 	</select>
 </mapper>

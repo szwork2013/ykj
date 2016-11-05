@@ -77,6 +77,9 @@ app.model(require('./models/storageInDetails'));
 app.model(require('./models/storageOuts'));
 app.model(require('./models/storageOutDetails'));
 
+/*************财务管理***************8 */
+app.model(require('./models/financeExpenses'));
+
 
 // 4. Router
 app.router(require('./router'));

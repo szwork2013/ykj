@@ -20,6 +20,13 @@ public interface RevenueAndRefundMapper extends Mapper<RevenueAndRefund> {
 	public RevenueAndRefund findById(@Param("id") String id);
 
 	public BigDecimal selectAmountStatistics(@Param("orderId") String orderId);
+	
+	/**
+	 * 根据查询条件查询收付款明细信息
+	 * @param condition
+	 * @return
+	 */
+	public List<RevenueAndRefund> selectRevenueAndRefundDetailsByCondition(RevenueAndRefundCondition condition);
 
 	public AmountStatistics selectAmountStatisticsByCategory(@Param("orderId") String orderId);
 

@@ -45,41 +45,7 @@ const initialState = {
     orderResponsibleName : '刘洋'
   }],
   stateStatisticalResult : [],
-  currentOrder : {
-    orderNo : 'FW201610080003',
-    type : '进行中',
-    payStatus : '已付款',
-    orderDate : '2016-10-08',
-    address : '城战火车站',
-    orderSourceName : '设计师',
-    orderResponsibleName : '刘洋',
-    orderGoods : [{
-      goodName : '木板',
-      goodModel : '兔宝宝系列',
-      initPosition : '大厅',
-      unit : '米',
-      orderGoodsNum : '10',
-      goodPrice : 100,
-      strikeUnitPrice : 80,
-      goodStoreNow : 100,
-      reservedGoods : 50,
-      reservedDate : '2016-11-15',
-      remark : '尽快送货'
-    },{
-      goodName : '坐便器',
-      goodModel : 'TOTO',
-      initPosition : '厨房',
-      unit : '个',
-      orderGoodsNum : '10',
-      goodPrice : 2300,
-      strikeUnitPrice : 1800,
-      goodStoreNow : 100,
-      reservedGoods : 10,
-      reservedDate : '2016-11-25',
-      remark : '尽快送货'
-    }]
-
-  },
+  currentOrder : {},
   //模糊匹配到的用户列表
   fuzzyCustomerList : [],
   current: {},
@@ -150,18 +116,6 @@ export default {
           const match = pathToRegexp('/order/orders/edit/:id').exec(location.pathname);
           const id = match[1];
           dispatch({
-            type: 'searchGoodsByModel',
-            payload: 'ALL'
-          });
-          dispatch({
-            type: 'searchCustomersByName',
-            payload: 'ALL'
-          });
-          dispatch({
-            type: 'codewords/setCodewordsByType',
-            payload: 'ORDER_SOURCE'
-          });
-          dispatch({
              type : "toEdit",
              payload : id
           });
@@ -175,15 +129,6 @@ export default {
     addSubscriptions({ dispatch, history }) {
       history.listen(location => {
                 if (location.pathname === '/order/orders/add') {
-                    dispatch({
-                        type: 'searchGoodsByModel',
-                        payload: 'ALL'
-                    });
-                    dispatch({
-                        type: 'searchCustomersByName',
-                        payload: 'ALL'
-                    });
-                    console.log("初始化完成")
                 }
             });
     },
@@ -306,8 +251,10 @@ export default {
       });
       
        yield put({
-        type: 'createSuccess',
-        payload: payload,
+        type: 'merge',
+        payload: {
+          currentOrder : payload  
+        }
       });
       const access_token = yield select( state => state.oauth.access_token );
       const { data, error } = yield create(access_token, payload);

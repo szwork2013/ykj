@@ -13,6 +13,7 @@ import CustomerSelect from '../Common/CustomerComponent';
 import CodewordSelect from '../Common/CodewordComponent';
 import { ClerkSelectModalInput } from '../Common/ClerkComponent'
 
+
 const FormItem = Form.Item;
 const CheckboxGroup = Checkbox.Group;
 const Option = Select.Option;
@@ -34,85 +35,10 @@ class Detail extends Component {
   }
 
   render() {
-    const { orders, form, type, onSubmit, codewordTypes, componentDataSource, moreProps, dispatch, ...rest } = this.props;
+    const { orders, form, type, onSubmit, codewordTypes, currentOrderz, moreProps, dispatch, ...rest } = this.props;
     const { loading, queryCustomers, currentOrder = {}, fuzzyCustomerList = [], goodList = [], customerList = []} = orders;
     const { getFieldProps, getFieldError, isFieldValidating, setFields } = form;
-    const orderSources = codewordTypes['ORDER_SOURCE'] || [];
 
-    const orderNoProps = getFieldProps('orderNo', {
-      rules: [
-        { required: true, min: 1, message: '订单号必须填写' }
-      ]
-    });
-
-    const orderDateProps = getFieldProps('orderDate', {
-      rules: [
-        { required: true, message: '订单日期必须填写' }
-      ]
-    });
-
-    const nameProps = getFieldProps('name', {
-      rules: [
-        { required: true, min: 1, message: '客户姓名不能小于1个字符' }
-      ]
-    });
-
-    const phoneSecProps = getFieldProps('phoneSec', {
-      rules: [
-        { pattern: new RegExp(/^1[0-9]{10}$/), message: '请填写正确的第二联系人号码' },
-      ],
-    });
-
-    const orderResponsibleProps = getFieldProps('orderResponsibleId', {
-      rules: [
-        { pattern: new RegExp(/^[0-9]+$/), message: '请填写正确的QQ' },
-      ],
-    });
-
-    const orderResponsibleNameProps = getFieldProps('orderResponsibleName', {
-      rules: [
-        { pattern: new RegExp(/^[0-9]+$/), message: '请填写正确的QQ' },
-      ],
-    });
-
-    
-
-    const orderSourceProps = getFieldProps('orderSource', {
-      rules: [
-        { required: false, message: '请选择订单来源' }
-      ],
-    });
-
-    const addressProps = getFieldProps('address', {
-      rules: [
-        { required: true, min: 1, message: '送货地址至少 1 个字符' }
-      ],
-    });
-
-    const companyProps = getFieldProps('company', {
-      rules: [
-        { required: false }
-      ],
-    });
-
-    const phoneProps = getFieldProps('phone', {
-      rules: [
-        { required: false }
-      ],
-    });
-
-    const orderResponsibleIdProps = getFieldProps('orderResponsibleId', {
-      rule: [
-        { required: false }
-      ]
-    })
-
-    const customerIdProps = getFieldProps('customerId', {
-      type: 'hidden',
-      rule: [
-        { required: false }
-      ]
-    })
 
     const formItemLayout = {
       labelCol: { span: 6 },
@@ -124,7 +50,6 @@ class Detail extends Component {
       id: '1',
       name: '33'
     }]
-
     return (
       <Container
         {...rest}
@@ -143,7 +68,12 @@ class Detail extends Component {
                     hasFeedback
                     help={isFieldValidating('orderNo') ? '校验中...' : (getFieldError('orderNo') || []).join(', ')}
                     >
-                    <Input {...orderNoProps} size="default" style={{ width: '80%' }} disabled={orders.submiting} />
+                    <Input {...getFieldProps('orderNo', {
+                      initialValue: currentOrder.batchNumber,
+                      rules: [
+                        { required: false }
+                      ]
+                    }) } size="default" style={{ width: '80%' }} disabled={true} />
                   </FormItem>
                 </Col>
                 <Col sm={12}>
@@ -153,7 +83,12 @@ class Detail extends Component {
                     hasFeedback
                     help={isFieldValidating('orderDate') ? '校验中...' : (getFieldError('orderDate') || []).join(', ')}
                     >
-                    <DatePicker {...orderDateProps} onChange={(date, dateString) => {
+                    <DatePicker {...getFieldProps('orderDate', {
+                      initialValue: currentOrder.orderDate,
+                      rules: [
+                        { required: true, message: '订单日期必须填写' }
+                      ]
+                    }) } onChange={(date, dateString) => {
                       form.setFieldsValue({
                         orderDate: dateString,
                       })
@@ -163,35 +98,41 @@ class Detail extends Component {
               </Row>
               <Row>
                 <Col sm={12}>
-                  <FormItem
-                    { ...formItemLayout }
-                    label="客户姓名"
-                    help={isFieldValidating('name') ? '校验中...' : (getFieldError('name') || []).join(', ')}
+
+
+                  <CustomerSelect
+                    layout={formItemLayout}
+                    label={"客户姓名"}
+                    form={form}
+                    style={{ width: '80%' }}
+                    elementProps={getFieldProps('customerId', {
+                      initialValue: currentOrder.customerId,
+                      rules: [
+                        { required: true, min: 1, message: '客户姓名不能小于1个字符' }
+                      ]
+                    })}
+                    dispatch={dispatch}
+                    onSelect={(item) => {
+                      form.setFieldsValue({
+                        company: item.organization || '',
+                        phone: item.phone || ''
+                      })
+                      return true;
+                    } }
                     >
-
-                    <CustomerSelect
-                      style={{ width: '80%' }}
-                      elementProps={customerIdProps}
-                      dispatch={dispatch}
-                      componentDataSource={componentDataSource}
-                      onSelect={(item) => {
-                        form.setFieldsValue({
-                          company: item.organization || '',
-                          phone: item.phone || ''
-                        })
-                        return true;
-                      } }
-                      >
-                    </CustomerSelect>
-
-                  </FormItem>
+                  </CustomerSelect>
                 </Col>
                 <Col sm={12}>
                   <FormItem
                     { ...formItemLayout }
                     label="客户单位名称"
                     >
-                    <Input {...companyProps} size="default" style={{ width: '80%' }} disabled={orders.submiting} />
+                    <Input {...getFieldProps('company', {
+                      initialValue: currentOrder.company,
+                      rules: [
+                        { required: false }
+                      ],
+                    }) } size="default" style={{ width: '80%' }} disabled={orders.submiting} />
                   </FormItem>
                 </Col>
               </Row>
@@ -201,7 +142,12 @@ class Detail extends Component {
                     { ...formItemLayout }
                     label="客户电话"
                     >
-                    <Input {...phoneProps} size="default" style={{ width: '80%' }} disabled={orders.submiting} />
+                    <Input {...getFieldProps('phone', {
+                      initialValue: currentOrder.phone,
+                      rules: [
+                        { required: false }
+                      ],
+                    }) } size="default" style={{ width: '80%' }} disabled={orders.submiting} />
                   </FormItem>
                 </Col>
                 <Col sm={12}>
@@ -211,7 +157,12 @@ class Detail extends Component {
                     hasFeedback
                     help={isFieldValidating('phoneSec') ? '校验中...' : (getFieldError('phoneSec') || []).join(', ')}
                     >
-                    <Input {...phoneSecProps} size="default" style={{ width: '80%' }} disabled={orders.submiting} />
+                    <Input {...getFieldProps('phoneSec', {
+                      initialValue: currentOrder.phoneSec,
+                      rules: [
+                        { pattern: new RegExp(/^1[0-9]{10}$/), message: '请填写正确的第二联系人号码' },
+                      ],
+                    }) } size="default" style={{ width: '80%' }} disabled={orders.submiting} />
                   </FormItem>
                 </Col>
               </Row>
@@ -220,37 +171,49 @@ class Detail extends Component {
                   <FormItem
                     { ...formItemLayout }
                     label="跟单人"
-                    hasFeedback
-                    help={isFieldValidating('orderResponsibleId') ? '校验中...' : (getFieldError('orderResponsibleId') || []).join(', ')}
                     >
                     <ClerkSelectModalInput
-                      idProps={orderResponsibleIdProps}
-                      nameProps={orderResponsibleNameProps}
+                      idProps={getFieldProps('orderResponsibleId', {
+                        initialValue: currentOrder.orderResponsibleId,
+                        rule: [
+                          { required: false, message: '请选择跟单人' }
+                        ]
+                      })}
+                      nameProps={getFieldProps('orderResponsibleName', {
+                        initialValue: currentOrder.orderResponsibleName,
+                        rules: [
+                          { required: false, message: '请选择跟单人' },
+                        ],
+                      })}
                       style={{ width: '80%' }}
                       dispatch={dispatch}
-                      componentDataSource={componentDataSource}
                       onOk={(value) => {
+                        form.setFieldsValue({
+                          orderResponsibleId: value.id,
+                          orderResponsibleName: value.name
+                        })
                       } }
                       >
                     </ClerkSelectModalInput>
                   </FormItem>
                 </Col>
                 <Col sm={12}>
-                  <FormItem
-                    { ...formItemLayout }
-                    label="订单来源"
-                    hasFeedback
-                    help={isFieldValidating('orderType') ? '校验中...' : (getFieldError('orderType') || []).join(', ')}
+
+                  <CodewordSelect
+                    layout={formItemLayout}
+                    label={"订单来源"}
+                    form={form}
+                    style={{ width: '80%' }}
+                    elementProps={getFieldProps('orderSource', {
+                      initialValue: currentOrder.orderSource,
+                      rules: [
+                        { required: true, message: '请选择订单来源' }
+                      ],
+                    })}
+                    type={"ORDER_SOURCE"}
+                    dispatch={dispatch}
                     >
-                    <CodewordSelect
-                      style={{ width: '80%' }}
-                      elementProps={orderSourceProps}
-                      type={"ORDER_SOURCE"}
-                      dispatch={dispatch}
-                      componentDataSource={componentDataSource}
-                      >
-                    </CodewordSelect>
-                  </FormItem>
+                  </CodewordSelect>
                 </Col>
               </Row>
               <Row>
@@ -261,7 +224,12 @@ class Detail extends Component {
                     hasFeedback
                     help={isFieldValidating('address') ? '校验中...' : (getFieldError('address') || []).join(', ')}
                     >
-                    <Input {...addressProps} size="default" style={{ width: '80%' }} disabled={orders.submiting} />
+                    <Input {...getFieldProps('address', {
+                      initialValue: currentOrder.address,
+                      rules: [
+                        { required: true, min: 1, message: '送货地址至少 1 个字符' }
+                      ],
+                    }) } size="default" style={{ width: '100%' }} disabled={orders.submiting} />
                   </FormItem>
                 </Col>
               </Row>
@@ -335,13 +303,13 @@ class Detail extends Component {
                 },
                 {
                   title: '商品名称',
-                  dataIndex: 'goodName',
-                  key: 'goodName',
+                  dataIndex: 'name',
+                  key: 'name',
                 },
                 {
                   title: '商品型号',
-                  dataIndex: 'goodModel',
-                  key: 'goodModel',
+                  dataIndex: 'model',
+                  key: 'model',
                   width: '120px',
                 },
                 {
@@ -351,8 +319,8 @@ class Detail extends Component {
                 },
                 {
                   title: '单位',
-                  dataIndex: 'goodUnitName',
-                  key: 'goodUnitName',
+                  dataIndex: 'unitText',
+                  key: 'unitText',
 
                 },
                 {
@@ -362,8 +330,8 @@ class Detail extends Component {
                 },
                 {
                   title: '原价',
-                  dataIndex: 'goodPrice',
-                  key: 'goodPrice',
+                  dataIndex: 'price',
+                  key: 'price',
                 },
                 {
                   title: '折扣率',
@@ -388,8 +356,8 @@ class Detail extends Component {
                 },
                 {
                   title: '当前库存',
-                  dataIndex: 'goodStoreNow',
-                  key: 'goodStoreNow',
+                  dataIndex: 'storeNow',
+                  key: 'storeNow',
                 },
                 {
                   title: '预留库存',
@@ -416,6 +384,7 @@ class Detail extends Component {
               goodList={goodList}
               goodsEditing={true}
               form={form}
+              dispatch={dispatch}
               />
             <br />
             <Row>
@@ -448,81 +417,8 @@ Detail.defaultProps = {
 
 export default Form.create({
   mapPropsToFields: (props) => {
-    const order = props.orders.currentOrder;
     return {
-      id: {
-        value: order.id
-      },
-      createDate: {
-        value: order.createDate
-      },
-      modifyDate: {
-        value: order.modifyDate
-      },
-      orderResponsibleId: {
-        value: order.orderResponsibleId
-      },
-      customerId: {
-        value: order.customerId
-      },
-      businessId: {
-        value: order.businessId
-      },
-      type: {
-        value: order.type
-      },
-      orderNo: {
-        value: order.orderNo
-      },
-      orderDate: {
-        value: order.orderDate
-      },
-      phoneSec: {
-        value: order.phoneSec
-      },
-      orderSource: {
-        value: order.orderSource
-      },
-      address: {
-        value: order.address
-      },
-      customerRemark: {
-        value: order.customerRemark
-      },
-      privateRemark: {
-        value: order.privateRemark
-      },
-      priceBeforeDiscount: {
-        value: order.priceBeforeDiscount
-      },
-      priceAfterDiscount: {
-        value: order.priceAfterDiscount
-      },
-      strikePrice: {
-        value: order.strikePrice
-      },
-      receiptPrice: {
-        value: order.receiptPrice
-      },
-      isNeedDelivery: {
-        value: order.isNeedDelivery
-      },
-      isNeedInstall: {
-        value: order.isNeedInstall
-      },
-      isNeedMeasure: {
-        value: order.isNeedMeasure
-      },
-      isNeedDesign: {
-        value: order.isNeedDesign
-      },
-      isDel: {
-        value: order.isDel
-      },
-      orderGoods: {
-        value: order.orderGoods
-      },
-      ...props.mapPropsToFields(order),
+
     }
   }
 })(Detail);

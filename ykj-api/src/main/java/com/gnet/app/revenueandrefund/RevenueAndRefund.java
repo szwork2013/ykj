@@ -5,8 +5,11 @@ import java.util.Date;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.gnet.app.clerk.Clerk;
+import com.gnet.app.order.Order;
 import com.gnet.mybatis.BaseEntity;
 
 import lombok.Getter;
@@ -93,14 +96,17 @@ public class RevenueAndRefund extends BaseEntity {
 
 	/** 记录人 **/
 	private String recorder;
-	
-	/** 记录人姓名 **/
-	private String recorderName;
 
 	/** 记录时间 **/
 	private @JsonFormat(pattern = "yyyy-MM-dd") Date recorderDate;
 
 	/** 记录人 **/
 	private String remark;
+	
+	/** 关联订单信息 **/
+	private @Transient Order order;
+	
+	/** 记录人信息**/
+	private @Transient Clerk recorderClerk;
 
 }

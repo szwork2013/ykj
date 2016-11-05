@@ -139,7 +139,9 @@ const Search = ({  orders, form, dispatch, ...rest }) => {
                 });
 
               } } >查询</Button>
-              <Button type="ghost" >重置</Button>
+              <Button type="ghost" onClick={() => {
+                form.resetFields();
+              } } >重置</Button>
             </ButtonGroup>
 
           } >

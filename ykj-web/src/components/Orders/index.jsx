@@ -99,13 +99,20 @@ const List = (props) => {
             },
             {
               title: '订单来源',
-              dataIndex: 'orderSourceName',
-              key: 'orderSourceName',
+              dataIndex: 'orderSourceText',
+              key: 'orderSourceText',
             },
             {
               title: '跟单人',
               dataIndex: 'orderResponsibleName',
               key: 'orderResponsibleName',
+              render : (text,record) =>{
+                if(record.orderResponsibleClerk){
+                  return record.orderResponsibleClerk.name||''
+                }else{
+                  return ''
+                }
+              }
             },
             {
               title: '操作',

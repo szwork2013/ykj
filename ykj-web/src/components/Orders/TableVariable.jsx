@@ -5,6 +5,8 @@ import { Link } from 'dva/router';
 import moment from 'moment';
 import Box from '../Box';
 
+import GoodSelect from '../Common/GoodComponent';
+
 //组件已经完成，但是封装性不够，该组件内的字段还不是正式字段，需要后续开发人员校验下
 
 class TableVariable extends Component {
@@ -12,10 +14,16 @@ class TableVariable extends Component {
     constructor(props) {
         super(props);
         var dataSource = props.dataSource || [];
-        dataSource.push({ Number: dataSource.length });
+        //dataSource.push({ Number: dataSource.length });
         this.state = {
             dataSource: dataSource
         };
+    }
+
+    setDataSource(dataSource){
+        this.setState({
+            dataSource : dataSource
+        })
     }
 
 
@@ -60,7 +68,7 @@ class TableVariable extends Component {
     }
 
     getEditColumns(columns, dataSource, type) {
-        const { goodList = [], form} = this.props;
+        const { goodList = [], form,dispatch} = this.props;
         columns.map((column, index) => {
             const columnName = column.dataIndex;
 
@@ -85,7 +93,7 @@ class TableVariable extends Component {
                     return (
                         <span>
                             {
-                                type == 'edit' ?
+                                text ?
                                     (
                                         <span>
                                             <Link to={`/order/orders/${record.id}/enterOut/${record.id}`}><Icon type="edit" />退补货</Link>
@@ -98,7 +106,6 @@ class TableVariable extends Component {
                             <a href="javascript:void(0)" onClick={() => {
 
                                 const newDataSource = this.removeRow(columns, dataSource, index)
-                                console.log(newDataSource);
                                 this.setState({
                                     dataSource: newDataSource,
                                 })
@@ -108,8 +115,9 @@ class TableVariable extends Component {
 
                 }
             }
-            if (column.dataIndex == 'goodModel') {
+            if (column.dataIndex == 'model') {
                 column.render = (text, record, index) => {
+                    text = column.getText? column.getText(record) : text;
                     if (text) {
                         return text;
                     } else {
@@ -121,8 +129,12 @@ class TableVariable extends Component {
                                     this.changeValue(value.price, 'price', index);
                                     this.changeValue(value.onsaleStatusText, 'onsaleStatusText', index);
                                     this.changeValue(value.id, 'storageGoodsId', index);
+                                    this.changeValue(value.unitText, 'unitText', index);
+                                    this.changeValue((value.storageGoodStatus?value.storageGoodStatus.storeNow:0), 'storeNow', index);
+                                    console.log(this.state.dataSource)
                                     return true;
                                 } }
+                                dispatch = {dispatch}
                                 >
                             </GoodSelect>
                         )
@@ -140,6 +152,10 @@ class TableVariable extends Component {
             }
             if (column.dataIndex == 'orderGoodsNum') {
                 column.render = (text, record, index) => {
+                    if (text) {
+                        return text;
+                    } 
+
                     return (
                         <InputNumber value={text} onChange={(value) => {
                             this.changeValue(value, columnName, index);
@@ -243,6 +259,7 @@ class TableVariable extends Component {
                     {
                         type == 'edit' ?
                       (
+                            <div>
                                 <Col sm={2} >
                                     <Button type="primary" onClick={() => {
                                         dispatch({
@@ -259,6 +276,7 @@ class TableVariable extends Component {
                                         采购
                                     </Button>
                                 </Col>
+                            </div>
                         ) 
                         : ''
                     }
@@ -278,7 +296,7 @@ class TableVariable extends Component {
                         </Table>
                         <Row>
                             <Col sm={24} offset={14}>
-                                <p className="ant-form-text" >{`折前总价：${this.getBeforePrice(this.state.dataSource)}`}&nbsp;&nbsp;&nbsp;&nbsp;{`折后总价：${this.getAfterPrice(this.state.dataSource)}`}&nbsp;&nbsp;&nbsp;&nbsp;{`成交价：（单位：元）`}</p>
+                                <p className="ant-form-text" >{`折前总价：${this.getBeforePrice(this.state.dataSource)}`}&nbsp;&nbsp;&nbsp;&nbsp;{`折后总价：${this.getAfterPrice(this.state.dataSource)}`}&nbsp;&nbsp;&nbsp;&nbsp;{`成交价：${this.getAfterPrice(this.state.dataSource)}（单位：元）`}</p>
                             </Col>
                         </Row>
                     </div>

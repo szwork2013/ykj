@@ -26,7 +26,6 @@ class GoodSelect extends Component {
         this.props.dispatch({
             type: 'componentDataSource/loadGoodsData',
             payload: {
-
                 callback: (data) => {
                     this.setState({
                         dataSource: data._embedded && data._embedded.goods || []

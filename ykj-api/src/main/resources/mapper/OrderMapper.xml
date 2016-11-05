@@ -34,7 +34,7 @@
 	</resultMap>
 	
 	<!-- 订单扩展信息映射 -->
-	<resultMap id="OrderExtMap" type="com.gnet.app.order.Order">
+	<resultMap id="OrderExtMap" type="com.gnet.app.order.Order" extends="BaseOrderMap">
         <association property="orderResponsibleClerk"  javaType="com.gnet.app.clerk.Clerk">  
             <result property="id" column="order_responsible_id"  jdbcType="VARCHAR" /> 
             <result property="name" column="order_responsible_name"  jdbcType="VARCHAR" /> 
@@ -270,7 +270,7 @@
 	</select>
 	
 	<!-- 根据查询条件获取订单明细 -->
-	<select id="selectOrderDetailsByCondition" resultMap="BaseOrderMap" parameterType="com.gnet.app.order.OrderCondition">
+	<select id="selectOrderDetailsByCondition" resultMap="OrderExtMap" parameterType="com.gnet.app.order.OrderCondition">
 	   SELECT
 		  yo.*,
 		  yckc.name AS order_creator_name,
@@ -326,7 +326,7 @@
 	</select>
 	
 	<!-- 根据ID获取订单详情 -->
-	<select id="getOrderDetailByIdAndBusinessId" resultMap="BaseOrderMap" >
+	<select id="getOrderDetailByIdAndBusinessId" resultMap="OrderExtMap" >
        SELECT
           yo.*,
           yckc.name AS order_creator_name,

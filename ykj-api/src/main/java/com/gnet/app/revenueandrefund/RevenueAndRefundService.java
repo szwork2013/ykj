@@ -27,12 +27,11 @@ public class RevenueAndRefundService {
 	 * @param condition
 	 * @return
 	 */
-	public List<RevenueAndRefund> selectRevenueAndRefundsAllWithDetailByCondition(RevenueAndRefundCondition condition) {
-
-		return this.revenueAndRefundMapper.selectRevenueAndRefundsAllWithDetailByCondition(condition);
+	public List<RevenueAndRefund> selectRevenueAndRefundDetailsByCondition(RevenueAndRefundCondition condition) {
+		return this.revenueAndRefundMapper.selectRevenueAndRefundDetailsByCondition(condition);
 	}
 
-	public Page<RevenueAndRefund> paginationRevenueAndRefundsAllWithDetailByCondition(
+	public Page<RevenueAndRefund> paginationRevenueAndRefundDetailsByCondition(
 			RevenueAndRefundCondition condition, Pageable pageable) {
 
 		List<String> revenueAndRefundList = null;
@@ -50,39 +49,59 @@ public class RevenueAndRefundService {
 
 			@Override
 			public List<RevenueAndRefund> getPageContent() {
-				return revenueAndRefundMapper.selectRevenueAndRefundsAllWithDetailByCondition(condition);
+				return revenueAndRefundMapper.selectRevenueAndRefundDetailsByCondition(condition);
 			}
 
 		});
 	}
 
-	public RevenueAndRefund findById(String id){
+	public RevenueAndRefund findById(String id) {
 		return this.revenueAndRefundMapper.findById(id);
 	}
-	
+
 	/**
 	 * 付款
+	 * 
 	 * @param revenueAndRefund
 	 * @return
 	 */
-	@Transactional(readOnly=false)
+	@Transactional(readOnly = false)
 	public boolean revenue(RevenueAndRefund revenueAndRefund) {
 		revenueAndRefund.setCreateDate(new Date());
 		revenueAndRefund.setModifyDate(new Date());
 		return this.revenueAndRefundMapper.insertSelective(revenueAndRefund) == 1;
 	}
-	
+
 	/**
 	 * 退款
+	 * 
 	 * @param revenueAndRefund
 	 * @return
 	 */
-	@Transactional(readOnly=false)
+	@Transactional(readOnly = false)
 	public boolean refund(RevenueAndRefund revenueAndRefund) {
 		revenueAndRefund.setCategory(RevenueAndRefund.TYPE_CATEGORY_REFUND);
 		revenueAndRefund.setCreateDate(new Date());
 		revenueAndRefund.setModifyDate(new Date());
 		return this.revenueAndRefundMapper.insertSelective(revenueAndRefund) == 1;
 	}
-	
+
+	// -----2016-11-05
+	/**
+	 * 根据订单编号获取相应的收付款信息
+	 * @param businessId
+	 * @param orderId
+	 * @return
+	 */
+	public List<RevenueAndRefund> selectRevenueAndRefundDetailsByOrderId(String businessId, String orderId) {
+		RevenueAndRefundCondition condition = new RevenueAndRefundCondition();
+		condition.setBusinessId(businessId);
+		condition.setOrderId(orderId);
+		List<RevenueAndRefund> list = this.revenueAndRefundMapper.selectRevenueAndRefundDetailsByCondition(condition);
+		RevenueAndRefundExtDataHandler.resultExtDataHandle(businessId, list);
+
+		return list;
+
+	}
+
 }

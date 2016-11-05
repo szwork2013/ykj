@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.SqlSession;
 import org.mybatis.spring.SqlSessionTemplate;
@@ -18,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
+import com.gnet.app.clerk.Clerk;
 import com.gnet.app.good.Good;
 import com.gnet.app.good.GoodMapper;
 import com.gnet.app.order.Order;
@@ -244,11 +244,13 @@ public class OrderGoodService {
 	 * @param orderId
 	 * @return
 	 */
-	public List<OrderGood> selectOrderGoodsListWithDetailByOrderId(String orderId){
+	public List<OrderGood> selectOrderGoodDetailsByOrderId(String businessId,String orderId){
 		OrderGoodCondition condition = new OrderGoodCondition();
-		condition.setOrderId(orderId);;
-		return this.orderGoodMapper.selectOrderGoodsAllWithDetailByCondition(condition);
+		condition.setOrderId(orderId);
+		condition.setBusinessId(businessId);
+		List<OrderGood> orderGoodList = this.orderGoodMapper.selectOrderGoodDetailsByCondition(condition);
+		OrderGoodExtDataHandler.resultExtDataHandle(businessId,orderGoodList);
+		return orderGoodList;
 	}
-	
 	
 }

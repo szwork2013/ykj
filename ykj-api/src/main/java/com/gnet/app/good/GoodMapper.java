@@ -19,7 +19,12 @@ public interface GoodMapper extends Mapper<Good> {
 	
 	public List<Good> findByIds(@Param("ids") List<String> ids);
 	
-	public List<Good> selectGoodsAllByCondition(GoodCondition condition);
+	/**
+	 * 根据查询条件查询商品明细信息
+	 * @param condition
+	 * @return
+	 */
+	public List<Good> selectGoodDetailsByCondition(GoodCondition condition);
 	
 	
 	public List<StorageGoodStatusDetail> selectStorageGoodStatusDetailList(GoodCondition condition);

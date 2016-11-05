@@ -43,6 +43,8 @@ import CgroupPage, { CgroupEdit } from './routes/CgroupPage';
 import SuppliersPage, { SupplierAdd, SupplierEdit } from './routes/SuppliersPage';
 import IndentsPage, { IndentAdd, IndentEdit } from './routes/IndentsPage';
 
+/*--------------------------------财务管理-------------------------------------- */
+import FinanceExpensesPage from './routes/FinanceExpensesPage';
 
 /*--------------------------------系统管理-------------------------------------- */
 import CodewordsPage, { CodewordAdd, CodewordEdit } from './routes/CodewordsPage';
@@ -91,6 +93,12 @@ export default ({ history }) => {
 
           </Route>
 
+          <Route breadcrumbName="财务管理" path="finance">
+            <Route breadcrumbName="财务支出列表" path="financeExpenses" >
+              <IndexRoute component={FinanceExpensesPage} />
+            </Route>
+          </Route>
+
           <Route breadcrumbName="库存管理" path="storage">
             <IndexRoute component={StorageGoodsStatusPage} />
             <Route breadcrumbName="库存列表" path="storageGoodsStatus" >
@@ -117,7 +125,6 @@ export default ({ history }) => {
             <Route breadcrumbName="出库历史" path="storageOuts/good/:id" >
               <IndexRoute component={StorageOutsPage} />
               <Route breadcrumbName="明细" path="detail/:id" component={StorageOutDetailsPage} />
-
             </Route>
           </Route>
 

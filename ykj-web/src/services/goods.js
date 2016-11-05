@@ -3,10 +3,10 @@ import querystring from 'querystring';
 
 
 /**
- * 根据商品型号搜索商品信息
+ * 获取在售商品明细信息
  */
-export async function searchGoodsAllByModel(access_token, model) {
-  return request(`/api/goods/searchGoodsAllByModel/${model}`, {
+export async function searchOnSaleGoodDetails(access_token) {
+  return request(`/api/goods/searchOnSaleGoodDetails`, {
     headers: {
       'Authorization': `Bearer ${access_token}`,
       'Content-Type': 'application/json',

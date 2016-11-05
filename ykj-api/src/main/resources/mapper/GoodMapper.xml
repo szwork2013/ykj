@@ -3,26 +3,26 @@
 <mapper namespace="com.gnet.app.good.GoodMapper" >
     <resultMap id="BaseGoodMap" type="com.gnet.app.good.Good" >
         <id column="id" property="id" jdbcType="CHAR" />
-		<result column="onsale_status" property="onsaleStatus" jdbcType="INTEGER"/>
-		<result column="onsale_status_text" property="onsaleStatusText" jdbcType="VARCHAR"/>
-		<result column="color" property="color" jdbcType="VARCHAR"/>
-		<result column="status_type" property="statusType" jdbcType="INTEGER"/>
-		<result column="length" property="length" jdbcType="DECIMAL"/>
-		<result column="specification" property="specification" jdbcType="VARCHAR"/>
-		<result column="atom_unit" property="atomUnit" jdbcType="INTEGER"/>
-		<result column="weight" property="weight" jdbcType="DECIMAL"/>
-		<result column="type" property="type" jdbcType="VARCHAR"/>
-		<result column="unit" property="unit" jdbcType="INTEGER"/>
-		<result column="price" property="price" jdbcType="DECIMAL"/>
-		<result column="name" property="name" jdbcType="VARCHAR"/>
-		<result column="width" property="width" jdbcType="DECIMAL"/>
-		<result column="model" property="model" jdbcType="VARCHAR"/>
 		<result column="create_date" property="createDate" />
 		<result column="modify_date" property="modifyDate" />
 		<result column="supplier_id" property="supplierId" jdbcType="CHAR"/>
-		<result column="business_id" property="businessId" jdbcType="CHAR"/>
+		<result column="name" property="name" jdbcType="VARCHAR"/>
+		<result column="model" property="model" jdbcType="VARCHAR"/>
+		<result column="type" property="type" jdbcType="VARCHAR"/>
+		<result column="color" property="color" jdbcType="VARCHAR"/>
+		<result column="specification" property="specification" jdbcType="VARCHAR"/>
+		<result column="status_type" property="statusType" jdbcType="INTEGER"/>
+		<result column="unit" property="unit" jdbcType="INTEGER"/>
+		<result column="atom_unit" property="atomUnit" jdbcType="INTEGER"/>
+		<result column="price" property="price" jdbcType="DECIMAL"/>
+		<result column="length" property="length" jdbcType="DECIMAL"/>
+		<result column="weight" property="weight" jdbcType="DECIMAL"/>
+		<result column="width" property="width" jdbcType="DECIMAL"/>
 		<result column="height" property="height" jdbcType="DECIMAL"/>
-		<result column="store_now" property="storeNow" jdbcType="DECIMAL"/>
+		<result column="onsale_status" property="onsaleStatus" jdbcType="INTEGER"/>
+		<result column="business_id" property="businessId" jdbcType="CHAR"/>
+		<result column="onsale_status_text" property="onsaleStatusText" jdbcType="VARCHAR"/>
+		
     </resultMap>
     
     <resultMap id="StorageGoodStatusDetailMap" type="com.gnet.app.good.StorageGoodStatusDetail" >
@@ -33,33 +33,24 @@
     </resultMap>
     
     <resultMap id="GoodExtMap"  type="com.gnet.app.good.Good"  extends ="BaseGoodMap">
+        <association property="supplier"  javaType="com.gnet.app.supplier.Supplier">  
+            <result property="id" column="supplier_id"  jdbcType="VARCHAR" /> 
+            <result property="supplierName" column="supplier_name"  jdbcType="VARCHAR" /> 
+        </association>
+        <association property="storageGoodStatus"  javaType="com.gnet.app.storageGoodStatus.StorageGoodStatus">  
+            <result property="id" column="id"  jdbcType="VARCHAR" /> 
+            <result property="storeNow" column="good_staus_store_now"  /> 
+        </association>
         <collection property="storageInAndOutList" ofType="com.gnet.app.good.GoodStorageInAndOutRecord" >
-            <result column="type" property="type" jdbcType="INTEGER"/>
-            <result column="id" property="id" jdbcType="VARCHAR"/>
-            <result column="batch_number" property="batchNumber" jdbcType="VARCHAR"/>
-            <result column="change_date" property="changeDate" />
-            <result column="num" property="num" jdbcType="INTEGER"/>
-            <result column="cost" property="cost" jdbcType="DECIMAL"/>
+            <result column="storage_op_type" property="type" jdbcType="INTEGER"/>
+            <result column="storage_op_id" property="id" jdbcType="VARCHAR"/>
+            <result column="storage_op_batch_number" property="batchNumber" jdbcType="VARCHAR"/>
+            <result column="storage_op_change_date" property="changeDate" />
+            <result column="storage_op_num" property="num" jdbcType="INTEGER"/>
+            <result column="storage_op_cost" property="cost" jdbcType="DECIMAL"/>
         </collection>
     </resultMap>
 	
-	<select id="selectGoodsAllByCondition" resultMap="BaseGoodMap" parameterType="com.gnet.app.good.GoodCondition">
-		select t.*,s.store_now from ykj_storage_goods t left join ykj_storage_goods_status s on s.id = t.id
-		<where>
-			<if test=" fuzzyName != null and fuzzyName != ''">
-                and name like CONCAT('%',CONCAT(#{fuzzyName},'%'))
-            </if>
-		    <if test=" fuzzyModel != null and fuzzyModel != ''">
-                and model like CONCAT('%',CONCAT(#{fuzzyModel},'%'))
-            </if>
-            <if test=" businessId != null and businessId != ''">
-                and business_id = #{businessId}
-            </if>
-            <if test=" onsaleStatus != null ">
-                and onsale_status = #{onsaleStatus}
-            </if>
-		</where>
-	</select>
 	
 	<select id="selectGoodsAll" resultMap="BaseGoodMap">
 		select * from ykj_storage_goods 
@@ -109,6 +100,31 @@
        </foreach>
     </select>
     
+    <!-- 2016-11-04 -->
+   	<!-- 根据查询条件查询商品详情信息-->
+	<select id="selectGoodDetailsByCondition" resultMap="GoodExtMap" parameterType="com.gnet.app.good.GoodCondition">
+		SELECT
+		  t.*, s.store_now good_staus_store_now, w.supplier_name
+		FROM
+		  ykj_storage_goods t
+		LEFT JOIN ykj_storage_goods_status s ON s.id = t.id
+		LEFT JOIN ykj_supplier w ON w.id = t.supplier_id AND t.business_id = w.business_id
+		<where>
+			<if test=" fuzzyName != null and fuzzyName != ''">
+                and t.name like CONCAT('%',CONCAT(#{fuzzyName},'%'))
+            </if>
+		    <if test=" fuzzyModel != null and fuzzyModel != ''">
+                and t.model like CONCAT('%',CONCAT(#{fuzzyModel},'%'))
+            </if>
+            <if test=" businessId != null and businessId != ''">
+                and t.business_id = #{businessId}
+            </if>
+            <if test=" onsaleStatus != null ">
+                and t.onsale_status = #{onsaleStatus}
+            </if>
+		</where>
+	</select>
+    
     <!-- 根据查询条件查询库存商品状态明细清单 -->
     <select id="selectStorageGoodStatusDetailList" resultMap="StorageGoodStatusDetailMap" parameterType="com.gnet.app.good.GoodCondition">
         SELECT
@@ -142,10 +158,10 @@
     </select>
     
     <select id="selectStorageInAndOutRecordsById" resultMap="GoodExtMap">
-        (select 0 as type,t.id,t.batch_number,t.change_date,s.num,s.cost from ykj_storage_in t,ykj_storage_in_detail s where t.id = s.storage_in_id
+        (select 0 as storage_op_type,t.id storage_op_id,t.batch_number storage_op_batch_number,t.change_date storage_op_change_date,s.num storage_op_num,s.cost storage_op_cost from ykj_storage_in t,ykj_storage_in_detail s where t.id = s.storage_in_id
         and s.storage_goods_id = #{id})
         union all 
-        (select 1 as type,t.id,t.batch_number,t.change_date,s.num,0 cost from ykj_storage_out t,ykj_storage_out_detail s where t.id = s.storage_out_id
+        (select 1 as storage_op_type,t.id storage_op_id,t.batch_number storage_op_batch_number,t.change_date storage_op_change_date,s.num storage_op_num,0 storage_op_cost from ykj_storage_out t,ykj_storage_out_detail s where t.id = s.storage_out_id
         and s.storage_goods_id = #{id})
     </select>
 </mapper>

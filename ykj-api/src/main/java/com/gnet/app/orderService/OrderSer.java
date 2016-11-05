@@ -15,6 +15,7 @@ import com.gnet.app.clerk.Clerk;
 import com.gnet.app.customer.Customer;
 import com.gnet.app.orderDeliverGoods.OrderDeliverGoods;
 import com.gnet.app.orderInstallGoods.OrderInstallGoods;
+import com.gnet.app.orderServiceAttachment.OrderServiceAttachment;
 import com.gnet.mybatis.BaseEntity;
 
 import lombok.Getter;
@@ -136,5 +137,8 @@ public class OrderSer extends BaseEntity {
 	
 	/** 安装商品列表 **/
 	private @Transient List<OrderInstallGoods> installGoods;
+	
+	/** 订单服务附件**/
+	private @Transient List<OrderServiceAttachment> orderServiceAttachments;
 	
 }

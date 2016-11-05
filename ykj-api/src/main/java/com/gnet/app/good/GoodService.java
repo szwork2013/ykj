@@ -3,14 +3,19 @@ package com.gnet.app.good;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
+import com.gnet.app.Constant;
 import com.gnet.app.clerk.Clerk;
+import com.gnet.app.codeword.Codeword;
+import com.gnet.app.codeword.CodewordService;
 import com.gnet.utils.page.PageUtil;
 
 @Service
@@ -19,6 +24,9 @@ public class GoodService {
 
 	@Autowired
 	private GoodMapper goodMapper;
+
+	@Autowired
+	private CodewordService codewordService;
 
 	public Good findById(String id) {
 		List<String> ids = new ArrayList<>();
@@ -105,21 +113,17 @@ public class GoodService {
 	}
 
 	/**
-	 * 根据商家编码和商品类型模糊查询在售所有商品
-	 * 
-	 * @param businessId
-	 *            商家编码
-	 * @param fuzzyModel
-	 *            商品类型模糊
+	 * 根据用户及查询条件查询相关商品明细信息集合
+	 * @param clerk
+	 * @param condition
 	 * @return
 	 */
 	@Transactional(readOnly = true)
-	public List<Good> selectOnSaleGoodsAllForFuzzyModel(String businessId, String fuzzyModel) {
-		GoodCondition condition = new GoodCondition();
-		condition.setFuzzyModel(fuzzyModel);
-		condition.setBusinessId(businessId);
-		condition.setOnsaleStatus(Good.ONSALE_STATUS);
-		return this.goodMapper.selectGoodsAllByCondition(condition);
+	public List<Good> selectGoodDetailsByCondition(Clerk clerk, GoodCondition condition) {
+		condition.setBusinessId(clerk.getBusinessId());
+		List<Good> goodList = this.goodMapper.selectGoodDetailsByCondition(condition);
+		GoodExtDataHandler.resultExtDataHandle(clerk.getBusinessId(),goodList);
+		return goodList;
 	}
 
 	/**
@@ -151,19 +155,19 @@ public class GoodService {
 		condition.setBusinessId(clerk.getBusinessId());
 		return goodMapper.selectStorageGoodStatusDetailList(condition);
 	}
-	
+
 	/**
-   * 根据ID获取商品信息及其相关出入库详情
-   * 
-   * @return
-   */
-	public Good selectGoodInfoWithStorageInAndOutRecordById(String id){
-	  Good good = this.goodMapper.selectByPrimaryKey(id);
-	  if(null != good){
-	    good.setStorageInAndOutList(this.goodMapper.selectStorageInAndOutRecordsById(id));
-	  }
-	  
-	  return good;
+	 * 根据ID获取商品信息及其相关出入库详情
+	 * 
+	 * @return
+	 */
+	public Good selectGoodInfoWithStorageInAndOutRecordById(String id) {
+		Good good = this.goodMapper.selectByPrimaryKey(id);
+		if (null != good) {
+			good.setStorageInAndOutList(this.goodMapper.selectStorageInAndOutRecordsById(id));
+		}
+
+		return good;
 	}
 
 }

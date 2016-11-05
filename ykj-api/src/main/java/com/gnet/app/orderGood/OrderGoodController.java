@@ -6,8 +6,10 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.RepositoryLinksResource;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
+import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.ResourceProcessor;
+import org.springframework.hateoas.Resources;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,8 +19,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.gnet.app.good.GoodResource;
 import com.gnet.app.order.OrderErrorBuilder;
 import com.gnet.resource.boolResource.BooleanResourceAssembler;
+import com.gnet.resource.listResource.ListResourcesAssembler;
 import com.gnet.security.user.CustomUser;
 
 @RepositoryRestController
@@ -28,6 +32,11 @@ public class OrderGoodController implements ResourceProcessor<RepositoryLinksRes
 
 	@Autowired
 	private OrderGoodService orderGoodService;
+
+	@Autowired
+	private PagedResourcesAssembler<OrderGood> pagedResourcesAssembler;
+	@Autowired
+	private ListResourcesAssembler<OrderGood> listResourcesAssembler;
 
 	@RequestMapping(value = "/{id}", method = RequestMethod.GET)
 	public ResponseEntity<?> getOrderGood(@PathVariable("id") String id) {
@@ -64,16 +73,21 @@ public class OrderGoodController implements ResourceProcessor<RepositoryLinksRes
 
 	/**
 	 * 根据订单获取其下的订单商品明细数据
+	 * 
 	 * @param orderId
 	 * @param authentication
 	 * @return
 	 */
-	@RequestMapping(value = "/getOrderGoodsListWithDetailByOrderId", method = RequestMethod.GET)
-	public ResponseEntity<?> getOrderGoodsListWithDetailByOrderId(@RequestParam("orderId") String orderId,
+	@RequestMapping(value = "/getOrderGoodDetailsByOrderId", method = RequestMethod.GET)
+	public ResponseEntity<?> getOrderGoodDetailsByOrderId(@RequestParam("orderId") String orderId,
 			Authentication authentication) {
-		List<OrderGood> list = this.orderGoodService.selectOrderGoodsListWithDetailByOrderId(orderId);
+		CustomUser customUser = (CustomUser) authentication.getPrincipal();
+		List<OrderGood> list = this.orderGoodService
+				.selectOrderGoodDetailsByOrderId(customUser.getClerk().getBusinessId(), orderId);
+		Resources<OrderGoodResource> resources = listResourcesAssembler.toResource(list,
+				new OrderGoodResourceAssembler());
 
-		return ResponseEntity.status(HttpStatus.OK).body(list);
+		return ResponseEntity.ok(resources);
 	}
 
 	@Override

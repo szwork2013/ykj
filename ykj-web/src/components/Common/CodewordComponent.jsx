@@ -1,8 +1,9 @@
 import React, { PropTypes, Component } from 'react';
-import { Select, Input } from 'antd';
+import { Form,Select, Input } from 'antd';
 import { routerRedux } from 'dva/router';
 import { Link } from 'dva/router';
 
+const FormItem = Form.Item;
 /**
  * 数据字典下拉框组件
  */
@@ -58,24 +59,31 @@ class CodewordSelect extends Component {
     }
 
     render() {
+        const {elementProps, layout, label, form} = this.props;
+        const {isFieldValidating, getFieldError} = form;
         return (
-            <Select showSearch
-                {...this.props.elementProps}
-                style={this.props.style}
-                onSelect={(value, option) => {
-                    this.handleSelect(this.props.onSelect, value, option)
-                    return true;
-                } }
-                optionFilterProp={"children"}
-                defaultActiveFirstOption={false}
-                disabled={this.props.disabled}
+            <FormItem
+                { ...layout }
+                label={label}
                 >
-                {
-                    this.state.dataSource.map(item => {
-                        return <Select.Option key={item.code} value={item.code}>{item.value}</Select.Option>
-                    })
-                }
-            </Select >
+                <Select showSearch
+                    {...this.props.elementProps}
+                    style={this.props.style}
+                    onSelect={(value, option) => {
+                        this.handleSelect(this.props.onSelect, value, option)
+                        return true;
+                    } }
+                    optionFilterProp={"children"}
+                    defaultActiveFirstOption={false}
+                    disabled={this.props.disabled}
+                    >
+                    {
+                        this.state.dataSource.map(item => {
+                            return <Select.Option key={item.code} value={item.code}>{item.value}</Select.Option>
+                        })
+                    }
+                </Select >
+            </FormItem>
         )
     }
 }

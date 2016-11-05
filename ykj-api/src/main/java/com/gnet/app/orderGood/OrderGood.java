@@ -7,6 +7,9 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import com.gnet.app.good.Good;
+import com.gnet.app.order.Order;
+import com.gnet.app.supplier.Supplier;
 import com.gnet.mybatis.BaseEntity;
 
 import lombok.Getter;
@@ -64,27 +67,9 @@ public class OrderGood extends BaseEntity {
 	/** 备注 **/
 	private String remark;
 
-	/** 商品名称 **/
-	private @Transient String goodName;
-
-	/** 商品型号 **/
-	private @Transient String goodModel;
-
-	/** 商品规则 **/
-	private @Transient String goodSpecification;
-
-	/** 商品单价 **/
-	private @Transient BigDecimal goodPrice;
+	/** 商品信息 **/
+	private @Transient Good good;
 	
-	/** 商品当前库存 **/
-	private @Transient BigDecimal goodStoreNow;
-	
-	/** 商品单位 **/
-	private @Transient Integer goodUnit;
-	
-	/** 商品单位名称 **/
-	private @Transient String goodUnitName;
-
-	/** 商品供货商名称 **/
-	private @Transient String supplierName;
+	/** 订单信息**/
+	private @Transient Order order;
 }

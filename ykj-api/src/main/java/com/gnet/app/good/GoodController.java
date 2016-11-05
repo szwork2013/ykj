@@ -23,9 +23,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.gnet.app.order.Order;
-import com.gnet.app.order.OrderResource;
-import com.gnet.app.order.OrderResourceAssembler;
 import com.gnet.resource.boolResource.BooleanResourceAssembler;
 import com.gnet.resource.listResource.ListResourcesAssembler;
 import com.gnet.security.user.CustomUser;
@@ -206,22 +203,36 @@ public class GoodController implements ResourceProcessor<RepositoryLinksResource
 	}
 
 	/**
-	 * 根据商品类型搜索所有对应的商品
+	 * 根据商品查询条件查询相关商品信息
 	 * 
 	 * @param model
 	 * @param authentication
 	 * @return
 	 */
-	@RequestMapping(value = "/searchGoodsAllByModel/{model}", method = RequestMethod.GET)
-	public ResponseEntity<?> searchGoodsAllByModel(@PathVariable("model") String model, Authentication authentication) {
+	@RequestMapping(value = "/searchGoodDetailsByCondition", method = RequestMethod.GET)
+	public ResponseEntity<?> searchGoodDetailsByCondition(GoodCondition condition, Authentication authentication) {
 		CustomUser customUser = (CustomUser) authentication.getPrincipal();
-		String businessId = customUser.getClerk().getBusinessId();
 
-		if ("ALL".equalsIgnoreCase(model)) {
-			model = "";
-		}
+		List<Good> goodList = this.goodService.selectGoodDetailsByCondition(customUser.getClerk(), condition);
 
-		List<Good> goodList = this.goodService.selectOnSaleGoodsAllForFuzzyModel(businessId, model);
+		Resources<GoodResource> resources = listResourcesAssembler.toResource(goodList, new GoodResourceAssembler());
+
+		return ResponseEntity.ok(resources);
+	}
+	
+	/**
+	 * 获取在售商品信息集合
+	 * @param authentication
+	 * @return
+	 */
+	@RequestMapping(value = "/searchOnSaleGoodDetails", method = RequestMethod.GET)
+	public ResponseEntity<?> searchOnSaleGoodDetails(Authentication authentication) {
+		CustomUser customUser = (CustomUser) authentication.getPrincipal();
+		
+		GoodCondition condition = new GoodCondition();
+		condition.setOnsaleStatus(Good.ONSALE_STATUS);
+
+		List<Good> goodList = this.goodService.selectGoodDetailsByCondition(customUser.getClerk(), condition);
 
 		Resources<GoodResource> resources = listResourcesAssembler.toResource(goodList, new GoodResourceAssembler());
 

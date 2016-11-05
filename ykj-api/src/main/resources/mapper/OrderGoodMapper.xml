@@ -3,29 +3,46 @@
 <mapper namespace="com.gnet.app.orderGood.OrderGoodMapper" >
     <resultMap id="BaseOrderGoodMap" type="com.gnet.app.orderGood.OrderGood" >
         <id column="id" property="id" jdbcType="CHAR" />
-		<result column="reserved_goods" property="reservedGoods" jdbcType="INTEGER"/>
-		<result column="order_goods_num" property="orderGoodsNum" jdbcType="INTEGER"/>
-		<result column="init_position" property="initPosition" jdbcType="VARCHAR"/>
-		<result column="reserved_date" property="reservedDate" jdbcType="DATE"/>
-		<result column="remark" property="remark" jdbcType="VARCHAR"/>
-		<result column="need_deliver_num" property="needDeliverNum" jdbcType="INTEGER"/>
-		<result column="discount_rate" property="discountRate" jdbcType="DECIMAL"/>
-		<result column="strike_unit_price" property="strikeUnitPrice" jdbcType="DECIMAL"/>
-		<result column="need_install_num" property="needInstallNum" jdbcType="INTEGER"/>
-		<result column="out_goods_num" property="outGoodsNum" jdbcType="INTEGER"/>
 		<result column="create_date" property="createDate" />
 		<result column="modify_date" property="modifyDate" />
 		<result column="order_id" property="orderId" jdbcType="CHAR"/>
 		<result column="storage_goods_id" property="storageGoodsId" jdbcType="CHAR"/>
+		<result column="order_goods_num" property="orderGoodsNum" jdbcType="INTEGER"/>
+		<result column="discount_rate" property="discountRate" jdbcType="DECIMAL"/>
+		<result column="strike_unit_price" property="strikeUnitPrice" jdbcType="DECIMAL"/>
+		<result column="reserved_goods" property="reservedGoods" jdbcType="INTEGER"/>
+		<result column="reserved_date" property="reservedDate" jdbcType="DATE"/>
+		<result column="init_position" property="initPosition" jdbcType="VARCHAR"/>
+		<result column="need_deliver_num" property="needDeliverNum" jdbcType="INTEGER"/>
+		<result column="need_install_num" property="needInstallNum" jdbcType="INTEGER"/>
 		<result column="out_goods_num" property="outGoodsNum" jdbcType="INTEGER"/>
-		<result column="good_name" property="goodName" jdbcType="VARCHAR"/>
-		<result column="good_model" property="goodModel" jdbcType="VARCHAR"/>
-		<result column="goodPrice" property="goodPrice" jdbcType="DECIMAL"/>
-		<result column="goodStoreNow" property="goodStoreNow" jdbcType="DECIMAL"/>
-		<result column="goodUnit" property="goodUnit" jdbcType="INTEGER"/>
-		<result column="goodUnitName" property="goodUnitName" jdbcType="VARCHAR"/>
-		<result column="supplier_name" property="supplierName" jdbcType="VARCHAR"/>
+		<result column="remark" property="remark" jdbcType="VARCHAR"/>
     </resultMap>
+    
+    <resultMap id="OrderGoodExtMap" type="com.gnet.app.orderGood.OrderGood" extends="BaseOrderGoodMap">
+        <association property="good"  javaType="com.gnet.app.good.Good">  
+            <result property="id" column="storage_goods_id"  jdbcType="VARCHAR" /> 
+            <result property="name" column="good_name"  jdbcType="VARCHAR" /> 
+            <result property="model" column="good_model"  jdbcType="VARCHAR" /> 
+            <result property="price" column="good_price"  jdbcType="VARCHAR" /> 
+            <result property="unit" column="good_unit"  jdbcType="VARCHAR" />
+            <result property="specification" column="good_specification"  jdbcType="VARCHAR" />
+            <association property="storageGoodStatus"  javaType="com.gnet.app.storageGoodStatus.StorageGoodStatus">
+            	<result property="id" column="storage_goods_id"  jdbcType="VARCHAR" /> 
+            	<result column="storeNow" property="good_store_now" jdbcType="DECIMAL"/>
+            </association> 
+            <association property="supplier"  javaType="com.gnet.app.supplier.Supplier">
+            	<result property="id" column="storage_goods_id"  jdbcType="VARCHAR" /> 
+            	<result column="name" property="supplier_name" jdbcType="DECIMAL"/>
+            </association> 
+        </association>
+		<association property="order"  javaType="com.gnet.app.order.Order">
+        	<result property="id" column="order_id"  jdbcType="VARCHAR" /> 
+        </association> 
+		
+    </resultMap>
+    
+    
    
    <insert id="insertAllOrderGoods">
         insert into ykj_order_goods (id, create_date, modify_date, order_id, storage_goods_id, order_goods_num, discount_rate, strike_unit_price, reserved_goods, reserved_date, init_position, need_deliver_num, need_install_num, remark, out_goods_num) values
@@ -116,6 +133,28 @@
    		from ykj_order_goods t 
    		left join ykj_storage_goods s on t.storage_goods_id = s.id 
    		left join ykj_storage_goods_status w on w.id = t.storage_goods_id
+   		<where>
+   			<if test="orderId != null and orderId !=''">
+   				and t.order_id = #{orderId}
+   			</if>
+   			<if test="businessId != null and businessId !=''">
+   				and s.business_id = #{businessId}
+   			</if>
+   			<if test="storageGoodsId != null and storageGoodsId !=''">
+   				and t.storage_goods_id = #{storageGoodsId}
+   			</if>
+   		</where>
+   </select>
+   
+   <!-- 根据查询条件获取相应的订单商品信息 -->
+   <select id="selectOrderGoodDetailsByCondition" resultMap="OrderGoodExtMap" parameterType="com.gnet.app.orderGood.OrderGoodCondition">
+   		select t.*,s.name good_name,s.model good_model,s.specification good_specification,
+   		s.price good_price,w.store_now good_store_now,s.unit good_unit,q.supplier_name 
+   		from ykj_order_goods t 
+   		JOIN ykj_order a ON a.id = t.order_id
+   		left join ykj_storage_goods s on t.storage_goods_id = s.id 
+   		left join ykj_storage_goods_status w on w.id = t.storage_goods_id
+   		left join ykj_supplier q on q.id = s.supplier_id
    		<where>
    			<if test="orderId != null and orderId !=''">
    				and t.order_id = #{orderId}

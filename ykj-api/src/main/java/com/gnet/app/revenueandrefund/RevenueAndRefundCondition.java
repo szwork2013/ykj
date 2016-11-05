@@ -22,5 +22,7 @@ public class RevenueAndRefundCondition extends CommonCondition {
 	
 	private Integer payWay;
 	
+	
+	
 
 }

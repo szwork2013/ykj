@@ -70,5 +70,15 @@ public class OrderServiceAttachmentService {
 
 		});
 	}
+	
+	/**
+	 * 根据订单号查询其下指定服务单的附件信息集合
+	 * @param orderId
+	 * @param serviceTypes
+	 * @return
+	 */
+	public List<OrderServiceAttachment> selectAttachmentsByOrderIdAndServiceType(String orderId,Integer[] serviceTypes){
+		return this.orderServiceAttachmentMapper.selectAttachmentsByOrderIdAndServiceType(orderId,serviceTypes);
+	}
 
 }
