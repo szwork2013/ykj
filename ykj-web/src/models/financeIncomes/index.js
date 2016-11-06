@@ -5,7 +5,7 @@ import request, { parseError } from '../../utils/request';
 import pathToRegexp from 'path-to-regexp';
 import querystring from 'querystring';
 
-import { search,getFinanceExpense,createOrUpdateFinanceExpense,deleteFinanceExpense } from '../../services/financeExpense';
+import { search,getFinanceIncome,createOrUpdateFinanceIncome,deleteFinanceIncome } from '../../services/financeIncome';
 
 const mergeQuery = (oldQuery, newQuery) => {
     return {
@@ -48,7 +48,7 @@ const initialState = {
 }
 
 export default {
-    namespace: 'financeExpenses',
+    namespace: 'financeIncomes',
 
     state: initialState,
 
@@ -56,7 +56,7 @@ export default {
 
         listSubscriptions({ dispatch, history }) {
             history.listen((location, state) => {
-                if (pathToRegexp('/finance/financeExpenses').test(location.pathname)) {
+                if (pathToRegexp('/finance/financeIncomes').test(location.pathname)) {
                     dispatch({ type: 'clear' })
                     dispatch({
                         type: 'setQuery',
@@ -81,11 +81,11 @@ export default {
             const { access_token, oldQuery } = yield select(state => {
                 return {
                     'access_token': state.oauth.access_token,
-                    'oldQuery': state.financeExpenses.query,
+                    'oldQuery': state.financeIncomes.query,
                 }
             });
 
-            const { data, error } = yield createOrUpdateFinanceExpense(access_token, payload);
+            const { data, error } = yield createOrUpdateFinanceIncome(access_token, payload);
             if (!error) {
 
                 yield put({
@@ -116,7 +116,7 @@ export default {
             });
 
             const err = yield parseError(error);
-            yield message.error(`新增支出记录失败:${err.status} ${err.message}`, 3);
+            yield message.error(`新增收入记录失败:${err.status} ${err.message}`, 3);
             return false;
         },
         /**
@@ -131,13 +131,13 @@ export default {
             const { access_token, oldQuery } = yield select(state => {
                 return {
                     'access_token': state.oauth.access_token,
-                    'oldQuery': state.financeExpenses.query,
+                    'oldQuery': state.financeIncomes.query,
                 }
             });
 
 
 
-            const { data, error } = yield deleteFinanceExpense(access_token, id);
+            const { data, error } = yield deleteFinanceIncome(access_token, id);
             if (!error) {
 
                 yield put({
@@ -159,7 +159,7 @@ export default {
             });
 
             const err = yield parseError(error);
-            yield message.error(`修改支出记录失败:${err.status} ${err.message}`, 3);
+            yield message.error(`删除收入记录失败:${err.status} ${err.message}`, 3);
             return false;
         },
         /**
@@ -170,11 +170,11 @@ export default {
             const { access_token, oldQuery } = yield select(state => {
                 return {
                     'access_token': state.oauth.access_token,
-                    'oldQuery': state.financeExpenses.query,
+                    'oldQuery': state.financeIncomes.query,
                 }
             });
 
-            const { data, error } = yield getFinanceExpense(access_token, id);
+            const { data, error } = yield getFinanceIncome(access_token, id);
             if (!error) {
                 
                 yield put({
@@ -198,7 +198,7 @@ export default {
             });
 
             const err = yield parseError(error);
-            yield message.error(`修改支出记录失败:${err.status} ${err.message}`, 3);
+            yield message.error(`加载支出记录失败:${err.status} ${err.message}`, 3);
             return false;
         },
         /**
@@ -213,7 +213,7 @@ export default {
             const { access_token, oldQuery } = yield select(state => {
                 return {
                     'access_token': state.oauth.access_token,
-                    'oldQuery': state.financeExpenses.query,
+                    'oldQuery': state.financeIncomes.query,
                 }
             });
             console.log(mergeQuery(oldQuery,query));
@@ -222,7 +222,7 @@ export default {
                 yield put({
                     type: 'merge',
                     payload: {
-                        list: data._embedded && data._embedded.financeExpenses || [],
+                        list: data._embedded && data._embedded.financeIncomes || [],
                         pagination: {
                             current: data.page && data.page.number + 1,
                             total: data.page && data.page.totalElements,
@@ -244,7 +244,7 @@ export default {
             });
 
             const err = yield parseError(error);
-            yield message.error(`查询财务支出信息失败:${err.status} ${err.message}`, 3);
+            yield message.error(`查询财务收入信息失败:${err.status} ${err.message}`, 3);
             return false;
         },
     },

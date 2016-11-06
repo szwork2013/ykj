@@ -1,4 +1,5 @@
 import pathToRegexp from 'path-to-regexp';
+import { routerRedux } from 'dva/router';
 
 export default {
 
@@ -16,6 +17,13 @@ export default {
         type: 'oauth/token',
         payload,
       })
+    },
+    *loginOut({ payload }, { put }) {
+      yield put({
+        type: 'oauth/loginOutSuccess',
+        payload : {}
+      })
+      routerRedux.replace('/login');
     }
   },
 

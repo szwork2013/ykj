@@ -57,6 +57,9 @@ const GuideMenu = ({ menuCurrent, menuOpenKeys, dispatch }) => {
         <Menu.Item key="/finance/financeExpenses">
           <Link to="/finance/financeExpenses">财务支出</Link>
         </Menu.Item>
+        <Menu.Item key="/finance/financeIncomes">
+          <Link to="/finance/financeIncomes">财务收款</Link>
+        </Menu.Item>
       </Menu.SubMenu>
 
       <Menu.SubMenu

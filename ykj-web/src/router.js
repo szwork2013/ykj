@@ -45,6 +45,7 @@ import IndentsPage, { IndentAdd, IndentEdit } from './routes/IndentsPage';
 
 /*--------------------------------财务管理-------------------------------------- */
 import FinanceExpensesPage from './routes/FinanceExpensesPage';
+import FinanceIncomesPage from './routes/FinanceIncomesPage';
 
 /*--------------------------------系统管理-------------------------------------- */
 import CodewordsPage, { CodewordAdd, CodewordEdit } from './routes/CodewordsPage';
@@ -96,6 +97,9 @@ export default ({ history }) => {
           <Route breadcrumbName="财务管理" path="finance">
             <Route breadcrumbName="财务支出列表" path="financeExpenses" >
               <IndexRoute component={FinanceExpensesPage} />
+            </Route>
+            <Route breadcrumbName="财务收款列表" path="financeIncomes" >
+              <IndexRoute component={FinanceIncomesPage} />
             </Route>
           </Route>
 

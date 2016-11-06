@@ -44,6 +44,14 @@ export default {
   reducers: {
     loginSuccess(state, { payload }) {
       return { ...state, ...payload };
+    },
+    loginOutSuccess(state) {
+      localStorage.clear();
+      return { ...state, ...{
+        authentication : '',
+        access_token : '',
+        uid : ''
+      } };
     }
   }
 }

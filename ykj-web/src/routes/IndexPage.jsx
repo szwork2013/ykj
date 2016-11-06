@@ -12,18 +12,18 @@ import styles from './IndexPage.less';
 
 class IndexPage extends Component {
   componentWillMount() {
-    // const { oauth } = this.props;
-    // if (!oauth.authentication) {
-    //   this.context.router.replace('/login');
-    //   return false;
-    // }
+    const { oauth } = this.props;
+    if (!oauth.authentication) {
+      this.context.router.replace('/login');
+      return false;
+    }
   }
 
   render() {
     const { app, dispatch, children } = this.props;
     return (
       <div>
-        <Header/>
+        <Header {...this.props}/>
         <Row>
           <Col span={ 4 }>
             <GuideMenu menuOpenKeys={ app.menu_open_keys } menuCurrent={ app.menu_current } dispatch={ dispatch } />
